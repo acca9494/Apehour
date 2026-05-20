@@ -2326,19 +2326,20 @@ main > * { animation: page-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.65rem 1.4rem;
-  clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-full);
   border: none;
   background: var(--gold);
   color: #fff;
   font-size: 0.82rem;
   font-weight: 800;
   cursor: pointer;
-  transition: background 150ms, transform 150ms;
+  box-shadow: 0 4px 20px rgba(245,168,0,0.45);
+  transition: background 150ms, transform 150ms, box-shadow 150ms;
   position: relative;
 }
-.gchat__toggle:hover { background: var(--gold-dk); transform: translateY(-2px); }
-.gchat__toggle.is-open { background: var(--bg-dark); }
+.gchat__toggle:hover { background: var(--gold-dk); transform: translateY(-2px); box-shadow: 0 6px 28px rgba(245,168,0,0.5); }
+.gchat__toggle.is-open { background: var(--bg-dark); box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
 
 .gchat__label { letter-spacing: 0.02em; }
 
@@ -2649,6 +2650,32 @@ main > * { animation: page-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
   border-radius: var(--radius-lg);
   padding: 2.5rem;
   box-shadow: var(--shadow-lg);
+  transition: max-width 300ms ease;
+}
+.auth-card--merchant { max-width: 480px; }
+
+/* ── Register mode toggle ── */
+.reg-mode-toggle {
+  display: flex;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.reg-mode-toggle__btn {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-3);
+  transition: background 150ms, color 150ms;
+  font-family: inherit;
+}
+.reg-mode-toggle__btn.is-active {
+  background: var(--gold);
+  color: #fff;
 }
 
 .auth-card h1 {
@@ -5212,6 +5239,239 @@ main > * { animation: page-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ── MERCHANT MULTI-STEP FORM ───────────────────── */
+.mreg { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.mreg-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 0.25rem;
+}
+.mreg-stepper__dot {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid #d0d0c8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #aaa;
+  flex-shrink: 0;
+  transition: border-color 200ms, color 200ms, background 200ms;
+}
+.mreg-stepper__dot.is-active {
+  border-color: var(--gold);
+  color: #fff;
+  background: var(--gold);
+}
+.mreg-stepper__line {
+  flex: 1;
+  max-width: 3rem;
+  height: 2px;
+  background: #d0d0c8;
+  transition: background 200ms;
+}
+.mreg-stepper__line.is-active { background: var(--gold); }
+
+.mreg__step-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--gold-dk);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: -0.25rem;
+}
+
+.mreg__form { display: flex; flex-direction: column; gap: 0.85rem; }
+
+.mreg__row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.mreg__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #444;
+  letter-spacing: 0.02em;
+}
+.mreg__field em { font-style: normal; color: #c0392b; }
+.mreg__field input,
+.mreg__field select {
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid #d5d5cc;
+  background: #fff;
+  color: #222;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.mreg__field input:focus,
+.mreg__field select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245,168,0,0.12);
+}
+.mreg__field input::placeholder { color: #bbb; }
+
+.mreg__checkbox {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  align-items: start;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #666;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.mreg__checkbox input { margin-top: 3px; accent-color: var(--gold); width: 1rem; height: 1rem; }
+.mreg__checkbox span { display: block; }
+
+.mreg__actions { display: flex; gap: 0.75rem; }
+
+.mreg__btn {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  transition: background 150ms, transform 100ms;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.mreg__btn--primary { background: var(--gold); color: #fff; width: 100%; }
+.mreg__btn--primary:hover { background: var(--gold-dk); transform: translateY(-1px); }
+.mreg__btn--primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.mreg__btn--ghost {
+  background: #f0f0ea;
+  color: #555;
+  border: 1.5px solid #d5d5cc;
+}
+.mreg__btn--ghost:hover { background: #e4e4dc; }
+
+.mreg__success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0;
+}
+.mreg__success-icon { font-size: 2.5rem; }
+.mreg__success h3   { font-size: 1.15rem; font-weight: 800; color: var(--text-1); }
+.mreg__success p    { font-size: 0.88rem; color: var(--text-3); line-height: 1.6; }
+.mreg__success-cta  { margin-top: 0.5rem; flex: unset; width: auto; padding: 0.65rem 1.75rem; border-radius: var(--radius-sm); }
+.mreg__success-note { font-size: 0.75rem; color: var(--text-4); margin-top: 0.25rem; }
+
+/* ── CALL CALENDAR (step 3) ─────────────────────── */
+.mreg__calendar-wrap { display: flex; flex-direction: column; gap: 1rem; }
+.mreg__cal-sub { font-size: 0.82rem; color: #666; margin-top: -0.5rem; }
+
+.mreg-cal {
+  border: 1.5px solid #d5d5cc;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.mreg-cal__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  background: #f5f5f0;
+  border-bottom: 1.5px solid #d5d5cc;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #333;
+}
+.mreg-cal__arrow {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #555;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+.mreg-cal__arrow:hover { color: var(--gold-dk); }
+
+.mreg-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  padding: 0.5rem;
+  background: #fff;
+}
+.mreg-cal__dayname {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #aaa;
+  text-align: center;
+  padding-bottom: 0.35rem;
+  letter-spacing: 0.03em;
+}
+.mreg-cal__day {
+  aspect-ratio: 1;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+  transition: background 120ms, color 120ms;
+}
+.mreg-cal__day:hover:not(.is-disabled) { background: rgba(245,168,0,0.15); color: var(--gold-dk); }
+.mreg-cal__day.is-selected { background: var(--gold); color: #fff; }
+.mreg-cal__day.is-disabled { color: #ccc; cursor: default; }
+
+.mreg-times__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 0.03em;
+}
+.mreg-times__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+.mreg-times__slot {
+  padding: 0.4rem 0.2rem;
+  border: 1.5px solid #d5d5cc;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #444;
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms, color 120ms;
+  text-align: center;
+}
+.mreg-times__slot:hover { border-color: var(--gold); color: var(--gold-dk); }
+.mreg-times__slot.is-selected { background: var(--gold); border-color: var(--gold); color: #fff; }
+
+.mreg__booked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+.mreg__booked-icon { font-size: 2.5rem; }
+.mreg__booked h3   { font-size: 1.1rem; font-weight: 800; color: #222; }
+.mreg__booked p    { font-size: 0.85rem; color: #555; line-height: 1.65; }
 
 /* ── COME FUNZIONA PAGE ─────────────────────────── */
 .hiwp {

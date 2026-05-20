@@ -5,18 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { ClayButton } from "@/components/ui/clay-button";
+import { MerchantRegisterForm } from "@/components/home/merchant-register-form";
 import type { AuthErrorCode } from "@/lib/auth/types";
-
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-    </svg>
-  );
-}
 
 const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   invalid_credentials: "Credenziali non valide.",
@@ -25,14 +15,14 @@ const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
 };
 
 export default function RegisterPage() {
-  const { register, loginWithGoogle, loading, user } = useAuth();
+  const { register, loading, user } = useAuth();
   const router = useRouter();
 
+  const [mode, setMode] = useState<"cliente" | "commerciante">("cliente");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<AuthErrorCode | null>(null);
 
   useEffect(() => {
@@ -40,17 +30,6 @@ export default function RegisterPage() {
       router.replace(user.role === "commerciante" ? "/dashboard" : "/profile");
     }
   }, [user, loading, router]);
-
-  async function handleGoogle() {
-    setError(null);
-    setGoogleLoading(true);
-    try {
-      await loginWithGoogle("cliente");
-    } catch {
-      setError("unknown");
-      setGoogleLoading(false);
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -69,75 +48,79 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
-        <p className="eyebrow">Crea account</p>
-        <h1>Registrati</h1>
-        <p>Gratis. Nessuna carta di credito richiesta.</p>
+      <div className={`auth-card ${mode === "commerciante" ? "auth-card--merchant" : ""}`}>
 
-        <button type="button" className="google-btn" onClick={handleGoogle} disabled={googleLoading || submitting}>
-          <GoogleIcon />
-          {googleLoading ? "Connessione…" : "Continua con Google"}
-        </button>
-        <div className="auth-divider"><span>oppure via email</span></div>
+        {/* Mode toggle */}
+        <div className="reg-mode-toggle">
+          <button
+            type="button"
+            className={`reg-mode-toggle__btn ${mode === "cliente" ? "is-active" : ""}`}
+            onClick={() => { setMode("cliente"); setError(null); }}
+          >
+            Sono un cliente
+          </button>
+          <button
+            type="button"
+            className={`reg-mode-toggle__btn ${mode === "commerciante" ? "is-active" : ""}`}
+            onClick={() => { setMode("commerciante"); setError(null); }}
+          >
+            Ho un locale
+          </button>
+        </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          {error && (
-            <div className="auth-error" role="alert">
-              {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.unknown}
+        {mode === "cliente" && (
+          <>
+            <p className="eyebrow" style={{ marginTop: "1rem" }}>Crea account</p>
+            <h1>Registrati</h1>
+            <p>Gratis. Nessuna carta di credito richiesta.</p>
+
+            <form className="auth-form" onSubmit={handleSubmit}>
+              {error && (
+                <div className="auth-error" role="alert">
+                  {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.unknown}
+                </div>
+              )}
+
+              <label>
+                Nome completo
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Mario Rossi" required autoComplete="name" />
+              </label>
+
+              <label>
+                Email
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="la@tua-email.com" required autoComplete="email" />
+              </label>
+
+              <label>
+                Password
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="minimo 6 caratteri" required autoComplete="new-password" minLength={6} />
+              </label>
+
+              <ClayButton type="submit" className="auth-form__submit" disabled={submitting}>
+                {submitting ? "Creazione account…" : "Crea account"}
+              </ClayButton>
+            </form>
+
+            <p className="auth-link">
+              Hai già un account? <Link href="/login">Accedi</Link>
+            </p>
+          </>
+        )}
+
+        {mode === "commerciante" && (
+          <>
+            <p className="eyebrow" style={{ marginTop: "1rem" }}>Registra il tuo locale</p>
+            <h1>Per i locali</h1>
+            <p>Gratis per i primi 30 giorni. Nessun contratto.</p>
+            <div style={{ marginTop: "1rem" }}>
+              <MerchantRegisterForm />
             </div>
-          )}
+            <p className="auth-link" style={{ marginTop: "1rem" }}>
+              Hai già un account? <Link href="/login">Accedi</Link>
+            </p>
+          </>
+        )}
 
-          <label>
-            Nome completo
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Mario Rossi"
-              required
-              autoComplete="name"
-            />
-          </label>
-
-          <label>
-            Email
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="la@tua-email.com"
-              required
-              autoComplete="email"
-            />
-          </label>
-
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="minimo 6 caratteri"
-              required
-              autoComplete="new-password"
-              minLength={6}
-            />
-          </label>
-
-          <ClayButton type="submit" className="auth-form__submit" disabled={submitting}>
-            {submitting ? "Creazione account…" : "Crea account"}
-          </ClayButton>
-        </form>
-
-        <p className="auth-link">
-          Hai già un account?{" "}
-          <Link href="/login">Accedi</Link>
-        </p>
-
-        <p className="auth-link" style={{ marginTop: "0.5rem" }}>
-          Hai un locale?{" "}
-          <Link href="/#per-i-locali">Registra il tuo bar</Link>
-        </p>
       </div>
     </div>
   );

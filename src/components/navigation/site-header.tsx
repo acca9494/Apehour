@@ -69,19 +69,32 @@ export function SiteHeader() {
           </Link>
 
           <nav className="desktop-nav" aria-label="Navigazione principale">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "desktop-nav__link",
-                  (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href.split("?")[0]) && item.href !== "/") && "desktop-nav__link--home-active",
-                  item.active && pathname === "/" && "desktop-nav__link--home-active",
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const isAnchor = item.href.includes("#");
+              const anchorId = isAnchor ? item.href.split("#")[1] : null;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "desktop-nav__link",
+                    (item.href === "/" ? pathname === "/" : isAnchor ? pathname === "/" : pathname.startsWith(item.href.split("?")[0]) && item.href !== "/") && "desktop-nav__link--home-active",
+                    item.active && pathname === "/" && "desktop-nav__link--home-active",
+                  )}
+                  onClick={isAnchor ? (e) => {
+                    e.preventDefault();
+                    if (pathname !== "/") {
+                      router.push("/");
+                      setTimeout(() => document.getElementById(anchorId!)?.scrollIntoView({ behavior: "smooth" }), 400);
+                    } else {
+                      document.getElementById(anchorId!)?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  } : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
             {isMerchant && (
               <Link className="desktop-nav__link" href="/dashboard">
                 Dashboard
@@ -170,11 +183,28 @@ export function SiteHeader() {
         </Link>
 
         <nav className="mobile-nav" aria-label="Navigazione mobile">
-          {NAV_ITEMS.map((item) => (
-            <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
-              {item.label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const isAnchor = item.href.includes("#");
+            const anchorId = isAnchor ? item.href.split("#")[1] : null;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={isAnchor ? (e) => {
+                  e.preventDefault();
+                  setOpen(false);
+                  if (pathname !== "/") {
+                    router.push("/");
+                    setTimeout(() => document.getElementById(anchorId!)?.scrollIntoView({ behavior: "smooth" }), 400);
+                  } else {
+                    document.getElementById(anchorId!)?.scrollIntoView({ behavior: "smooth" });
+                  }
+                } : () => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
           {isMerchant && (
             <Link href="/dashboard" onClick={() => setOpen(false)}>
               Dashboard
