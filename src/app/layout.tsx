@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
+import { headers } from "next/headers";
 import { AuthProvider } from "@/lib/auth/context";
 import { Footer } from "@/components/layout/footer";
 import { BottomNav } from "@/components/navigation/bottom-nav";
@@ -23,18 +24,21 @@ export const metadata: Metadata = {
     "Scopri e prenota i migliori bar per l'aperitivo a Milano, Venezia, Roma e in tutta Europa. Disponibilità live, offerte esclusive, conferma immediata.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const headersList = await headers();
+  const isMaintenance = headersList.get("x-maintenance") === "1";
+
   return (
     <html lang="it" className={inter.variable}>
       <body>
         <AuthProvider>
-          <SiteHeader />
+          {!isMaintenance && <SiteHeader />}
           <main>
             {children}
           </main>
-          <Footer />
-          <BottomNav />
-          <GlobalChat />
+          {!isMaintenance && <Footer />}
+          {!isMaintenance && <BottomNav />}
+          {!isMaintenance && <GlobalChat />}
         </AuthProvider>
       </body>
     </html>

@@ -11,8 +11,14 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Maintenance mode ──────────────────────────────
-  if (MAINTENANCE && pathname !== "/maintenance") {
-    return NextResponse.redirect(new URL("/maintenance", request.url));
+  if (MAINTENANCE) {
+    if (pathname !== "/maintenance") {
+      return NextResponse.redirect(new URL("/maintenance", request.url));
+    }
+    // On the maintenance page: pass through with a custom header
+    const res = NextResponse.next();
+    res.headers.set("x-maintenance", "1");
+    return res;
   }
 
   const role = request.cookies.get("appape_role")?.value;
