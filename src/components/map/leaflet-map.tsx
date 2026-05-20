@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type * as MaptilerSDK from "@maptiler/sdk";
 
 export type MapMarker = {
   lat: number;
@@ -17,31 +18,30 @@ type Props = {
   style?: React.CSSProperties;
 };
 
+const MAP_STYLE_URL = `https://api.maptiler.com/maps/019e4581-2447-72a7-989f-09082cf76c75/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`;
+
 export default function LeafletMap({ center, zoom = 14, markers = [], className, style }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<unknown>(null);
+  const mapRef = useRef<MaptilerSDK.Map | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-
-    const el = containerRef.current;
+    if (mapRef.current || !containerRef.current) return;
 
     import("@maptiler/sdk").then((sdk) => {
-      if (mapRef.current || !el) return;
+      if (mapRef.current || !containerRef.current) return;
 
       sdk.config.apiKey = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "";
 
       const map = new sdk.Map({
-        container: el,
-        style: sdk.MapStyle.STREETS,
+        container: containerRef.current,
+        style: MAP_STYLE_URL,
         center: [center.lng, center.lat],
         zoom,
       });
 
       mapRef.current = map;
 
-      // Add navigation control the correct way
-      map.addControl(new sdk.NavigationControl(), "bottom-right");
+      map.addControl(new sdk.NavigationControl({ visualizePitch: true }), "bottom-right");
 
       map.on("load", () => {
         markers.forEach(({ lat, lng, label, popupHtml }, i) => {
@@ -78,18 +78,14 @@ export default function LeafletMap({ center, zoom = 14, markers = [], className,
     });
 
     return () => {
-      if (mapRef.current) {
-        (mapRef.current as { remove: () => void }).remove();
-        mapRef.current = null;
-      }
+      mapRef.current?.remove();
+      mapRef.current = null;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      style={{ height: "100%", width: "100%", minHeight: "200px", ...style }}
-    />
+    <div className={className} style={{ position: "relative", height: "100%", width: "100%", ...style }}>
+      <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
+    </div>
   );
 }
