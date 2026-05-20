@@ -11,11 +11,15 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Maintenance mode ──────────────────────────────
-  if (MAINTENANCE) {
-    if (pathname !== "/maintenance") {
-      return NextResponse.redirect(new URL("/maintenance", request.url));
-    }
-    // On the maintenance page: pass through with a custom header
+  if (MAINTENANCE && pathname !== "/maintenance") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/maintenance";
+    const res = NextResponse.rewrite(url);
+    res.headers.set("x-maintenance", "1");
+    return res;
+  }
+
+  if (MAINTENANCE && pathname === "/maintenance") {
     const res = NextResponse.next();
     res.headers.set("x-maintenance", "1");
     return res;
