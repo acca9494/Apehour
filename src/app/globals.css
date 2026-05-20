@@ -6789,11 +6789,11 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   }
   .dashboard-mobile-nav__hint-right {
     right: 0;
-    background: linear-gradient(to left, rgba(245,130,0,0.45), transparent);
+    background: linear-gradient(to left, rgba(245,130,0,0.22), transparent);
   }
   .dashboard-mobile-nav__hint-left {
     left: 0;
-    background: linear-gradient(to right, rgba(245,130,0,0.45), transparent);
+    background: linear-gradient(to right, rgba(245,130,0,0.22), transparent);
   }
 
   /* Tables: horizontal scroll */

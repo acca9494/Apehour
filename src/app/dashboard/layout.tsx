@@ -24,7 +24,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [userPopup, setUserPopup] = useState(false);
   const [navScroll, setNavScroll] = useState<"start" | "mid" | "end">("start");
   const popupRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!userPopup) return;
@@ -37,19 +36,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return () => document.removeEventListener("mousedown", handler);
   }, [userPopup]);
 
-  useEffect(() => {
-    const el = navRef.current;
-    if (!el) return;
-    function onScroll() {
-      if (!el) return;
-      const atStart = el.scrollLeft <= 4;
-      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-      setNavScroll(atStart ? "start" : atEnd ? "end" : "mid");
-    }
-    el.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  function handleNavScroll(e: React.UIEvent<HTMLElement>) {
+    const el = e.currentTarget;
+    const atStart = el.scrollLeft <= 4;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    setNavScroll(atStart ? "start" : atEnd ? "end" : "mid");
+  }
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "commerciante")) {
@@ -152,9 +144,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Mobile-only: horizontal tab nav */}
         <div className="dashboard-mobile-nav-wrap">
           <nav
-            ref={navRef}
             className="dashboard-mobile-nav"
             aria-label="Navigazione dashboard"
+            onScroll={handleNavScroll}
           >
             {NAV_ITEMS.map((item) => {
               const exact = item.href === "/dashboard";
