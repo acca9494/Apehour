@@ -6798,11 +6798,13 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
     background: linear-gradient(to right, rgba(245,130,0,0.28), transparent);
     opacity: 0;
   }
-  .dashboard-mobile-nav-wrap--end::after  { opacity: 0; }
-  .dashboard-mobile-nav-wrap--end::before { opacity: 1; }
-  .dashboard-mobile-nav-wrap--mid::before { opacity: 1; }
-  .dashboard-mobile-nav-wrap--mid::after  { opacity: 1; }
+  /* start: solo destra | mid/end: solo sinistra */
   .dashboard-mobile-nav-wrap--start::before { opacity: 0; }
+  .dashboard-mobile-nav-wrap--start::after  { opacity: 1; }
+  .dashboard-mobile-nav-wrap--mid::after    { opacity: 0; }
+  .dashboard-mobile-nav-wrap--mid::before   { opacity: 1; }
+  .dashboard-mobile-nav-wrap--end::after    { opacity: 0; }
+  .dashboard-mobile-nav-wrap--end::before   { opacity: 1; }
 
   /* Tables: horizontal scroll */
   .dash-card { overflow-x: auto; }
