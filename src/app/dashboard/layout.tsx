@@ -150,27 +150,33 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Mobile-only: horizontal tab nav */}
-        <div className={cn("dashboard-mobile-nav-wrap", `dashboard-mobile-nav-wrap--${navScroll}`)}>
-        <nav
-          ref={navRef}
-          className="dashboard-mobile-nav"
-          aria-label="Navigazione dashboard"
-        >
-          {NAV_ITEMS.map((item) => {
-            const exact = item.href === "/dashboard";
-            const active = exact ? pathname === item.href : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn("dashboard-mobile-nav__item", active && "is-active")}
-              >
-                <span className="dashboard-mobile-nav__icon">{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        <div className="dashboard-mobile-nav-wrap">
+          <nav
+            ref={navRef}
+            className="dashboard-mobile-nav"
+            aria-label="Navigazione dashboard"
+          >
+            {NAV_ITEMS.map((item) => {
+              const exact = item.href === "/dashboard";
+              const active = exact ? pathname === item.href : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn("dashboard-mobile-nav__item", active && "is-active")}
+                >
+                  <span className="dashboard-mobile-nav__icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+          {navScroll !== "end" && (
+            <div className="dashboard-mobile-nav__hint-right" aria-hidden="true" />
+          )}
+          {navScroll !== "start" && (
+            <div className="dashboard-mobile-nav__hint-left" aria-hidden="true" />
+          )}
         </div>
 
         <div className="dashboard-mobile-content">

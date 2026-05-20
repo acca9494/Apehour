@@ -6770,7 +6770,7 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   /* Nav items: scrollable, don't force equal width */
   .dashboard-mobile-nav__item { flex: 0 0 auto; min-width: 72px; padding: 0.4rem 0.6rem; }
 
-  /* Wrapper for scroll hint gradients */
+  /* Wrapper: fixed container for nav + gradient hints */
   .dashboard-mobile-nav-wrap {
     position: fixed;
     bottom: 0;
@@ -6778,33 +6778,23 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
     right: 0;
     z-index: 40;
   }
-  .dashboard-mobile-nav-wrap::before,
-  .dashboard-mobile-nav-wrap::after {
-    content: "";
+  .dashboard-mobile-nav__hint-right,
+  .dashboard-mobile-nav__hint-left {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 2.5rem;
+    width: 3rem;
     pointer-events: none;
     z-index: 2;
-    transition: opacity 200ms;
   }
-  .dashboard-mobile-nav-wrap::after {
+  .dashboard-mobile-nav__hint-right {
     right: 0;
-    background: linear-gradient(to left, rgba(245,130,0,0.28), transparent);
+    background: linear-gradient(to left, rgba(245,130,0,0.45), transparent);
   }
-  .dashboard-mobile-nav-wrap::before {
+  .dashboard-mobile-nav__hint-left {
     left: 0;
-    background: linear-gradient(to right, rgba(245,130,0,0.28), transparent);
-    opacity: 0;
+    background: linear-gradient(to right, rgba(245,130,0,0.45), transparent);
   }
-  /* start: solo destra | mid/end: solo sinistra */
-  .dashboard-mobile-nav-wrap--start::before { opacity: 0; }
-  .dashboard-mobile-nav-wrap--start::after  { opacity: 1; }
-  .dashboard-mobile-nav-wrap--mid::after    { opacity: 0; }
-  .dashboard-mobile-nav-wrap--mid::before   { opacity: 1; }
-  .dashboard-mobile-nav-wrap--end::after    { opacity: 0; }
-  .dashboard-mobile-nav-wrap--end::before   { opacity: 1; }
 
   /* Tables: horizontal scroll */
   .dash-card { overflow-x: auto; }
