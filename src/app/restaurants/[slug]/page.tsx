@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { MapClient } from "@/components/map/map-client";
 import { BookingPanel } from "@/components/booking/booking-panel";
 import { DetailHero } from "@/components/detail/detail-hero";
 import { RestaurantCard } from "@/components/restaurant-card";
@@ -129,10 +130,17 @@ export default async function RestaurantPage({ params }: Props) {
                 ))}
               </dl>
             </div>
-            <div className="map-placeholder">
-              <span>Mappa</span>
-              <strong>{mapPreview.embedLabel}</strong>
-              <p>{mapPreview.coordinates.lat.toFixed(4)}, {mapPreview.coordinates.lng.toFixed(4)}</p>
+            <div className="detail-map-wrap">
+              <MapClient
+                center={mapPreview.coordinates}
+                zoom={15}
+                markers={[{
+                  lat: mapPreview.coordinates.lat,
+                  lng: mapPreview.coordinates.lng,
+                  label: restaurant.name,
+                  popupHtml: `<a href="#" style="font-weight:800;font-size:0.9rem;color:#222">${restaurant.name}</a><br/><span style="font-size:0.78rem;color:#888">${restaurant.address}</span>`,
+                }]}
+              />
             </div>
           </section>
 

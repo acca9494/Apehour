@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonGrid } from "@/components/ui/skeleton";
 import { getRestaurantsClient } from "@/lib/services/restaurants";
 import type { Cuisine, PriceRange, Restaurant, SearchFilters } from "@/lib/types";
+
+const LeafletMap = dynamic(() => import("@/components/map/leaflet-map"), { ssr: false });
 
 const CATEGORY_ICONS: Array<{ label: string; emoji: string; value: Cuisine | "All" }> = [
   { label: "Tutti",         emoji: "🎉", value: "All" },
@@ -43,6 +46,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
   useEffect(() => {
     let active = true;
@@ -169,6 +173,22 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
         <span className="mobile-results-bar__count">
           {loading ? "…" : `${restaurants.length} locali`}
         </span>
+        <div className="search-view-toggle">
+          <button
+            type="button"
+            className={`search-view-toggle__btn${viewMode === "list" ? " is-active" : ""}`}
+            onClick={() => setViewMode("list")}
+          >
+            ☰ Lista
+          </button>
+          <button
+            type="button"
+            className={`search-view-toggle__btn${viewMode === "map" ? " is-active" : ""}`}
+            onClick={() => setViewMode("map")}
+          >
+            ◎ Mappa
+          </button>
+        </div>
         <button
           className="mobile-filter-trigger"
           type="button"
@@ -213,11 +233,27 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
             </div>
           )}
 
-          {!loading && restaurants.length > 0 && (
+          {!loading && restaurants.length > 0 && viewMode === "list" && (
             <div className="search-grid">
               {restaurants.map((restaurant, i) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} priority={i < 3} />
               ))}
+            </div>
+          )}
+
+          {!loading && restaurants.length > 0 && viewMode === "map" && (
+            <div className="search-map-wrap">
+              <LeafletMap
+                key={restaurants.map((r) => r.id).join(",")}
+                center={restaurants[0].coordinates}
+                zoom={13}
+                markers={restaurants.map((r) => ({
+                  lat: r.coordinates.lat,
+                  lng: r.coordinates.lng,
+                  label: r.priceRange,
+                  popupHtml: `<a href="/restaurants/${r.slug}" style="font-weight:800;font-size:0.92rem;color:#222;display:block;margin-bottom:2px">${r.name}</a><span style="font-size:0.76rem;color:#888">${r.cuisine}</span><br/><a href="/restaurants/${r.slug}" style="font-size:0.78rem;color:#F58200;font-weight:700;margin-top:6px;display:inline-block">Prenota →</a>`,
+                }))}
+              />
             </div>
           )}
         </div>

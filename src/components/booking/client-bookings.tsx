@@ -1,11 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/context";
 import { cancelBooking, fetchClientBookings } from "@/lib/bookings/service";
 import { ClayButton, ClayLink } from "@/components/ui/clay-button";
+import { restaurants as allRestaurants } from "@/lib/data/restaurants";
 import type { ClientBooking } from "@/lib/bookings/types";
+
+const LeafletMap = dynamic(() => import("@/components/map/leaflet-map"), { ssr: false });
 
 const STATUS_LABEL: Record<string, string> = {
   pending:   "In attesa",
@@ -19,6 +23,7 @@ const FILTER_TABS = [
   { key: "all",      label: "Tutte" },
   { key: "upcoming", label: "In arrivo" },
   { key: "past",     label: "Passate" },
+  { key: "map",      label: "Mappa" },
 ] as const;
 
 function formatDate(dateStr: string): string {
@@ -35,7 +40,7 @@ export function ClientBookings() {
   const [bookings, setBookings] = useState<ClientBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "upcoming" | "past">("all");
+  const [filter, setFilter] = useState<"all" | "upcoming" | "past" | "map">("all");
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -66,6 +71,25 @@ export function ClientBookings() {
     if (filter === "past")     return isPast(b.date, b.time) || b.status === "cancelled";
     return true;
   });
+
+  const mapMarkers = (() => {
+    const seen = new Set<string>();
+    return bookings
+      .filter((b) => b.status !== "cancelled")
+      .reduce<Array<{ lat: number; lng: number; label: string; popupHtml: string }>>((acc, b) => {
+        if (seen.has(b.restaurantId)) return acc;
+        seen.add(b.restaurantId);
+        const r = allRestaurants.find((r) => r.id === b.restaurantId);
+        if (!r) return acc;
+        acc.push({
+          lat: r.coordinates.lat,
+          lng: r.coordinates.lng,
+          label: b.restaurantName.split(" ").slice(0, 2).join(" "),
+          popupHtml: `<a href="/restaurants/${b.restaurantSlug}" style="font-weight:800;font-size:0.92rem;color:#222;display:block;margin-bottom:2px">${b.restaurantName}</a><span style="font-size:0.76rem;color:#888">${b.restaurantCity}</span><br/><a href="/restaurants/${b.restaurantSlug}" style="font-size:0.78rem;color:#F58200;font-weight:700;margin-top:6px;display:inline-block">Vedi locale →</a>`,
+        });
+        return acc;
+      }, []);
+  })();
 
   const upcoming = bookings.filter((b) => !isPast(b.date, b.time) && b.status === "confirmed").length;
   const past     = bookings.filter((b) => isPast(b.date, b.time)).length;
@@ -103,6 +127,7 @@ export function ClientBookings() {
           const count =
             t.key === "all"      ? bookings.length :
             t.key === "upcoming" ? bookings.filter((b) => !isPast(b.date, b.time) && b.status !== "cancelled").length :
+            t.key === "map"      ? mapMarkers.length :
                                    bookings.filter((b) => isPast(b.date, b.time) || b.status === "cancelled").length;
           return (
             <button
@@ -118,8 +143,24 @@ export function ClientBookings() {
         })}
       </div>
 
+      {/* Map view */}
+      {filter === "map" && (
+        <div className="booking-map-wrap">
+          {mapMarkers.length === 0 ? (
+            <div className="dash-empty">Nessun locale da mostrare sulla mappa.</div>
+          ) : (
+            <LeafletMap
+              key={mapMarkers.map((m) => `${m.lat},${m.lng}`).join("|")}
+              center={{ lat: mapMarkers[0].lat, lng: mapMarkers[0].lng }}
+              zoom={mapMarkers.length === 1 ? 14 : 12}
+              markers={mapMarkers}
+            />
+          )}
+        </div>
+      )}
+
       {/* Table */}
-      <div className="dash-table-card">
+      {filter !== "map" && <div className="dash-table-card">
         {loading ? (
           <p className="dash-empty">Caricamento…</p>
         ) : filtered.length === 0 ? (
@@ -194,7 +235,7 @@ export function ClientBookings() {
             </tbody>
           </table>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

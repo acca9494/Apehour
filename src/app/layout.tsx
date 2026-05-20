@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/navigation/bottom-nav";
 import { SiteHeader } from "@/components/navigation/site-header";
 import { GlobalChat } from "@/components/chat/global-chat";
 import "./globals.css";
+import "@maptiler/sdk/dist/maptiler-sdk.css";
 
 const inter = Inter({
   subsets: ["latin"],
