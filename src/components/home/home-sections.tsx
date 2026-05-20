@@ -92,10 +92,11 @@ const MOCK_EVENTS = [
 
 export function OffersSection({ promotions }: { promotions: Promotion[] }) {
   return (
-    <section className="page-section page-section--dark">
-      <SectionHeading eyebrow="Stasera conviene" title="I tavoli migliori, al prezzo giusto">
-        Prenota nelle ore d&apos;ingresso e risparmia fino al 40%. Più aspetti, meno trovi.
-      </SectionHeading>
+    <section className="page-section page-section--dark page-section--offers">
+      <div className="offers-header">
+        <span className="eyebrow">Offerte</span>
+        <span className="offers-savings-badge">Risparmia fino al 40%</span>
+      </div>
       <div className="offer-grid">
         {promotions.map((promotion) => (
           <Link className="offer-card" href={`/restaurants/${promotion.restaurantSlug}`} key={promotion.id}>

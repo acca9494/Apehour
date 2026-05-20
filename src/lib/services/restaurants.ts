@@ -9,8 +9,26 @@ function applyRestaurantFilters(items: Restaurant[], filters?: SearchFilters): R
 
   return items.filter((restaurant) => {
     const matchesCity = filters.city
-      ? restaurant.city.toLowerCase().includes(filters.city.toLowerCase()) ||
-        restaurant.neighborhood.toLowerCase().includes(filters.city.toLowerCase())
+      ? (() => {
+          const CITY_ALIASES: Record<string, string[]> = {
+            milan: ["milano", "milan"],
+            rome: ["roma", "rome"],
+            florence: ["firenze", "florence"],
+            venice: ["venezia", "venice"],
+            naples: ["napoli", "naples"],
+            turin: ["torino", "turin"],
+            bologna: ["bologna"],
+            barcelona: ["barcelona", "barcellona"],
+            paris: ["paris", "parigi"],
+            london: ["london", "londra"],
+          };
+          const q = filters.city.toLowerCase().trim();
+          const dataCity = restaurant.city.toLowerCase();
+          const dataNeighborhood = restaurant.neighborhood.toLowerCase();
+          const aliases = Object.values(CITY_ALIASES).find((group) => group.includes(dataCity)) ?? [dataCity];
+          return aliases.some((a) => a.includes(q) || q.includes(a)) ||
+            dataNeighborhood.includes(q) || q.includes(dataNeighborhood);
+        })()
       : true;
     const matchesCuisine =
       filters.cuisine && filters.cuisine !== "All" ? restaurant.cuisine === filters.cuisine : true;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonGrid } from "@/components/ui/skeleton";
@@ -46,7 +47,14 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const searchParams = useSearchParams();
+  const viewMode = (searchParams.get("view") ?? "list") as "list" | "map";
+
+  // Sync filters when URL changes (e.g. city change from header nav)
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, ...initialFilters }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialFilters.city, initialFilters.cuisine, initialFilters.date, initialFilters.time, initialFilters.guests]);
 
   useEffect(() => {
     let active = true;
@@ -173,22 +181,6 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
         <span className="mobile-results-bar__count">
           {loading ? "…" : `${restaurants.length} locali`}
         </span>
-        <div className="search-view-toggle">
-          <button
-            type="button"
-            className={`search-view-toggle__btn${viewMode === "list" ? " is-active" : ""}`}
-            onClick={() => setViewMode("list")}
-          >
-            ☰ Lista
-          </button>
-          <button
-            type="button"
-            className={`search-view-toggle__btn${viewMode === "map" ? " is-active" : ""}`}
-            onClick={() => setViewMode("map")}
-          >
-            ◎ Mappa
-          </button>
-        </div>
         <button
           className="mobile-filter-trigger"
           type="button"
@@ -198,8 +190,29 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
         </button>
       </div>
 
+      {/* ── Map view ────────────────────────────────── */}
+      {viewMode === "map" && (
+        <div className="search-map-view">
+          <LeafletMap
+            center={
+              restaurants.length > 0
+                ? { lat: restaurants[0]!.coordinates.lat, lng: restaurants[0]!.coordinates.lng }
+                : { lat: 45.464, lng: 9.188 }
+            }
+            zoom={13}
+            markers={restaurants.map((r) => ({
+              lat: r.coordinates.lat,
+              lng: r.coordinates.lng,
+              label: r.name,
+              popupHtml: `<strong>${r.name}</strong><br/>${r.neighborhood}<br/><a href="/restaurants/${r.slug}">Scopri →</a>`,
+            }))}
+            style={{ height: "100%", width: "100%" }}
+          />
+        </div>
+      )}
+
       {/* ── Body: sidebar + results ─────────────────── */}
-      <div className="search-body">
+      <div className={`search-body${viewMode === "map" ? " search-body--hidden-mobile" : ""}`}>
         <aside className="search-sidebar">
           <p className="search-sidebar__label">Filtri</p>
 
@@ -233,27 +246,11 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
             </div>
           )}
 
-          {!loading && restaurants.length > 0 && viewMode === "list" && (
+          {!loading && restaurants.length > 0 && (
             <div className="search-grid">
               {restaurants.map((restaurant, i) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} priority={i < 3} />
               ))}
-            </div>
-          )}
-
-          {!loading && restaurants.length > 0 && viewMode === "map" && (
-            <div className="search-map-wrap">
-              <LeafletMap
-                key={restaurants.map((r) => r.id).join(",")}
-                center={restaurants[0].coordinates}
-                zoom={13}
-                markers={restaurants.map((r) => ({
-                  lat: r.coordinates.lat,
-                  lng: r.coordinates.lng,
-                  label: r.priceRange,
-                  popupHtml: `<a href="/restaurants/${r.slug}" style="font-weight:800;font-size:0.92rem;color:#222;display:block;margin-bottom:2px">${r.name}</a><span style="font-size:0.76rem;color:#888">${r.cuisine}</span><br/><a href="/restaurants/${r.slug}" style="font-size:0.78rem;color:#F58200;font-weight:700;margin-top:6px;display:inline-block">Prenota →</a>`,
-                }))}
-              />
             </div>
           )}
         </div>

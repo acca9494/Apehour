@@ -284,7 +284,13 @@ export function SiteHeader() {
                       <button
                         type="button"
                         className={cn("mobile-city-dropdown__item", c === mobileCity && "is-active")}
-                        onClick={() => { setMobileCity(c); setCityDropdown(false); }}
+                        onClick={() => {
+                          setMobileCity(c);
+                          setCityDropdown(false);
+                          if (pathname === "/search") {
+                            router.push(`/search?city=${encodeURIComponent(c)}`);
+                          }
+                        }}
                       >
                         <PinIcon className="mobile-city-dropdown__icon" aria-hidden="true" />
                         {c}
@@ -488,21 +494,31 @@ export function SiteHeader() {
           )}
           <div className="mobile-map-overlay__map">
             <iframe
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(mobileCity)}+Italia&output=embed&z=13`}
+              src={`https://maps.google.com/maps?q=aperitivo+bar+${encodeURIComponent(mobileCity)}&output=embed&z=14`}
               title="Mappa locali"
               className="mobile-map-overlay__iframe"
               loading="lazy"
             />
-            <button
-              className="mobile-map-overlay__list-btn"
-              type="button"
-              onClick={() => {
-                setMapOpen(false);
-                router.push(`/search?city=${mobileCity}`);
-              }}
-            >
-              Lista locali →
-            </button>
+          </div>
+          <div className="mobile-map-overlay__footer">
+            <div className="search-view-pill search-view-pill--inline" role="group" aria-label="Vista">
+              <button
+                type="button"
+                className="search-view-pill__btn"
+                onClick={() => {
+                  setMapOpen(false);
+                  router.push(`/search?city=${encodeURIComponent(mobileCity)}`);
+                }}
+              >
+                Lista
+              </button>
+              <button
+                type="button"
+                className="search-view-pill__btn is-active"
+              >
+                Mappa
+              </button>
+            </div>
           </div>
         </div>
       )}
