@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const MAINTENANCE = true;
+const MAINTENANCE = false;
 
 const PROTECTED_ANY = ["/profile", "/favorites"];
 const PROTECTED_MERCHANT = ["/dashboard"];
