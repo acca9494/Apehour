@@ -42,6 +42,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -81,6 +82,66 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
     );
   }
 
+  const filterControls = (
+    <>
+      <label className="search-sidebar__field">
+        <span>Budget</span>
+        <select
+          value={filters.priceRange ?? "All"}
+          onChange={(e) => setFilter("priceRange", e.target.value as PriceRange | "All")}
+        >
+          {PRICE_RANGES.map((p) => (
+            <option key={p} value={p}>{PRICE_LABEL[p]}</option>
+          ))}
+        </select>
+      </label>
+
+      <label className="search-sidebar__field">
+        <span>Persone</span>
+        <select
+          value={filters.guests ?? 2}
+          onChange={(e) => setFilter("guests", Number(e.target.value))}
+        >
+          {GUESTS_OPTIONS.map((n) => (
+            <option key={n} value={n}>{n} {n === 1 ? "persona" : "persone"}</option>
+          ))}
+        </select>
+      </label>
+
+      <label className="search-sidebar__field">
+        <span>Data</span>
+        <input
+          type="date"
+          value={filters.date ?? ""}
+          onChange={(e) => setFilter("date", e.target.value)}
+        />
+      </label>
+
+      <label className="search-sidebar__field">
+        <span>Orario</span>
+        <select
+          value={filters.time ?? ""}
+          onChange={(e) => setFilter("time", e.target.value)}
+        >
+          <option value="">Qualsiasi ora</option>
+          {["17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"].map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </label>
+
+      <label className="search-sidebar__field">
+        <span>Città</span>
+        <input
+          type="text"
+          placeholder="Milano, Roma, Torino…"
+          value={filters.city ?? ""}
+          onChange={(e) => setFilter("city", e.target.value || undefined)}
+        />
+      </label>
+    </>
+  );
+
   return (
     <div className="search-page">
       {/* ── Category icon strip ─────────────────────── */}
@@ -103,67 +164,27 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
         </div>
       </div>
 
+      {/* ── Mobile filter trigger bar ───────────────── */}
+      <div className="mobile-results-bar">
+        <span className="mobile-results-bar__count">
+          {loading ? "…" : `${restaurants.length} locali`}
+        </span>
+        <button
+          className="mobile-filter-trigger"
+          type="button"
+          onClick={() => setFiltersOpen(true)}
+        >
+          Filtri
+        </button>
+      </div>
+
       {/* ── Body: sidebar + results ─────────────────── */}
       <div className="search-body">
         <aside className="search-sidebar">
           <p className="search-sidebar__label">Filtri</p>
 
           <div className="search-sidebar__group">
-            <label className="search-sidebar__field">
-              <span>Budget</span>
-              <select
-                value={filters.priceRange ?? "All"}
-                onChange={(e) => setFilter("priceRange", e.target.value as PriceRange | "All")}
-              >
-                {PRICE_RANGES.map((p) => (
-                  <option key={p} value={p}>{PRICE_LABEL[p]}</option>
-                ))}
-              </select>
-            </label>
-
-            <label className="search-sidebar__field">
-              <span>Persone</span>
-              <select
-                value={filters.guests ?? 2}
-                onChange={(e) => setFilter("guests", Number(e.target.value))}
-              >
-                {GUESTS_OPTIONS.map((n) => (
-                  <option key={n} value={n}>{n} {n === 1 ? "persona" : "persone"}</option>
-                ))}
-              </select>
-            </label>
-
-            <label className="search-sidebar__field">
-              <span>Data</span>
-              <input
-                type="date"
-                value={filters.date ?? ""}
-                onChange={(e) => setFilter("date", e.target.value)}
-              />
-            </label>
-
-            <label className="search-sidebar__field">
-              <span>Orario</span>
-              <select
-                value={filters.time ?? ""}
-                onChange={(e) => setFilter("time", e.target.value)}
-              >
-                <option value="">Qualsiasi ora</option>
-                {["17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"].map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </label>
-
-            <label className="search-sidebar__field">
-              <span>Città</span>
-              <input
-                type="text"
-                placeholder="Milano, Roma, Torino…"
-                value={filters.city ?? ""}
-                onChange={(e) => setFilter("city", e.target.value || undefined)}
-              />
-            </label>
+            {filterControls}
           </div>
 
           <div className="search-sidebar__stat">
@@ -201,6 +222,51 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
           )}
         </div>
       </div>
+
+      {/* ── Mobile filter bottom sheet ──────────────── */}
+      {filtersOpen && (
+        <>
+          <div
+            className="mobile-filter-backdrop"
+            onClick={() => setFiltersOpen(false)}
+          />
+          <div className="mobile-filter-sheet">
+            <div className="mobile-filter-sheet__handle" />
+            <div className="mobile-filter-sheet__header">
+              <h3>Filtri</h3>
+              <button
+                type="button"
+                className="mobile-filter-sheet__close"
+                onClick={() => setFiltersOpen(false)}
+                aria-label="Chiudi filtri"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mobile-filter-sheet__body">
+              <div className="search-sidebar__group">
+                {filterControls}
+              </div>
+            </div>
+            <div className="mobile-filter-sheet__footer">
+              <button
+                type="button"
+                className="mobile-filter-sheet__reset"
+                onClick={() => setFilters({ priceRange: "All" })}
+              >
+                Azzera
+              </button>
+              <button
+                type="button"
+                className="mobile-filter-sheet__apply"
+                onClick={() => setFiltersOpen(false)}
+              >
+                Mostra {loading ? "…" : restaurants.length} locali
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

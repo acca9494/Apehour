@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { SVGProps } from "react";
 import { cn } from "@/lib/utils";
+import { useMobileMenu } from "@/lib/mobile-menu-context";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -42,7 +43,17 @@ function UserIcon(props: IconProps) {
   );
 }
 
-const items = [
+function MenuIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20" {...props}>
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+const LINK_ITEMS = [
   { href: "/",          label: "Home",      Icon: HomeIcon },
   { href: "/search",    label: "Cerca",     Icon: SearchIcon },
   { href: "/favorites", label: "Preferiti", Icon: HeartIcon },
@@ -51,12 +62,13 @@ const items = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { open, toggle } = useMobileMenu();
 
   if (pathname.startsWith("/dashboard")) return null;
 
   return (
     <nav className="bottom-nav" aria-label="Navigazione principale">
-      {items.map(({ href, label, Icon }) => {
+      {LINK_ITEMS.map(({ href, label, Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
         return (
           <Link
@@ -72,6 +84,20 @@ export function BottomNav() {
           </Link>
         );
       })}
+
+      {/* Menu item — opens the mobile drawer */}
+      <button
+        type="button"
+        className={cn("bottom-nav__menu-btn", open && "is-active")}
+        onClick={toggle}
+        aria-label="Apri menu"
+        aria-expanded={open}
+      >
+        <span className="bottom-nav__icon">
+          <MenuIcon />
+        </span>
+        Menu
+      </button>
     </nav>
   );
 }

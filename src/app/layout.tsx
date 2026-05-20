@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 import { AuthProvider } from "@/lib/auth/context";
+import { MobileMenuProvider } from "@/lib/mobile-menu-context";
 import { Footer } from "@/components/layout/footer";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { SiteHeader } from "@/components/navigation/site-header";
@@ -32,13 +33,15 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="it" className={inter.variable}>
       <body>
         <AuthProvider>
-          {!isMaintenance && <SiteHeader />}
-          <main>
-            {children}
-          </main>
-          {!isMaintenance && <Footer />}
-          {!isMaintenance && <BottomNav />}
-          {!isMaintenance && <GlobalChat />}
+          <MobileMenuProvider>
+            {!isMaintenance && <SiteHeader />}
+            <main>
+              {children}
+            </main>
+            {!isMaintenance && <Footer />}
+            {!isMaintenance && <BottomNav />}
+            {!isMaintenance && <GlobalChat />}
+          </MobileMenuProvider>
         </AuthProvider>
       </body>
     </html>

@@ -66,7 +66,27 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="user-dash-main">
-        {children}
+        {/* Mobile-only horizontal tab nav */}
+        <nav className="profile-mobile-nav" aria-label="Navigazione profilo">
+          {NAV_ITEMS.map((item) => {
+            const exact = item.href === "/profile";
+            const active = exact ? pathname === item.href : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn("profile-mobile-nav__item", active && "is-active")}
+              >
+                <span className="profile-mobile-nav__icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="profile-mobile-content">
+          {children}
+        </div>
       </div>
     </div>
   );
