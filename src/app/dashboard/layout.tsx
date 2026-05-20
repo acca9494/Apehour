@@ -89,7 +89,44 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="dashboard-main">
-        {children}
+
+        {/* Mobile-only: compact topbar with brand + user */}
+        <div className="dashboard-mobile-topbar">
+          <Link href="/" className="dashboard-mobile-topbar__brand">
+            Ape<span>Hour</span>
+          </Link>
+          <div className="dashboard-mobile-topbar__right">
+            <span className="dash-avatar">{user.name[0].toUpperCase()}</span>
+            <button
+              className="dash-logout-btn"
+              onClick={() => { logout(); router.push("/"); }}
+            >
+              Esci
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile-only: horizontal tab nav */}
+        <nav className="dashboard-mobile-nav" aria-label="Navigazione dashboard">
+          {NAV_ITEMS.map((item) => {
+            const exact = item.href === "/dashboard";
+            const active = exact ? pathname === item.href : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn("dashboard-mobile-nav__item", active && "is-active")}
+              >
+                <span className="dashboard-mobile-nav__icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="dashboard-mobile-content">
+          {children}
+        </div>
       </div>
     </div>
   );
