@@ -24,56 +24,55 @@ export default function LeafletMap({ center, zoom = 14, markers = [], className,
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    import("@maptiler/sdk").then((maptiler) => {
-      if (mapRef.current || !containerRef.current) return;
+    const el = containerRef.current;
 
-      maptiler.config.apiKey = process.env.NEXT_PUBLIC_MAPTILER_KEY!;
+    import("@maptiler/sdk").then((sdk) => {
+      if (mapRef.current || !el) return;
 
-      const map = new maptiler.Map({
-        container: containerRef.current,
-        style: maptiler.MapStyle.STREETS,
+      sdk.config.apiKey = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "";
+
+      const map = new sdk.Map({
+        container: el,
+        style: sdk.MapStyle.STREETS,
         center: [center.lng, center.lat],
         zoom,
-        navigationControl: "bottom-right",
       });
 
       mapRef.current = map;
 
+      // Add navigation control the correct way
+      map.addControl(new sdk.NavigationControl(), "bottom-right");
+
       map.on("load", () => {
         markers.forEach(({ lat, lng, label, popupHtml }, i) => {
-          const pillLabel = label ?? `${i + 1}`;
+          const pill = document.createElement("div");
+          pill.className = "ape-pill";
+          pill.textContent = label ?? String(i + 1);
 
-          const el = document.createElement("div");
-          el.className = "ape-pill";
-          el.textContent = pillLabel;
-
-          const marker = new maptiler.Marker({ element: el })
+          const marker = new sdk.Marker({ element: pill })
             .setLngLat([lng, lat])
             .addTo(map);
 
           if (popupHtml) {
-            const popup = new maptiler.Popup({
+            const popup = new sdk.Popup({
               closeButton: false,
-              offset: 12,
+              offset: 14,
               className: "ape-popup-wrap",
             }).setHTML(`<div class="ape-popup">${popupHtml}</div>`);
 
             marker.setPopup(popup);
 
-            el.addEventListener("click", () => {
+            pill.addEventListener("click", () => {
               document.querySelectorAll(".ape-pill").forEach((p) => p.classList.remove("is-active"));
-              el.classList.add("is-active");
-              popup.addTo(map);
+              pill.classList.add("is-active");
             });
           }
         });
 
-        // Fit all markers
         if (markers.length > 1) {
-          const { LngLatBounds } = maptiler;
-          const bounds = new LngLatBounds();
+          const bounds = new sdk.LngLatBounds();
           markers.forEach(({ lng, lat }) => bounds.extend([lng, lat]));
-          map.fitBounds(bounds, { padding: 60, maxZoom: 15 });
+          map.fitBounds(bounds, { padding: 60, maxZoom: 15, duration: 0 });
         }
       });
     });
@@ -90,7 +89,7 @@ export default function LeafletMap({ center, zoom = 14, markers = [], className,
     <div
       ref={containerRef}
       className={className}
-      style={{ height: "100%", width: "100%", ...style }}
+      style={{ height: "100%", width: "100%", minHeight: "200px", ...style }}
     />
   );
 }
