@@ -22,7 +22,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [userPopup, setUserPopup] = useState(false);
+  const [navScroll, setNavScroll] = useState<"start" | "mid" | "end">("start");
   const popupRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!userPopup) return;
@@ -34,6 +36,20 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [userPopup]);
+
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    function onScroll() {
+      if (!el) return;
+      const atStart = el.scrollLeft <= 4;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      setNavScroll(atStart ? "start" : atEnd ? "end" : "mid");
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "commerciante")) {
@@ -134,7 +150,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Mobile-only: horizontal tab nav */}
-        <nav className="dashboard-mobile-nav" aria-label="Navigazione dashboard">
+        <div className={cn("dashboard-mobile-nav-wrap", `dashboard-mobile-nav-wrap--${navScroll}`)}>
+        <nav
+          ref={navRef}
+          className="dashboard-mobile-nav"
+          aria-label="Navigazione dashboard"
+        >
           {NAV_ITEMS.map((item) => {
             const exact = item.href === "/dashboard";
             const active = exact ? pathname === item.href : pathname.startsWith(item.href);
@@ -150,6 +171,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
+        </div>
 
         <div className="dashboard-mobile-content">
           {children}
