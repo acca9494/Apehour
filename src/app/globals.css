@@ -6700,7 +6700,8 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
     padding-bottom: env(safe-area-inset-bottom);
   }
   .dashboard-mobile-nav::-webkit-scrollbar { display: none; }
-  .dashboard-mobile-nav__item { flex: 1; min-width: 64px; }
+  /* Nav items: scrollable, don't force equal width */
+  .dashboard-mobile-nav__item { flex: 0 0 auto; min-width: 72px; padding: 0.4rem 0.6rem; }
 
   /* Tables: horizontal scroll */
   .dash-card { overflow-x: auto; }
@@ -6711,6 +6712,29 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   .dash-pending-item__ref { display: none; }
   .dash-pending-item__actions { width: 100%; margin-top: 0.5rem; }
   .dash-action-btn { flex: 1; justify-content: center; }
+
+  /* ── PAYMENTS PANEL MOBILE ───────────────────────── */
+
+  /* Stat cards: 2×2 grid */
+  .dash-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .dash-stat-card__value { font-size: 1.35rem; }
+
+  /* Stripe notice: stack icon + text */
+  .payments-stripe-notice { flex-direction: column; gap: 0.75rem; }
+  .payments-stripe-notice__icon { font-size: 1.4rem; }
+  .payments-step code { word-break: break-all; }
+
+  /* Filter tabs: scrollable row */
+  .mbk-tabs { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; padding-bottom: 0.25rem; }
+  .mbk-tabs::-webkit-scrollbar { display: none; }
+  .mbk-tab { flex-shrink: 0; }
+
+  /* Payments table: scrollable */
+  .dash-table-card { overflow-x: auto; }
+
+  /* Page header: tighter */
+  .dashboard-page-header h1 { font-size: 1.35rem; }
+  .dashboard-page-header > p { font-size: 0.82rem; }
 
   /* KPI: 2 cols (shared with profile, already set above) */
 }
