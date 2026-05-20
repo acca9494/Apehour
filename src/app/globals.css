@@ -409,12 +409,12 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.45rem 0.65rem;
+  padding: 0.6rem 0.75rem;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-3);
   color: var(--text);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -463,12 +463,12 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.45rem 0.75rem;
+  padding: 0.6rem 0.85rem;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-3);
   color: var(--text-3);
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
   text-align: left;
@@ -1199,7 +1199,7 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   bottom: 0; left: 0; right: 0;
   z-index: 40;
   display: none;
-  padding: 0.4rem 0 calc(0.4rem + env(safe-area-inset-bottom));
+  padding: 0.15rem 0 calc(0.15rem + env(safe-area-inset-bottom));
   background: rgba(255, 255, 255, 0.97);
   border-top: 1.5px solid var(--border);
   backdrop-filter: blur(20px);
@@ -1211,8 +1211,8 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
-  padding: 0.4rem 0;
+  gap: 0.15rem;
+  padding: 0.25rem 0;
   color: var(--text-4);
   font-size: 0.65rem;
   font-weight: 700;
@@ -1227,7 +1227,7 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   align-items: center;
   justify-content: center;
   width: 2.2rem;
-  height: 2rem;
+  height: 1.7rem;
   border-radius: var(--radius-sm);
   transition: background 160ms ease;
 }
@@ -3034,7 +3034,16 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
 .gchat__toggle:hover { background: var(--gold-dk); transform: translateY(-2px); box-shadow: 0 6px 28px rgba(245,168,0,0.5); }
 .gchat__toggle.is-open { background: var(--bg-dark); box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
 
-.gchat__label { letter-spacing: 0.02em; }
+.gchat__label { letter-spacing: 0.02em; overflow: hidden; white-space: nowrap; }
+.gchat__toggle.is-open .gchat__label { display: none; }
+
+@keyframes gchat-label-reveal {
+  0%   { max-width: 0;     opacity: 0; animation-timing-function: step-start; }
+  50%  { max-width: 0;     opacity: 0; animation-timing-function: ease-out; }
+  70%  { max-width: 220px; opacity: 1; animation-timing-function: step-start; }
+  92%  { max-width: 220px; opacity: 1; animation-timing-function: ease-in; }
+  100% { max-width: 0;     opacity: 0; }
+}
 
 .gchat__badge {
   position: absolute;
@@ -4175,12 +4184,12 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
 }
 .dashboard-mobile-topbar__brand span { color: var(--gold); }
 .dashboard-mobile-topbar__logo {
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 5rem;
+  height: 5rem;
   object-fit: contain;
   filter: brightness(0) invert(1);
   flex-shrink: 0;
-  margin-right: -0.6rem;
+  margin-right: -0.75rem;
 }
 .dashboard-mobile-topbar__right {
   display: flex;
@@ -6574,6 +6583,22 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   .home-hero          { display: none; }
   /* Push chat above bottom nav */
   .gchat { bottom: calc(4rem + env(safe-area-inset-bottom) + 0.75rem); right: 0.75rem; }
+  /* Mobile: start as icon-only, reveal label once after 5s, then stays hidden */
+  .gchat__label {
+    animation-name: gchat-label-reveal;
+    animation-duration: 10s;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    max-width: 0;
+    opacity: 0;
+  }
+  /* Hide label entirely when chat panel is open */
+  .gchat__toggle.is-open .gchat__label {
+    animation: none;
+    max-width: 0;
+    opacity: 0;
+  }
   /* Shift brand left: logo -20px, text -25px; push header-actions to right */
   .site-header__inner { padding-left: 0.25rem; justify-content: space-between; }
   .brand              { padding-left: calc(5.5rem - 5px); }

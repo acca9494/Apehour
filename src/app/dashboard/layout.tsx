@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Mobile-only: compact topbar with brand + user */}
         <div className="dashboard-mobile-topbar">
           <Link href="/" className="dashboard-mobile-topbar__brand">
-            <Image src="/apeapplogo1.png" alt="" width={60} height={60} className="dashboard-mobile-topbar__logo" />
+            <Image src="/apeapplogo1.png" alt="" width={80} height={80} className="dashboard-mobile-topbar__logo" />
             Ape<span>Hour</span>
           </Link>
           <div className="dashboard-mobile-topbar__right" ref={popupRef}>

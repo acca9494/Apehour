@@ -113,7 +113,7 @@ export function GlobalChat() {
       >
         {open ? <CloseIcon /> : <ChatBubbleIcon />}
         {!open && unread > 0 && <span className="gchat__badge">{unread > 9 ? "9+" : unread}</span>}
-        {!open && <span className="gchat__label">Chatta e chiedi consiglio!</span>}
+        <span className="gchat__label">Chatta e chiedi consiglio!</span>
       </button>
 
       {open && (
