@@ -115,9 +115,7 @@ export function EventsSection() {
   return (
     <section className="page-section page-section--with-deco">
       <img src="/apeapplogo1.png" alt="" className="section-deco-logo" aria-hidden="true" />
-      <SectionHeading eyebrow="Eventi" title="Scegli l'evento che fa per te">
-        Serate speciali, festival, musica live — ogni evento ti porta BEES da spendere sui prossimi aperitivi.
-      </SectionHeading>
+      <SectionHeading eyebrow="Eventi" title="Scegli l'evento che fa per te," />
       <div className="event-grid">
         {MOCK_EVENTS.map((event, index) => (
           <Reveal key={event.id} delay={index * 70}>
