@@ -4163,6 +4163,9 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
 .dashboard-mobile-content { display: contents; }
 
 .dashboard-mobile-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0;
   font-size: 1.1rem;
   font-weight: 900;
   color: #fff;
@@ -4170,7 +4173,74 @@ main > *:not(.dashboard-layout) { animation: page-in 320ms cubic-bezier(0.22, 1,
   text-decoration: none;
 }
 .dashboard-mobile-topbar__brand span { color: var(--gold); }
-.dashboard-mobile-topbar__right { display: flex; align-items: center; gap: 0.6rem; }
+.dashboard-mobile-topbar__logo {
+  width: 3.75rem;
+  height: 3.75rem;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  flex-shrink: 0;
+  margin-right: -0.6rem;
+}
+.dashboard-mobile-topbar__right {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.dashboard-mobile-topbar__user-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0.25rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+.dashboard-mobile-topbar__username {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+}
+.dashboard-mobile-user-popup {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  padding: 1rem;
+  min-width: 200px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.dashboard-mobile-user-popup__name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.dashboard-mobile-user-popup__email {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin: 0 0 0.5rem;
+}
+.dashboard-mobile-user-popup__logout {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: #fff0f0;
+  border: 1.5px solid #fca5a5;
+  color: #dc2626;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: background 140ms;
+}
+.dashboard-mobile-user-popup__logout:hover { background: #fee2e2; }
 
 .dashboard-mobile-nav__item {
   flex: 0 0 auto;

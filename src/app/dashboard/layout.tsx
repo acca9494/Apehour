@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,6 +21,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [userPopup, setUserPopup] = useState(false);
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!userPopup) return;
+    function handler(e: MouseEvent) {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        setUserPopup(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [userPopup]);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "commerciante")) {
@@ -93,16 +106,30 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Mobile-only: compact topbar with brand + user */}
         <div className="dashboard-mobile-topbar">
           <Link href="/" className="dashboard-mobile-topbar__brand">
+            <Image src="/apeapplogo1.png" alt="" width={60} height={60} className="dashboard-mobile-topbar__logo" />
             Ape<span>Hour</span>
           </Link>
-          <div className="dashboard-mobile-topbar__right">
-            <span className="dash-avatar">{user.name[0].toUpperCase()}</span>
+          <div className="dashboard-mobile-topbar__right" ref={popupRef}>
             <button
-              className="dash-logout-btn"
-              onClick={() => { logout(); router.push("/"); }}
+              className="dashboard-mobile-topbar__user-btn"
+              type="button"
+              onClick={() => setUserPopup((v) => !v)}
             >
-              Esci
+              <span className="dash-avatar">{user.name[0].toUpperCase()}</span>
+              <span className="dashboard-mobile-topbar__username">{user.name.split(" ")[0]}</span>
             </button>
+            {userPopup && (
+              <div className="dashboard-mobile-user-popup">
+                <p className="dashboard-mobile-user-popup__name">{user.name}</p>
+                <p className="dashboard-mobile-user-popup__email">{user.email}</p>
+                <button
+                  className="dashboard-mobile-user-popup__logout"
+                  onClick={() => { logout(); router.push("/"); }}
+                >
+                  Esci dall&apos;account
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
