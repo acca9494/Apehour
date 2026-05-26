@@ -69,12 +69,15 @@ export type Review = {
   date: string;
 };
 
+export type ApeType = "vespa-sprint" | "ape-plus" | "bombo-queen";
+
 export type Promotion = {
   id: string;
   title: string;
   description: string;
   discount: number;
   restaurantSlug: string;
+  apeType?: ApeType;
 };
 
 export type BookingRequest = {
@@ -95,10 +98,16 @@ export type BookingConfirmation = {
   message: string;
 };
 
+export type FoodType = "Vegano" | "Vegetariano" | "Senza Glutine" | "Halal" | "Bio";
+
 export type SearchFilters = {
   city?: string;
   date?: string;
   time?: string;
   guests?: number;
   cuisine?: Cuisine | "All";
+  priceRange?: PriceRange | "All";
+  foodType?: FoodType | "All";
+  petFriendly?: boolean;
+  outdoor?: boolean;
 };

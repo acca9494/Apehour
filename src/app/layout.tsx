@@ -10,6 +10,7 @@ import { BottomNav } from "@/components/navigation/bottom-nav";
 import { SiteHeader } from "@/components/navigation/site-header";
 import { GlobalChat } from "@/components/chat/global-chat";
 import { SearchViewPill } from "@/components/search/search-view-pill";
+import { CookieBanner } from "@/components/ui/cookie-banner";
 import "./globals.css";
 
 const inter = Inter({
@@ -44,6 +45,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             {!isMaintenance && <BottomNav />}
             {!isMaintenance && <GlobalChat />}
             {!isMaintenance && <Suspense><SearchViewPill /></Suspense>}
+            <CookieBanner />
           </MobileMenuProvider>
         </AuthProvider>
       </body>

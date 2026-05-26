@@ -24,6 +24,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     time: readParam(params, "time"),
     guests: Number(readParam(params, "guests") ?? 2),
     cuisine: readParam(params, "cuisine") as Cuisine | undefined,
+    priceRange: (readParam(params, "priceRange") as SearchFilters["priceRange"]) ?? "All",
   };
 
   return <SearchResultsClient initialFilters={filters} />;

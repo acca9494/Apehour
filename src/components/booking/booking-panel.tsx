@@ -47,11 +47,23 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-export function BookingPanel({ restaurant }: { restaurant: Restaurant }) {
+export function BookingPanel({ restaurant, initialSlot }: { restaurant: Restaurant; initialSlot?: string }) {
   const { user } = useAuth();
 
+  // Scroll to this panel when a slot was pre-selected from a card
+  useEffect(() => {
+    if (!initialSlot) return;
+    const el = document.getElementById("prenota");
+    if (!el) return;
+    setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [date, setDate] = useState(todayInputValue());
-  const [selectedSlot, setSelectedSlot] = useState(restaurant.slots[0]?.time ?? "");
+  const [selectedSlot, setSelectedSlot] = useState(
+    (initialSlot && restaurant.slots.some((s) => s.time === initialSlot) ? initialSlot : null)
+    ?? restaurant.slots[0]?.time
+    ?? ""
+  );
   const [guests, setGuests] = useState(2);
   const [availMsg, setAvailMsg] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
@@ -73,7 +85,7 @@ export function BookingPanel({ restaurant }: { restaurant: Restaurant }) {
   const href = `/booking?restaurant=${restaurant.slug}&date=${date}&time=${selectedSlot}&guests=${guests}`;
 
   return (
-    <aside className="booking-panel" aria-label="Prenota un tavolo">
+    <aside className="booking-panel" id="prenota" aria-label="Prenota un tavolo">
       {/* Header */}
       <div className="bp-header">
         <p className="eyebrow">Prenota il tavolo</p>

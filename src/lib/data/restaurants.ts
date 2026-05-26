@@ -111,15 +111,15 @@ export const restaurants: Restaurant[] = [
   {
     id: "rst-003",
     slug: "cafe-marais",
-    name: "Café Marais",
-    cuisine: "Champagne Bar",
+    name: "Bollicine Club",
+    cuisine: "Cocktail Bar",
     rating: 4.7,
     reviewCount: 713,
     priceRange: "$$$$",
     distance: "2.1 km",
-    city: "Paris",
-    neighborhood: "Le Marais",
-    address: "18 Rue Vieille du Temple, Paris",
+    city: "Turin",
+    neighborhood: "Centro Storico",
+    address: "Via Roma 180, Torino",
     heroImage:
       "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1600&q=80",
     gallery: [
@@ -154,7 +154,7 @@ export const restaurants: Restaurant[] = [
       { day: "Sab", hours: "12:00 - 15:00, 17:00 - 23:30" },
       { day: "Dom", hours: "Chiuso" },
     ],
-    coordinates: { lat: 48.858, lng: 2.361 },
+    coordinates: { lat: 45.0677, lng: 7.6829 },
     slots: [
       { id: "cm-1845", time: "18:45", availableSeats: 7 },
       { id: "cm-2015", time: "20:15", label: "Menu degustazione", availableSeats: 3 },
@@ -165,14 +165,14 @@ export const restaurants: Restaurant[] = [
     id: "rst-004",
     slug: "el-vermut",
     name: "El Vermut",
-    cuisine: "Vermouth Bar",
+    cuisine: "Spritz Bar",
     rating: 4.6,
     reviewCount: 1568,
     priceRange: "$$",
     distance: "0.4 km",
-    city: "Barcelona",
-    neighborhood: "Eixample",
-    address: "Carrer de Mallorca 255, Barcelona",
+    city: "Rome",
+    neighborhood: "Prati",
+    address: "Via Cola di Rienzo 114, Roma",
     heroImage:
       "https://images.unsplash.com/photo-1564759298141-cef5ca4a5c38?auto=format&fit=crop&w=1600&q=80",
     gallery: [
@@ -208,7 +208,7 @@ export const restaurants: Restaurant[] = [
       { day: "Cucina", hours: "12:30 - 23:00" },
       { day: "Brunch", hours: "Sab - Dom 11:00 - 15:00" },
     ],
-    coordinates: { lat: 41.393, lng: 2.165 },
+    coordinates: { lat: 41.9205, lng: 12.4609 },
     slots: [
       { id: "ev-1800", time: "18:00", label: "40% off", availableSeats: 10, discount: 40 },
       { id: "ev-1930", time: "19:30", availableSeats: 5, discount: 30 },
@@ -219,14 +219,14 @@ export const restaurants: Restaurant[] = [
     id: "rst-005",
     slug: "negroni-house",
     name: "The Negroni House",
-    cuisine: "Negroni Bar",
+    cuisine: "Cocktail Bar",
     rating: 4.8,
     reviewCount: 889,
     priceRange: "$$$",
     distance: "1.5 km",
-    city: "London",
-    neighborhood: "Soho",
-    address: "42 Dean Street, London",
+    city: "Naples",
+    neighborhood: "Chiaia",
+    address: "Via Chiaia 55, Napoli",
     heroImage:
       "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1600&q=80",
     gallery: [
@@ -262,7 +262,7 @@ export const restaurants: Restaurant[] = [
       { day: "Ven - Sab", hours: "16:30 - 00:30" },
       { day: "Dom", hours: "17:00 - 22:00" },
     ],
-    coordinates: { lat: 51.514, lng: -0.132 },
+    coordinates: { lat: 40.8348, lng: 14.2389 },
     slots: [
       { id: "nh-1830", time: "18:30", availableSeats: 6, discount: 25 },
       { id: "nh-2000", time: "20:00", label: "Peak hour", availableSeats: 3 },
@@ -663,6 +663,7 @@ export const promotions: Promotion[] = [
     description: "Fino al 40% di sconto sui tavoli prima delle 19:30.",
     discount: 40,
     restaurantSlug: "el-vermut",
+    apeType: "vespa-sprint",
   },
   {
     id: "promo-002",
@@ -670,6 +671,7 @@ export const promotions: Promotion[] = [
     description: "Selezione biodinamica con conferma istantanea stasera.",
     discount: 20,
     restaurantSlug: "stella-wines",
+    apeType: "ape-plus",
   },
   {
     id: "promo-003",
@@ -677,5 +679,6 @@ export const promotions: Promotion[] = [
     description: "Tavoli per due con slot serali e rating altissimo.",
     discount: 30,
     restaurantSlug: "spritz-brera",
+    apeType: "bombo-queen",
   },
 ];

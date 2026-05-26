@@ -5,6 +5,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import Image from "next/image";
 import type { Promotion, Review } from "@/lib/types";
 import { MerchantRegisterForm } from "@/components/home/merchant-register-form";
+import { ApeCardLink } from "@/components/home/ape-card-link";
 
 type HomeSectionsProps = {
   promotions: Promotion[];
@@ -90,21 +91,54 @@ const MOCK_EVENTS = [
   },
 ];
 
+const APE_IMG: Record<string, string> = {
+  "vespa-sprint": "/vespa.jpeg",
+  "ape-plus":     "/plus.jpeg",
+  "bombo-queen":  "/bombo.jpeg",
+};
+const APE_BUDGET: Record<string, string> = {
+  "vespa-sprint": "€",
+  "ape-plus":     "€€",
+  "bombo-queen":  "€€€",
+};
+const APE_LABEL: Record<string, string> = {
+  "vespa-sprint": "Vespa Sprint",
+  "ape-plus":     "Ape Plus",
+  "bombo-queen":  "Bombo Queen",
+};
+const APE_PRICE_RANGE: Record<string, string> = {
+  "vespa-sprint": "$$",
+  "ape-plus":     "$$$",
+  "bombo-queen":  "$$$$",
+};
+
 export function OffersSection({ promotions }: { promotions: Promotion[] }) {
   return (
     <section className="page-section page-section--dark page-section--offers">
       <div className="offers-header">
-        <span className="eyebrow">Offerte</span>
-        <span className="offers-savings-badge">Risparmia fino al 40%</span>
+        <span className="eyebrow offers-header__eyebrow--desktop">Offerte</span>
+        <span className="offers-savings-badge offers-header__badge--desktop">Risparmia fino al 40%</span>
+        <span className="eyebrow offers-header__eyebrow--mobile">Prenota ora</span>
+        <h2 className="offers-header__title--mobile">Scegli il tuo budget</h2>
       </div>
       <div className="offer-grid">
         {promotions.map((promotion) => (
-          <Link className="offer-card" href={`/restaurants/${promotion.restaurantSlug}`} key={promotion.id}>
-            <span>-{promotion.discount}%</span>
-            <h3>{promotion.title}</h3>
-            <p>{promotion.description}</p>
-            <strong>Prenota l&apos;offerta</strong>
-          </Link>
+          <div className="offer-card" key={promotion.id}>
+            {promotion.apeType && (
+              <ApeCardLink priceRange={APE_PRICE_RANGE[promotion.apeType]}>
+                <span className="offer-card__ape-name">{APE_LABEL[promotion.apeType]}</span>
+                <span className="offer-card__ape-budget">{APE_BUDGET[promotion.apeType]}</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={APE_IMG[promotion.apeType]} alt={APE_LABEL[promotion.apeType]} className="offer-card__ape-img" />
+              </ApeCardLink>
+            )}
+            <Link className="offer-card__desktop" href={`/restaurants/${promotion.restaurantSlug}`}>
+              <span>-{promotion.discount}%</span>
+              <h3>{promotion.title}</h3>
+              <p>{promotion.description}</p>
+              <strong>Prenota l&apos;offerta</strong>
+            </Link>
+          </div>
         ))}
       </div>
     </section>

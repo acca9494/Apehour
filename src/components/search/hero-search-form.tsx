@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { SVGProps } from "react";
 import { todayInputValue } from "@/lib/utils";
+import { CalendarDropdown } from "@/components/ui/calendar-dropdown";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -12,16 +13,6 @@ function MapPinIcon(props: IconProps) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11Z" />
       <circle cx="12" cy="10" r="2.3" />
-    </svg>
-  );
-}
-
-function CalendarIcon(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M7 3.5v3M17 3.5v3" />
-      <rect x="4" y="6.5" width="16" height="13" rx="2.5" />
-      <path d="M4 10.5h16" />
     </svg>
   );
 }
@@ -62,22 +53,6 @@ function ChevronDownIcon(props: IconProps) {
   );
 }
 
-function ChevronLeftIcon(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="m15 18-6-6 6-6" />
-    </svg>
-  );
-}
-
-function ChevronRightIcon(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
-
 /* ── Shared types ──────────────────────────────────── */
 type DropdownOption = {
   value: string;
@@ -85,10 +60,6 @@ type DropdownOption = {
   detail?: string;
   Icon: (props: IconProps) => React.ReactElement;
 };
-
-/* ── Helper ────────────────────────────────────────── */
-const MONTHS_IT = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-const DAYS_IT   = ["Lu","Ma","Me","Gi","Ve","Sa","Do"];
 
 /* ── List Dropdown ─────────────────────────────────── */
 type SearchDropdownProps = {
@@ -162,155 +133,6 @@ function SearchDropdown({ label, FieldIcon, options, value, onChange }: SearchDr
   );
 }
 
-/* ── Calendar Dropdown ─────────────────────────────── */
-type CalendarDropdownProps = {
-  value: string;
-  onChange: (v: string) => void;
-};
-
-function CalendarDropdown({ value, onChange }: CalendarDropdownProps) {
-  const todayDate = new Date();
-  todayDate.setHours(0, 0, 0, 0);
-
-  const [open, setOpen]           = useState(false);
-  const [viewYear, setViewYear]   = useState(todayDate.getFullYear());
-  const [viewMonth, setViewMonth] = useState(todayDate.getMonth());
-  const ref = useRef<HTMLDivElement>(null);
-
-  const close = useCallback(() => setOpen(false), []);
-  useEffect(() => {
-    if (!open) return;
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) close();
-    }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open, close]);
-
-  function prevMonth() {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); }
-    else setViewMonth((m) => m - 1);
-  }
-  function nextMonth() {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); }
-    else setViewMonth((m) => m + 1);
-  }
-
-  function toISO(day: number) {
-    return `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-  }
-
-  function isPast(day: number) {
-    return new Date(viewYear, viewMonth, day) < todayDate;
-  }
-  function isToday(day: number) {
-    return viewYear === todayDate.getFullYear() && viewMonth === todayDate.getMonth() && day === todayDate.getDate();
-  }
-  function isSelected(day: number) {
-    return value === toISO(day);
-  }
-
-  const daysInMonth  = new Date(viewYear, viewMonth + 1, 0).getDate();
-  const firstWeekday = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7; // Mon=0
-
-  const cells: (number | null)[] = [
-    ...Array<null>(firstWeekday).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-  ];
-
-  const displayValue = value
-    ? new Date(value + "T00:00:00").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" })
-    : "Seleziona data";
-
-  const hasValue = Boolean(value);
-
-  return (
-    <div
-      ref={ref}
-      className={`hero-search__field hero-search__field--dropdown${open ? " hero-search__field--open" : ""}`}
-      onClick={() => setOpen((v) => !v)}
-      role="button"
-      tabIndex={0}
-      aria-haspopup="dialog"
-      aria-expanded={open}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOpen((v) => !v); }}
-    >
-      <span className={`hero-search__icon${open || hasValue ? " hero-search__icon--active" : ""}`}>
-        <CalendarIcon aria-hidden="true" />
-      </span>
-      <span className="hero-search__copy">
-        <span className="hero-search__label">Data</span>
-        <span className={`hero-search__value${!hasValue ? " hero-search__value--placeholder" : ""}`}>
-          {displayValue}
-        </span>
-      </span>
-      <span className={`hero-search__chevron${open ? " hero-search__chevron--up" : ""}`}>
-        <ChevronDownIcon aria-hidden="true" />
-      </span>
-
-      {open && (
-        <div className="hscal" role="dialog" aria-label="Seleziona data" onClick={(e) => e.stopPropagation()}>
-          {/* Month navigation */}
-          <div className="hscal__header">
-            <span className="hscal__month">{MONTHS_IT[viewMonth]} {viewYear}</span>
-            <div className="hscal__navs">
-              <button type="button" className="hscal__nav" onClick={prevMonth} aria-label="Mese precedente">
-                <ChevronLeftIcon />
-              </button>
-              <button type="button" className="hscal__nav" onClick={nextMonth} aria-label="Mese successivo">
-                <ChevronRightIcon />
-              </button>
-            </div>
-          </div>
-
-          {/* Weekday headers */}
-          <div className="hscal__grid">
-            {DAYS_IT.map((d) => (
-              <div key={d} className="hscal__weekday">{d}</div>
-            ))}
-
-            {/* Day cells */}
-            {cells.map((day, idx) =>
-              day === null ? (
-                <div key={`e-${idx}`} />
-              ) : (
-                <button
-                  key={day}
-                  type="button"
-                  disabled={isPast(day)}
-                  className={[
-                    "hscal__day",
-                    isPast(day)     ? "hscal__day--past"     : "",
-                    isToday(day)    ? "hscal__day--today"    : "",
-                    isSelected(day) ? "hscal__day--selected" : "",
-                  ].filter(Boolean).join(" ")}
-                  onClick={() => { onChange(toISO(day)); setOpen(false); }}
-                >
-                  {day}
-                </button>
-              )
-            )}
-          </div>
-
-          {/* Quick picks */}
-          <div className="hscal__quick">
-            <button type="button" className="hscal__quick-btn" onClick={() => { onChange(todayInputValue()); setOpen(false); }}>Oggi</button>
-            <button type="button" className="hscal__quick-btn" onClick={() => {
-              const d = new Date(); d.setDate(d.getDate() + 1);
-              onChange(d.toISOString().split("T")[0]!); setOpen(false);
-            }}>Domani</button>
-            <button type="button" className="hscal__quick-btn" onClick={() => {
-              const delta = (6 - new Date().getDay() + 7) % 7;
-              const d = new Date(); d.setDate(d.getDate() + (delta || 7));
-              onChange(d.toISOString().split("T")[0]!); setOpen(false);
-            }}>Weekend</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 /* ── Data ──────────────────────────────────────────── */
 const CITY_OPTIONS: DropdownOption[] = [
   { value: "",        label: "Tutta Italia", detail: "tutte le città",  Icon: MapPinIcon },
@@ -348,16 +170,19 @@ function GridIcon(props: IconProps) {
 const TYPE_PILLS: {
   value: string;
   label: string;
+  budget: string;
   icon: React.ReactNode;
 }[] = [
   {
     value: "",
     label: "Tutti",
+    budget: "",
     icon: <GridIcon className="hstp__pill-icon" aria-hidden="true" />,
   },
   {
     value: "vespa-sprint",
     label: "Vespa Sprint",
+    budget: "€",
     icon: (
       <img
         src="/vespa.jpeg"
@@ -369,6 +194,7 @@ const TYPE_PILLS: {
   {
     value: "ape-plus",
     label: "Ape Plus",
+    budget: "€€",
     icon: (
       <img
         src="/plus.jpeg"
@@ -380,6 +206,7 @@ const TYPE_PILLS: {
   {
     value: "bombo-queen",
     label: "Bombo Queen",
+    budget: "€€€",
     icon: (
       <img
         src="/bombo.jpeg"
@@ -420,8 +247,10 @@ function TypeDropdown({ value, onChange }: { value: string; onChange: (v: string
         {selected.icon}
       </span>
       <span className="hero-search__copy">
-        <span className="hero-search__label">Tipo Ape</span>
-        <span className="hero-search__value">{selected.label}</span>
+        <span className="hero-search__label">Budget</span>
+        <span className="hero-search__value">
+          {selected.label}{selected.budget ? <span className="hero-search__budget">{selected.budget}</span> : null}
+        </span>
       </span>
       <span className={`hero-search__chevron${open ? " hero-search__chevron--up" : ""}`}>
         <ChevronDownIcon aria-hidden="true" />
@@ -441,6 +270,7 @@ function TypeDropdown({ value, onChange }: { value: string; onChange: (v: string
               >
                 <span className="hsdd__icon hsdd__icon--type">{opt.icon}</span>
                 <span className="hsdd__text">{opt.label}</span>
+                {opt.budget && <span className="hsdd__budget">{opt.budget}</span>}
               </li>
             );
           })}

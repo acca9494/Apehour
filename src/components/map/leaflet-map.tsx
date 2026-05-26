@@ -5,8 +5,12 @@ import { useEffect, useRef } from "react";
 export type MapMarker = {
   lat: number;
   lng: number;
-  label?: string;
-  popupHtml?: string;
+  label: string;
+  slug: string;
+  image: string;
+  neighborhood: string;
+  cuisine: string;
+  budget: string;
 };
 
 type Props = {
@@ -17,30 +21,33 @@ type Props = {
   style?: React.CSSProperties;
 };
 
+function budgetLabel(budget: string): string {
+  if (budget === "$$") return "€";
+  if (budget === "$$$") return "€€";
+  if (budget === "$$$$") return "€€€";
+  return "€";
+}
+
 export default function LeafletMap({ center, zoom = 13, markers = [], className, style }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<unknown>(null);
+  const mapRef       = useRef<ReturnType<typeof import("leaflet")["map"]> | null>(null);
+  const LRef         = useRef<typeof import("leaflet") | null>(null);
+  const layerRef     = useRef<ReturnType<typeof import("leaflet")["layerGroup"]> | null>(null);
 
+  // ── Init map once ────────────────────────────────
   useEffect(() => {
     if (mapRef.current || !containerRef.current) return;
 
-    let L: typeof import("leaflet");
-    let map: ReturnType<typeof import("leaflet")["map"]>;
-
     import("leaflet").then((mod) => {
       if (mapRef.current || !containerRef.current) return;
-      L = mod.default ?? mod;
+      const L = mod.default ?? mod;
+      LRef.current = L;
 
-      // Fix default icon paths broken by bundlers
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-      });
 
-      map = L.map(containerRef.current!, { zoomControl: false }).setView([center.lat, center.lng], zoom);
+      const map = L.map(containerRef.current!, { zoomControl: false })
+        .setView([center.lat, center.lng], zoom);
       mapRef.current = map;
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -50,49 +57,77 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
 
-      markers.forEach(({ lat, lng, label, popupHtml }) => {
-        const icon = L.divIcon({
-          html: `<div class="ape-pill">${label ?? "•"}</div>`,
-          className: "",
-          iconAnchor: [20, 20],
-        });
+      const layer = L.layerGroup().addTo(map);
+      layerRef.current = layer;
 
-        const marker = L.marker([lat, lng], { icon }).addTo(map);
-        if (popupHtml) {
-          marker.bindPopup(`<div class="ape-popup">${popupHtml}</div>`, {
-            closeButton: false,
-            offset: [0, -14],
-          });
-          marker.on("click", () => {
-            document.querySelectorAll(".ape-pill").forEach((p) => p.classList.remove("is-active"));
-            marker.getElement()?.querySelector(".ape-pill")?.classList.add("is-active");
-          });
-        }
+      // Let the browser finish layout before rendering markers
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+        renderMarkers(L, map, layer, markers);
       });
-
-      if (markers.length > 1) {
-        const bounds = L.latLngBounds(markers.map(({ lat, lng }) => [lat, lng] as [number, number]));
-        map.fitBounds(bounds, { padding: [48, 48], maxZoom: 15 });
-      }
     });
 
     return () => {
       if (mapRef.current) {
-        (mapRef.current as ReturnType<typeof import("leaflet")["map"]>).remove();
+        mapRef.current.remove();
         mapRef.current = null;
+        LRef.current = null;
+        layerRef.current = null;
       }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Re-render markers whenever the prop changes ──
+  useEffect(() => {
+    if (!mapRef.current || !LRef.current || !layerRef.current) return;
+    renderMarkers(LRef.current, mapRef.current, layerRef.current, markers);
+  }, [markers]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <>
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <div className={className} style={{ position: "relative", height: "100%", width: "100%", ...style }}>
         <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
       </div>
     </>
   );
+}
+
+function renderMarkers(
+  L: typeof import("leaflet"),
+  map: ReturnType<typeof import("leaflet")["map"]>,
+  layer: ReturnType<typeof import("leaflet")["layerGroup"]>,
+  markers: MapMarker[],
+) {
+  layer.clearLayers();
+  if (markers.length === 0) return;
+
+  markers.forEach(({ lat, lng, label, slug, image, neighborhood, cuisine, budget }) => {
+    const euros = budgetLabel(budget);
+    const cardHtml = `
+      <a class="mcrd" href="/restaurants/${slug}">
+        <img class="mcrd__img" src="${image}" alt="${label}" />
+        <div class="mcrd__body">
+          <span class="mcrd__budget">${euros}</span>
+          <strong class="mcrd__name">${label}</strong>
+          <span class="mcrd__tag">${cuisine}</span>
+          <span class="mcrd__hood">${neighborhood}</span>
+          <span class="mcrd__cta">Prenota</span>
+        </div>
+      </a>`;
+
+    const icon = L.divIcon({
+      html: cardHtml,
+      className: "mcrd-wrap",
+      iconSize: [160, 155],
+      iconAnchor: [80, 155],
+    });
+
+    L.marker([lat, lng], { icon }).addTo(layer);
+  });
+
+  if (markers.length > 1) {
+    const bounds = L.latLngBounds(markers.map(({ lat, lng }) => [lat, lng] as [number, number]));
+    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
+  }
 }

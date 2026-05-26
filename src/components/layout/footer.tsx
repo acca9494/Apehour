@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -17,12 +19,11 @@ export function Footer() {
             </span>
           </Link>
           <p className="footer-brand__desc">
-            Prenota il tuo aperitivo nei migliori bar d&apos;Italia. Disponibilità live, offerte esclusive, conferma immediata.
+            Prenota il tuo aperitivo nei migliori locali d&apos;Italia. Eventi, offerte esclusive e tanto altro!
           </p>
           <div className="footer-trust">
-            <span>⭐ 4.8 rating medio</span>
-            <span>⚡ Conferma istantanea</span>
-            <span>🍋 Offerte a ore d&apos;oro</span>
+            <Link href="/cookie-policy" className="footer-trust__link">Cookie policy</Link>
+            <Link href="/privacy" className="footer-trust__link">Privacy policy</Link>
           </div>
         </div>
 
@@ -63,9 +64,11 @@ export function Footer() {
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} ApeHour — tutti i diritti riservati</span>
         <div className="footer-bottom__links">
-          <Link href="#">Privacy policy</Link>
-          <Link href="#">Termini di servizio</Link>
-          <Link href="#">Cookie</Link>
+          <Link href="/privacy">Privacy policy</Link>
+          <Link href="/cookie-policy">Cookie policy</Link>
+          <button type="button" className="footer-cookie-reset" onClick={() => { try { localStorage.removeItem("apehour_cookie_consent"); window.location.reload(); } catch {} }}>
+            Gestisci cookie
+          </button>
         </div>
       </div>
     </footer>

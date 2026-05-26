@@ -10,7 +10,7 @@ import { getReviews } from "@/lib/services/reviews";
 import { getRestaurantBySlug, getSimilarRestaurants } from "@/lib/services/restaurants";
 import { formatReviewCount } from "@/lib/utils";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
 
 export function generateStaticParams() {
   return restaurants.map((r) => ({ slug: r.slug }));
@@ -26,8 +26,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function RestaurantPage({ params }: Props) {
+export default async function RestaurantPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const initialSlot = typeof sp.slot === "string" ? sp.slot : undefined;
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) notFound();
 
@@ -78,6 +80,11 @@ export default async function RestaurantPage({ params }: Props) {
               </div>
             </div>
           </section>
+
+          {/* ── Booking panel inline — mobile only, before gallery ──── */}
+          <div className="detail-booking-mobile">
+            <BookingPanel restaurant={restaurant} initialSlot={initialSlot} />
+          </div>
 
           {/* ── 9. Gallery strip ───────────────────────────────────────── */}
           {restaurant.gallery.length > 0 && (
@@ -182,8 +189,10 @@ export default async function RestaurantPage({ params }: Props) {
 
         </article>
 
-        {/* ── 10–14. Box prenotazione sticky ────────────────────────── */}
-        <BookingPanel restaurant={restaurant} />
+        {/* ── 10–14. Box prenotazione sticky — desktop only ─────────── */}
+        <div className="detail-booking-desktop">
+          <BookingPanel restaurant={restaurant} initialSlot={initialSlot} />
+        </div>
       </section>
 
       {/* ── Locali simili ─────────────────────────────────────────────── */}

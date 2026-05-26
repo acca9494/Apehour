@@ -45,7 +45,7 @@ export function RestaurantCard({ restaurant, priority = false }: RestaurantCardP
 
         <div className="slot-row" aria-label="Orari disponibili">
           {restaurant.slots.slice(0, 3).map((slot) => (
-            <Link key={slot.id} href={`/booking?restaurant=${restaurant.slug}&time=${slot.time}`}>
+            <Link key={slot.id} href={`/restaurants/${restaurant.slug}?slot=${slot.time}`}>
               {slot.time}
             </Link>
           ))}

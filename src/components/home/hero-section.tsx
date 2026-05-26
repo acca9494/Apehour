@@ -16,32 +16,34 @@ function BrandIcon(props: IconProps) {
   );
 }
 
-function CheckIcon(props: IconProps) {
+function ClockIcon(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="m5 12 4.2 4.2L19 6.5" />
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 3" />
     </svg>
   );
 }
-function StarIcon(props: IconProps) {
+function ZapIcon(props: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="m12 4 2.5 5 5.5.8-4 3.9 1 5.5L12 16.5 7 19.2l1-5.5-4-3.9 5.5-.8L12 4Z" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M13 2 4.5 13.5H12L11 22l8.5-11.5H12L13 2Z" />
     </svg>
   );
 }
-function CalendarIcon(props: IconProps) {
+function TagIcon(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="4" y="6.5" width="16" height="13" rx="2.5" />
-      <path d="M4 10.5h16M7 3.5v3M17 3.5v3" />
+      <path d="M12.5 2H7a2 2 0 0 0-2 2v5.5a1 1 0 0 0 .3.7l9 9a2 2 0 0 0 2.8 0l4.7-4.7a2 2 0 0 0 0-2.8l-9-9A1 1 0 0 0 12.5 2Z" />
+      <circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none" />
     </svg>
   );
 }
-function PercentIcon(props: IconProps) {
+function ShieldCheckIcon(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="m6 18 12-12" /><circle cx="7.5" cy="7.5" r="2.5" /><circle cx="16.5" cy="16.5" r="2.5" />
+      <path d="M12 2 4 6v6c0 5 3.6 9.3 8 10.3C16.4 21.3 20 17 20 12V6L12 2Z" />
+      <path d="m9 12 2.2 2.2L15 9" />
     </svg>
   );
 }
@@ -54,10 +56,10 @@ function ChevronDownIcon(props: IconProps) {
 }
 
 const FEATURES = [
-  { title: "Prenota in 30 secondi",  copy: "Niente telefonate, niente attese",   Icon: CheckIcon },
-  { title: "Solo bar da 10",         copy: "Selezionati, verificati, adorati",    Icon: StarIcon },
-  { title: "Cancella quando vuoi",   copy: "Zero penali, zero stress",            Icon: CalendarIcon },
-  { title: "Sconti fino al 40%",     copy: "Solo per chi prenota su ApeHour",     Icon: PercentIcon },
+  { title: "Prenota in 1 minuto",    Icon: ClockIcon },
+  { title: "Conferma immediata",     Icon: ZapIcon },
+  { title: "Sconti fino al 40%",     Icon: TagIcon },
+  { title: "Cancellazione gratuita", Icon: ShieldCheckIcon },
 ];
 
 // speed: how many px to move per 100px of scroll (negative = move up slower)
@@ -132,12 +134,11 @@ export function HeroSection() {
         </div>
 
         <div className="home-hero__features">
-          {FEATURES.map(({ title, copy, Icon }) => (
+          {FEATURES.map(({ title, Icon }) => (
             <div className="home-hero__feature" key={title}>
               <span className="home-hero__feature-icon"><Icon aria-hidden="true" /></span>
               <div className="home-hero__feature-text">
                 <strong>{title}</strong>
-                <span>{copy}</span>
               </div>
             </div>
           ))}

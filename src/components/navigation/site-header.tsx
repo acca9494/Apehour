@@ -85,6 +85,13 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [bees, setBees] = useState(0);
   const [mobileCity, setMobileCity] = useState("Milano");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("apehour_city");
+      if (saved) setMobileCity(saved);
+    } catch {}
+  }, []);
   const [cityDropdown, setCityDropdown] = useState(false);
   const [searchOverlay, setSearchOverlay] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,10 +99,12 @@ export function SiteHeader() {
   const [mapDate, setMapDate] = useState("");
   const [mapTime, setMapTime] = useState("");
   const [mapGuests, setMapGuests] = useState(2);
-  const [activeMapFilter, setActiveMapFilter] = useState<"date" | "time" | "guests" | null>(null);
+  const [activeMapFilter, setActiveMapFilter] = useState<"date" | "time" | "guests" | "budget" | null>(null);
+  const [mapBudget, setMapBudget] = useState<"" | "$$" | "$$$" | "$$$$">("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const cityDropdownRef = useRef<HTMLDivElement>(null);
 
+  const [restaurantCount, setRestaurantCount] = useState<number | null>(null);
   const { open, toggle, close } = useMobileMenu();
   const { user, loading, logout } = useAuth();
   const router = useRouter();
@@ -113,6 +122,14 @@ export function SiteHeader() {
   }, [user]);
 
   useEffect(() => { close(); }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setRestaurantCount((e as CustomEvent<number | null>).detail);
+    };
+    window.addEventListener("apehour:restaurants-count", handler);
+    return () => window.removeEventListener("apehour:restaurants-count", handler);
+  }, []);
 
   // Close city dropdown on outside click
   useEffect(() => {
@@ -286,9 +303,12 @@ export function SiteHeader() {
                         className={cn("mobile-city-dropdown__item", c === mobileCity && "is-active")}
                         onClick={() => {
                           setMobileCity(c);
+                          try { localStorage.setItem("apehour_city", c); } catch {}
                           setCityDropdown(false);
                           if (pathname === "/search") {
-                            router.push(`/search?city=${encodeURIComponent(c)}`);
+                            const params = new URLSearchParams(window.location.search);
+                            params.set("city", c);
+                            router.push(`/search?${params.toString()}`);
                           }
                         }}
                       >
@@ -301,14 +321,35 @@ export function SiteHeader() {
               )}
             </div>
 
-            <button
-              className="mobile-search-btn"
-              type="button"
-              onClick={() => setSearchOverlay(true)}
-            >
-              <SearchIcon className="mobile-search-btn__icon" aria-hidden="true" />
-              <span>Cerca bar, tipo di aperitivo...</span>
-            </button>
+            {pathname === "/search" ? (
+              <button
+                className="mobile-search-btn mobile-search-btn--filtri"
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("apehour:open-filters"))}
+              >
+                <svg className="mobile-search-btn__icon" viewBox="0 0 22 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <polygon points="5.5,0 9.5,0 11.5,3.46 9.5,6.93 5.5,6.93 3.5,3.46" />
+                  <polygon points="12.5,0 16.5,0 18.5,3.46 16.5,6.93 12.5,6.93 10.5,3.46" />
+                  <polygon points="5.5,7.07 9.5,7.07 11.5,10.54 9.5,14 5.5,14 3.5,10.54" />
+                  <polygon points="12.5,7.07 16.5,7.07 18.5,10.54 16.5,14 12.5,14 10.5,10.54" />
+                </svg>
+                <span className="mobile-search-btn__filtri-label">Filtri</span>
+                {restaurantCount !== null && (
+                  <span className="mobile-search-btn__filtri-count">
+                    {restaurantCount === 0 ? "nessun locale" : restaurantCount === 1 ? "1 locale" : `${restaurantCount} locali`}
+                  </span>
+                )}
+              </button>
+            ) : (
+              <button
+                className="mobile-search-btn"
+                type="button"
+                onClick={() => setSearchOverlay(true)}
+              >
+                <SearchIcon className="mobile-search-btn__icon" aria-hidden="true" />
+                <span>Cerca bar, tipo di aperitivo...</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -343,7 +384,7 @@ export function SiteHeader() {
           <button
             className="mobile-search-overlay__locations"
             type="button"
-            onClick={() => { setSearchOverlay(false); setMapOpen(true); }}
+            onClick={() => { setSearchOverlay(false); router.push(`/search?view=map&city=${encodeURIComponent(mobileCity)}`); }}
           >
             <span className="mobile-search-overlay__locations-icon">
               <MapIcon aria-hidden="true" />
@@ -417,7 +458,14 @@ export function SiteHeader() {
               className={`mobile-map-overlay__filter-pill${activeMapFilter === "guests" ? " is-active" : ""}${mapGuests !== 2 ? " has-value" : ""}`}
               onClick={() => setActiveMapFilter(activeMapFilter === "guests" ? null : "guests")}
             >
-              👥 {mapGuests} {mapGuests === 1 ? "pers." : "pers."} ↓
+              👥 {mapGuests} pers. ↓
+            </button>
+            <button
+              type="button"
+              className={`mobile-map-overlay__filter-pill${activeMapFilter === "budget" ? " is-active" : ""}${mapBudget ? " has-value" : ""}`}
+              onClick={() => setActiveMapFilter(activeMapFilter === "budget" ? null : "budget")}
+            >
+              💰 {mapBudget === "$$" ? "€" : mapBudget === "$$$" ? "€€" : mapBudget === "$$$$" ? "€€€" : "Budget"} ↓
             </button>
           </div>
 
@@ -467,6 +515,32 @@ export function SiteHeader() {
                 </div>
               )}
 
+              {activeMapFilter === "budget" && (
+                <div className="mobile-map-filter-panel__budget">
+                  {([
+                    { value: "" as const,     label: "Tutti",        budget: "",    imgSrc: "" },
+                    { value: "$$" as const,   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa.jpeg" },
+                    { value: "$$$" as const,  label: "Ape Plus",     budget: "€€",  imgSrc: "/plus.jpeg" },
+                    { value: "$$$$" as const, label: "Bombo Queen",  budget: "€€€", imgSrc: "/bombo.jpeg" },
+                  ]).map((opt) => (
+                    <button
+                      key={opt.value || "all"}
+                      type="button"
+                      className={`mobile-map-filter-panel__budget-btn${mapBudget === opt.value ? " is-active" : ""}`}
+                      onClick={() => { setMapBudget(opt.value); setActiveMapFilter(null); }}
+                    >
+                      {opt.imgSrc
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        ? <img src={opt.imgSrc} alt="" className="mobile-map-filter-panel__budget-img" />
+                        : <span>🎉</span>
+                      }
+                      <span>{opt.label}</span>
+                      {opt.budget && <span className="mobile-map-filter-panel__budget-sym">{opt.budget}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {activeMapFilter === "guests" && (
                 <div className="mobile-map-filter-panel__guests">
                   <button
@@ -507,7 +581,7 @@ export function SiteHeader() {
                 className="search-view-pill__btn"
                 onClick={() => {
                   setMapOpen(false);
-                  router.push(`/search?city=${encodeURIComponent(mobileCity)}`);
+                  router.push(`/search?city=${encodeURIComponent(mobileCity)}${mapBudget ? `&priceRange=${mapBudget}` : ""}`);
                 }}
               >
                 Lista

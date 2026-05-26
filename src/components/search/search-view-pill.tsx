@@ -15,6 +15,11 @@ export function SearchViewPill() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("view", mode);
     router.replace(`/search?${params.toString()}`, { scroll: false });
+    if (mode === "list") {
+      requestAnimationFrame(() => {
+        document.querySelector(".search-category-strip")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
   }
 
   return (
