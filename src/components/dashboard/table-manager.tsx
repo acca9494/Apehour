@@ -1,11 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchTables, saveTable, removeTable } from "@/lib/merchant/service";
+import { getZones, addZone } from "@/lib/merchant/store";
 import type { MerchantTable, TableStatus } from "@/lib/merchant/store";
 import { useAuth } from "@/lib/auth/context";
 
-const ZONES = ["Interno", "Terrazza", "Bancone", "Esterno", "Privato"];
+const ZONE_COLOR_PALETTE = ["#F5A800", "#22C55E", "#3B82F6", "#A855F7", "#EF4444", "#14B8A6", "#F97316", "#EC4899"];
+
+function zoneColor(zone: string, zones: string[]): string {
+  const idx = zones.indexOf(zone);
+  return ZONE_COLOR_PALETTE[idx % ZONE_COLOR_PALETTE.length] ?? "var(--border)";
+}
+
+const MIN_SIZE = 60;
+const MAX_SIZE = 240;
+const CANVAS_W = 900;
+const CANVAS_H = 520;
 
 function generateId() {
   return `tbl-${Date.now()}`;
@@ -16,19 +27,31 @@ const EMPTY_TABLE: Omit<MerchantTable, "id"> = {
   capacity: 2,
   zone: "Interno",
   status: "active",
+  x: 40,
+  y: 40,
+  width: 100,
+  height: 90,
 };
 
-function TableForm({
-  initial,
+function EditPanel({
+  table,
+  zones,
   onSave,
-  onCancel,
+  onDelete,
+  onClose,
+  deleting,
 }: {
-  initial: MerchantTable;
+  table: MerchantTable;
+  zones: string[];
   onSave: (t: MerchantTable) => Promise<void>;
-  onCancel: () => void;
+  onDelete: (id: string) => void;
+  onClose: () => void;
+  deleting: boolean;
 }) {
-  const [form, setForm] = useState(initial);
+  const [form, setForm] = useState(table);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => setForm(table), [table]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,8 +62,12 @@ function TableForm({
   }
 
   return (
-    <form className="table-form" onSubmit={handleSubmit}>
-      <div className="table-form__row">
+    <div className="table-edit-panel">
+      <div className="table-edit-panel__head">
+        <h3>Modifica tavolo</h3>
+        <button type="button" className="artist-back-link" onClick={onClose}>✕ Chiudi</button>
+      </div>
+      <form className="table-edit-panel__form" onSubmit={handleSubmit}>
         <label>
           Nome tavolo
           <input
@@ -63,80 +90,190 @@ function TableForm({
         </label>
         <label>
           Zona
-          <select
-            value={form.zone}
-            onChange={(e) => setForm({ ...form, zone: e.target.value })}
-          >
-            {ZONES.map((z) => <option key={z} value={z}>{z}</option>)}
+          <select value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })}>
+            {zones.map((z) => <option key={z} value={z}>{z}</option>)}
           </select>
         </label>
         <label>
           Stato
-          <select
-            value={form.status}
-            onChange={(e) => setForm({ ...form, status: e.target.value as TableStatus })}
-          >
+          <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as TableStatus })}>
             <option value="active">Attivo</option>
             <option value="inactive">Inattivo</option>
           </select>
         </label>
-      </div>
-      <div className="table-form__actions">
-        <button type="submit" className="clay-button clay-button--primary" disabled={saving}>
-          {saving ? "Salvataggio…" : "Salva"}
-        </button>
-        <button type="button" className="clay-button clay-button--secondary" onClick={onCancel}>
-          Annulla
-        </button>
-      </div>
-    </form>
+        <div className="table-edit-panel__size-row">
+          <label>
+            Larghezza
+            <input
+              type="range"
+              min={MIN_SIZE}
+              max={MAX_SIZE}
+              value={form.width}
+              onChange={(e) => setForm({ ...form, width: Number(e.target.value) })}
+            />
+          </label>
+          <label>
+            Altezza
+            <input
+              type="range"
+              min={MIN_SIZE}
+              max={MAX_SIZE}
+              value={form.height}
+              onChange={(e) => setForm({ ...form, height: Number(e.target.value) })}
+            />
+          </label>
+        </div>
+        <div className="table-form__actions">
+          <button type="submit" className="clay-button clay-button--primary" disabled={saving}>
+            {saving ? "Salvataggio…" : "Salva"}
+          </button>
+          <button
+            type="button"
+            className="table-card__btn table-card__btn--delete"
+            disabled={deleting}
+            onClick={() => onDelete(form.id)}
+          >
+            {deleting ? "…" : "Elimina tavolo"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
 export function TableManager() {
   const { user } = useAuth();
   const [tables, setTables] = useState<MerchantTable[]>([]);
+  const [zones, setZones] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [addingNew, setAddingNew] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [addingZone, setAddingZone] = useState(false);
+  const [newZoneName, setNewZoneName] = useState("");
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const dragState = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
 
   useEffect(() => {
     if (!user) return;
+    setZones(getZones(user.id));
     fetchTables(user.id).then((t) => { setTables(t); setLoading(false); });
   }, [user]);
 
-  async function handleSave(table: MerchantTable) {
+  async function persist(table: MerchantTable) {
     if (!user) return;
     await saveTable(table, user.id);
-    const updated = await fetchTables(user.id);
-    setTables(updated);
+  }
+
+  async function handleSave(table: MerchantTable) {
+    await persist(table);
+    setTables((prev) => {
+      const exists = prev.some((t) => t.id === table.id);
+      return exists ? prev.map((t) => (t.id === table.id ? table : t)) : [...prev, table];
+    });
     setEditingId(null);
-    setAddingNew(false);
   }
 
   async function handleDelete(id: string) {
     if (!user) return;
     setDeletingId(id);
     await removeTable(id, user.id);
-    const updated = await fetchTables(user.id);
-    setTables(updated);
+    setTables((prev) => prev.filter((t) => t.id !== id));
     setDeletingId(null);
+    setEditingId(null);
   }
 
-  async function toggleStatus(table: MerchantTable) {
-    if (!user) return;
-    const updated: MerchantTable = {
-      ...table,
-      status: table.status === "active" ? "inactive" : "active",
+  function nextFreeSpot(): { x: number; y: number } {
+    const n = tables.length;
+    const col = n % 6;
+    const row = Math.floor(n / 6);
+    return { x: 40 + col * 130, y: 40 + row * 130 };
+  }
+
+  function handleAdd(zone?: string) {
+    const spot = nextFreeSpot();
+    const newTable: MerchantTable = {
+      id: generateId(),
+      ...EMPTY_TABLE,
+      zone: zone ?? zones[0] ?? EMPTY_TABLE.zone,
+      x: spot.x,
+      y: spot.y,
     };
-    await saveTable(updated, user.id);
-    setTables((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    setTables((prev) => [...prev, newTable]);
+    setEditingId(newTable.id);
+    void persist(newTable);
   }
 
-  const zones = [...new Set(tables.map((t) => t.zone))];
+  function handleAddZone(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user || !newZoneName.trim()) return;
+    const updated = addZone(newZoneName.trim(), user.id);
+    setZones(updated);
+    setNewZoneName("");
+    setAddingZone(false);
+  }
+
+  // ── Free drag within the floor canvas ──────────────────────────
+  function handlePointerDown(e: React.PointerEvent, table: MerchantTable) {
+    if ((e.target as HTMLElement).closest(".floor-table__resize")) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    dragState.current = {
+      id: table.id,
+      offsetX: e.clientX - rect.left - table.x,
+      offsetY: e.clientY - rect.top - table.y,
+    };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function handlePointerMove(e: React.PointerEvent) {
+    const drag = dragState.current;
+    const canvas = canvasRef.current;
+    if (!drag || !canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const table = tables.find((t) => t.id === drag.id);
+    if (!table) return;
+    const nextX = Math.max(0, Math.min(CANVAS_W - table.width, e.clientX - rect.left - drag.offsetX));
+    const nextY = Math.max(0, Math.min(CANVAS_H - table.height, e.clientY - rect.top - drag.offsetY));
+    setTables((prev) => prev.map((t) => (t.id === drag.id ? { ...t, x: nextX, y: nextY } : t)));
+  }
+
+  function handlePointerUp() {
+    const drag = dragState.current;
+    dragState.current = null;
+    if (!drag) return;
+    const table = tables.find((t) => t.id === drag.id);
+    if (table) void persist(table);
+  }
+
+  // ── Free resize via corner handle ──────────────────────────────
+  const resizeState = useRef<{ id: string; startX: number; startY: number; startW: number; startH: number } | null>(null);
+
+  function handleResizeDown(e: React.PointerEvent, table: MerchantTable) {
+    e.stopPropagation();
+    resizeState.current = { id: table.id, startX: e.clientX, startY: e.clientY, startW: table.width, startH: table.height };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function handleResizeMove(e: React.PointerEvent) {
+    const resize = resizeState.current;
+    if (!resize) return;
+    const nextW = Math.max(MIN_SIZE, Math.min(MAX_SIZE, resize.startW + (e.clientX - resize.startX)));
+    const nextH = Math.max(MIN_SIZE, Math.min(MAX_SIZE, resize.startH + (e.clientY - resize.startY)));
+    setTables((prev) => prev.map((t) => (t.id === resize.id ? { ...t, width: nextW, height: nextH } : t)));
+  }
+
+  function handleResizeUp() {
+    const resize = resizeState.current;
+    resizeState.current = null;
+    if (!resize) return;
+    const table = tables.find((t) => t.id === resize.id);
+    if (table) void persist(table);
+  }
+
   const totalCapacity = tables.filter((t) => t.status === "active").reduce((s, t) => s + t.capacity, 0);
   const activeCount = tables.filter((t) => t.status === "active").length;
+  const editingTable = tables.find((t) => t.id === editingId) ?? null;
 
   if (loading) return <div className="dash-loading">Caricamento tavoli…</div>;
 
@@ -144,8 +281,8 @@ export function TableManager() {
     <div className="table-manager">
       <div className="dashboard-page-header">
         <p className="eyebrow">Tavoli</p>
-        <h1>Gestisci tavoli e capienza</h1>
-        <p>Configura tavoli, zone e capacità del tuo locale.</p>
+        <h1>Disponi la sala come vuoi</h1>
+        <p>Trascina i tavoli per posizionarli liberamente, e ridimensionali dall&apos;angolo in basso a destra.</p>
       </div>
 
       <div className="avail-summary-bar">
@@ -161,84 +298,90 @@ export function TableManager() {
           <strong>{totalCapacity}</strong>
           <span>Posti totali</span>
         </div>
-        <button
-          type="button"
-          className="clay-button clay-button--primary"
-          onClick={() => { setAddingNew(true); setEditingId(null); }}
-          disabled={addingNew}
-        >
+        <button type="button" className="clay-button clay-button--primary" onClick={() => handleAdd()}>
           + Aggiungi tavolo
         </button>
       </div>
 
-      {addingNew && (
-        <div className="dash-table-card" style={{ marginBottom: "1.5rem" }}>
-          <h3 style={{ marginBottom: "1rem" }}>Nuovo tavolo</h3>
-          <TableForm
-            initial={{ id: generateId(), ...EMPTY_TABLE }}
-            onSave={handleSave}
-            onCancel={() => setAddingNew(false)}
-          />
-        </div>
-      )}
+      <div className="floor-legend">
+        {zones.map((z) => (
+          <span key={z} className="floor-legend__item">
+            <span className="floor-legend__dot" style={{ background: zoneColor(z, zones) }} />
+            {z}
+            <button
+              type="button"
+              className="floor-legend__add-btn"
+              title={`Aggiungi tavolo in ${z}`}
+              onClick={() => handleAdd(z)}
+            >
+              +
+            </button>
+          </span>
+        ))}
 
-      {zones.map((zone) => {
-        const zoneTables = tables.filter((t) => t.zone === zone);
-        return (
-          <div key={zone} className="dash-table-card table-zone-card">
-            <div className="table-zone-header">
-              <h3>{zone}</h3>
-              <span>{zoneTables.filter((t) => t.status === "active").length} attivi · {zoneTables.reduce((s, t) => s + t.capacity, 0)} posti</span>
+        {addingZone ? (
+          <form className="floor-add-zone" onSubmit={handleAddZone}>
+            <input
+              type="text"
+              autoFocus
+              value={newZoneName}
+              onChange={(e) => setNewZoneName(e.target.value)}
+              placeholder="Nome zona"
+            />
+            <button type="submit">Aggiungi</button>
+            <button type="button" className="artist-back-link" onClick={() => setAddingZone(false)}>Annulla</button>
+          </form>
+        ) : (
+          <button type="button" className="floor-add-zone-btn" onClick={() => setAddingZone(true)}>
+            + Aggiungi zona
+          </button>
+        )}
+      </div>
+
+      <div className="floor-layout">
+        <div
+          ref={canvasRef}
+          className="floor-canvas"
+          style={{ width: CANVAS_W, height: CANVAS_H }}
+          onPointerMove={(e) => { handlePointerMove(e); handleResizeMove(e); }}
+          onPointerUp={() => { handlePointerUp(); handleResizeUp(); }}
+        >
+          {tables.map((table) => (
+            <div
+              key={table.id}
+              className={`floor-table${table.status === "inactive" ? " floor-table--inactive" : ""}${editingId === table.id ? " is-selected" : ""}`}
+              style={{
+                left: table.x,
+                top: table.y,
+                width: table.width,
+                height: table.height,
+                borderColor: zoneColor(table.zone, zones),
+              }}
+              onPointerDown={(e) => handlePointerDown(e, table)}
+              onClick={() => setEditingId(table.id)}
+            >
+              <span className="floor-table__name">{table.name}</span>
+              <span className="floor-table__capacity">{table.capacity} 👤</span>
+              <div
+                className="floor-table__resize"
+                onPointerDown={(e) => handleResizeDown(e, table)}
+                aria-hidden="true"
+              />
             </div>
-            <div className="table-grid">
-              {zoneTables.map((table) => (
-                <div key={table.id}>
-                  {editingId === table.id ? (
-                    <TableForm
-                      initial={table}
-                      onSave={handleSave}
-                      onCancel={() => setEditingId(null)}
-                    />
-                  ) : (
-                    <div className={`table-card${table.status === "inactive" ? " table-card--inactive" : ""}`}>
-                      <div className="table-card__top">
-                        <div className="table-card__icon">⊞</div>
-                        <button
-                          type="button"
-                          className={`avail-toggle${table.status === "active" ? " is-on" : ""}`}
-                          onClick={() => toggleStatus(table)}
-                          aria-label="Attiva/disattiva"
-                        >
-                          <span />
-                        </button>
-                      </div>
-                      <div className="table-card__name">{table.name}</div>
-                      <div className="table-card__capacity">{table.capacity} {table.capacity === 1 ? "posto" : "posti"}</div>
-                      <div className="table-card__actions">
-                        <button
-                          type="button"
-                          className="table-card__btn"
-                          onClick={() => { setEditingId(table.id); setAddingNew(false); }}
-                        >
-                          Modifica
-                        </button>
-                        <button
-                          type="button"
-                          className="table-card__btn table-card__btn--delete"
-                          disabled={deletingId === table.id}
-                          onClick={() => handleDelete(table.id)}
-                        >
-                          {deletingId === table.id ? "…" : "Elimina"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
+          ))}
+        </div>
+
+        {editingTable && (
+          <EditPanel
+            table={editingTable}
+            zones={zones}
+            onSave={handleSave}
+            onDelete={handleDelete}
+            onClose={() => setEditingId(null)}
+            deleting={deletingId === editingTable.id}
+          />
+        )}
+      </div>
     </div>
   );
 }

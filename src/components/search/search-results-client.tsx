@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonGrid } from "@/components/ui/skeleton";
@@ -25,9 +25,9 @@ const CATEGORY_ICONS: Array<{ label: string; emoji: string; value: Cuisine | "Al
 
 const BUDGET_OPTIONS: Array<{ value: PriceRange | "All"; label: string; budget: string; imgSrc?: string }> = [
   { value: "All",  label: "Tutti",       budget: ""    },
-  { value: "$$",   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa.jpeg" },
-  { value: "$$$",  label: "Ape Plus",    budget: "€€",  imgSrc: "/plus.jpeg"  },
-  { value: "$$$$", label: "Bombo Queen", budget: "€€€", imgSrc: "/bombo.jpeg" },
+  { value: "$$",   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa.png" },
+  { value: "$$$",  label: "Ape Plus",    budget: "€€",  imgSrc: "/plus.png"  },
+  { value: "$$$$", label: "Bombo Queen", budget: "€€€", imgSrc: "/bombo.png" },
 ];
 
 const GUESTS_OPTIONS = [1, 2, 3, 4, 5, 6, 8, 10];
@@ -59,6 +59,21 @@ function togglePill<T>(arr: T[], value: T): T[] {
   return arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
 }
 
+const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+  Milano:  { lat: 45.464, lng: 9.188 },
+  Roma:    { lat: 41.894, lng: 12.482 },
+  Torino:  { lat: 45.070, lng: 7.687 },
+  Venezia: { lat: 45.437, lng: 12.335 },
+  Firenze: { lat: 43.769, lng: 11.256 },
+  Napoli:  { lat: 40.851, lng: 14.268 },
+  Bologna: { lat: 44.494, lng: 11.342 },
+  Genova:  { lat: 44.407, lng: 8.934 },
+  Palermo: { lat: 38.116, lng: 13.362 },
+  Bari:    { lat: 41.117, lng: 16.872 },
+};
+
+const ITALY_CENTER = { lat: 42.5, lng: 12.5 };
+
 export function SearchResultsClient({ initialFilters }: { initialFilters: SearchFilters }) {
   const todayISO = new Date().toISOString().split("T")[0]!;
 
@@ -79,15 +94,14 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [localiOpen, setLocaliOpen] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const viewMode = (searchParams.get("view") ?? "list") as "list" | "map";
 
-  // Lock body scroll when map is open on mobile (prevents map panning from scrolling the page)
-  useEffect(() => {
-    if (viewMode !== "map") return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, [viewMode]);
+  function switchView(mode: "list" | "map") {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", mode);
+    router.replace(`/search?${params.toString()}`, { scroll: false });
+  }
 
   // Toggle results dropdown when header Filtri button is tapped
   useEffect(() => {
@@ -281,75 +295,9 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
   return (
     <div className={`search-page${viewMode === "map" ? " search-page--map" : ""}`}>
-      {/* ── Category icon strip ─────────────────────── */}
-      <div className="search-category-strip">
-        <div className="search-category-strip__scroll">
-          {CATEGORY_ICONS.map((cat) => {
-            const active = cat.value === "All"
-              ? filters.cuisines.length === 0
-              : filters.cuisines.includes(cat.value as Cuisine);
-            return (
-              <button
-                key={cat.value}
-                type="button"
-                className={`search-cat-item${active ? " is-active" : ""}`}
-                onClick={() => {
-                  if (cat.value === "All") setFilter("cuisines", []);
-                  else setFilter("cuisines", togglePill(filters.cuisines, cat.value as Cuisine));
-                }}
-              >
-                <span className="search-cat-item__icon">{cat.emoji}</span>
-                <span className="search-cat-item__label">{cat.label}</span>
-              </button>
-            );
-          })}
-          <span className="search-cat-item__divider" aria-hidden="true" />
-          {BUDGET_OPTIONS.filter((o) => o.value !== "All").map((opt) => {
-            const active = filters.priceRanges.includes(opt.value as PriceRange);
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                className={`search-cat-item search-cat-item--budget${active ? " is-active" : ""}`}
-                onClick={() => setFilter("priceRanges", togglePill(filters.priceRanges, opt.value as PriceRange))}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                {opt.imgSrc && <img src={opt.imgSrc} alt="" className="search-cat-item__ape-img" />}
-                <span className="search-cat-item__label">{opt.label}</span>
-                <span className="search-cat-item__budget">{opt.budget}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* ── Map view ────────────────────────────────── */}
-      {viewMode === "map" && (
-        <div className="search-map-view">
-          <LeafletMap
-            center={
-              restaurants.length > 0
-                ? { lat: restaurants[0]!.coordinates.lat, lng: restaurants[0]!.coordinates.lng }
-                : { lat: 45.464, lng: 9.188 }
-            }
-            zoom={13}
-            markers={restaurants.map((r) => ({
-              lat: r.coordinates.lat,
-              lng: r.coordinates.lng,
-              label: r.name,
-              slug: r.slug,
-              image: r.heroImage,
-              neighborhood: r.neighborhood,
-              cuisine: r.cuisine,
-              budget: r.priceRange,
-            }))}
-            style={{ height: "100%", width: "100%" }}
-          />
-        </div>
-      )}
-
-      {/* ── Body: sidebar + results ─────────────────── */}
-      <div className={`search-body${viewMode === "map" ? " search-body--hidden" : ""}`}>
+      {/* ── Body: sidebar + (map or results) ───────── */}
+      <div className={`search-body${viewMode === "map" ? " search-body--map" : ""}`}>
         {/* Tablet-only Filtri toggle */}
         <button
           type="button"
@@ -366,65 +314,110 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
         </button>
 
         <aside className={`search-sidebar${sidebarOpen ? " search-sidebar--open" : ""}`}>
-          <p className="search-sidebar__label">Filtri</p>
-          <div className="search-sidebar__group">{filterControls}</div>
-          <div className="search-sidebar__locali">
+          <div className="search-view-pill search-view-pill--sidebar" role="group" aria-label="Vista">
             <button
               type="button"
-              className="search-sidebar__locali-trigger"
-              onClick={() => setLocaliOpen((v) => !v)}
+              className={`search-view-pill__btn${viewMode === "list" ? " is-active" : ""}`}
+              onClick={() => switchView("list")}
             >
-              <span className="search-sidebar__locali-label">Locali trovati</span>
-              <span className="search-sidebar__locali-count">{loading ? "…" : restaurants.length}</span>
-              <svg className={`search-sidebar__locali-chevron${localiOpen ? " is-open" : ""}`} viewBox="0 0 20 20" fill="currentColor"><path d="M5 8l5 5 5-5"/></svg>
+              Lista
             </button>
-            {localiOpen && !loading && (
-              <ul className="search-sidebar__locali-list">
-                {restaurants.length === 0 && (
-                  <li className="search-sidebar__locali-empty">Nessun locale trovato</li>
-                )}
-                {restaurants.map((r) => (
-                  <li key={r.id}>
-                    <Link className="rrow" href={`/restaurants/${r.slug}`}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img className="rrow__img" src={r.heroImage} alt={r.name} />
-                      <div className="rrow__info">
-                        <strong className="rrow__name">{r.name}</strong>
-                        <span className="rrow__meta">{r.neighborhood} · {r.cuisine}</span>
-                        {r.discount && <span className="rrow__badge">-{r.discount}%</span>}
-                      </div>
-                      <span className="rrow__price">{r.priceRange.replace(/\$/g, "€")}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <button
+              type="button"
+              className={`search-view-pill__btn${viewMode === "map" ? " is-active" : ""}`}
+              onClick={() => switchView("map")}
+            >
+              Mappa
+            </button>
           </div>
-          <button type="button" className="search-sidebar__reset" onClick={resetFilters}>
-            Azzera filtri
-          </button>
-          <button type="button" className="search-sidebar__apply" onClick={() => setSidebarOpen(false)}>
-            Applica filtri
-          </button>
+
+          <div className="search-sidebar__scroll">
+            <p className="search-sidebar__label">Filtri</p>
+            <div className="search-sidebar__group">{filterControls}</div>
+            <div className="search-sidebar__locali">
+              <button
+                type="button"
+                className="search-sidebar__locali-trigger"
+                onClick={() => setLocaliOpen((v) => !v)}
+              >
+                <span className="search-sidebar__locali-label">Locali trovati</span>
+                <span className="search-sidebar__locali-count">{loading ? "…" : restaurants.length}</span>
+                <svg className={`search-sidebar__locali-chevron${localiOpen ? " is-open" : ""}`} viewBox="0 0 20 20" fill="currentColor"><path d="M5 8l5 5 5-5"/></svg>
+              </button>
+              {localiOpen && !loading && (
+                <ul className="search-sidebar__locali-list">
+                  {restaurants.length === 0 && (
+                    <li className="search-sidebar__locali-empty">Nessun locale trovato</li>
+                  )}
+                  {restaurants.map((r) => (
+                    <li key={r.id}>
+                      <Link className="rrow" href={`/restaurants/${r.slug}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img className="rrow__img" src={r.heroImage} alt={r.name} />
+                        <div className="rrow__info">
+                          <strong className="rrow__name">{r.name}</strong>
+                          <span className="rrow__meta">{r.neighborhood} · {r.cuisine}</span>
+                          {r.discount && <span className="rrow__badge">-{r.discount}%</span>}
+                        </div>
+                        <span className="rrow__price">{r.priceRange.replace(/\$/g, "€")}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <button type="button" className="search-sidebar__reset" onClick={resetFilters}>
+              Azzera filtri
+            </button>
+            <button type="button" className="search-sidebar__apply" onClick={() => setSidebarOpen(false)}>
+              Applica filtri
+            </button>
+          </div>
         </aside>
 
-        <div className="search-results">
-          {loading && <SkeletonGrid />}
-          {!loading && restaurants.length === 0 && (
-            <div className="search-empty">
-              <p className="search-empty__icon">🍋</p>
-              <h2>Nessun locale trovato</h2>
-              <p>Prova a rimuovere qualche filtro o cerca in un&apos;altra città.</p>
-            </div>
-          )}
-          {!loading && restaurants.length > 0 && (
-            <div className="search-grid">
-              {restaurants.map((restaurant, i) => (
-                <RestaurantCard key={restaurant.id} restaurant={restaurant} priority={i < 3} />
-              ))}
-            </div>
-          )}
-        </div>
+        {viewMode === "map" ? (
+          <div className="search-map-view">
+            <LeafletMap
+              center={
+                filters.city && CITY_COORDS[filters.city]
+                  ? CITY_COORDS[filters.city]!
+                  : ITALY_CENTER
+              }
+              zoom={filters.city && CITY_COORDS[filters.city] ? 12.5 : 5.6}
+              fitToMarkers={false}
+              markers={restaurants.map((r) => ({
+                lat: r.coordinates.lat,
+                lng: r.coordinates.lng,
+                label: r.name,
+                slug: r.slug,
+                image: r.heroImage,
+                neighborhood: r.neighborhood,
+                cuisine: r.cuisine,
+                budget: r.priceRange,
+                rating: r.rating,
+              }))}
+              style={{ height: "100%", width: "100%" }}
+            />
+          </div>
+        ) : (
+          <div className="search-results">
+            {loading && <SkeletonGrid />}
+            {!loading && restaurants.length === 0 && (
+              <div className="search-empty">
+                <p className="search-empty__icon">🍋</p>
+                <h2>Nessun locale trovato</h2>
+                <p>Prova a rimuovere qualche filtro o cerca in un&apos;altra città.</p>
+              </div>
+            )}
+            {!loading && restaurants.length > 0 && (
+              <div className="search-grid">
+                {restaurants.map((restaurant, i) => (
+                  <RestaurantCard key={restaurant.id} restaurant={restaurant} priority={i < 3} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Results dropdown (triggered by header Filtri btn) ── */}

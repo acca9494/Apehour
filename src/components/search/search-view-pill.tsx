@@ -17,7 +17,7 @@ export function SearchViewPill() {
     router.replace(`/search?${params.toString()}`, { scroll: false });
     if (mode === "list") {
       requestAnimationFrame(() => {
-        document.querySelector(".search-category-strip")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.querySelector(".search-page")?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { getMessages, addMessage, CHAT_CITIES, type ChatMessage, type ChatCity } from "@/lib/chat/store";
 import { moderateText } from "@/lib/chat/moderation";
@@ -35,8 +36,13 @@ function CloseIcon() {
   );
 }
 
+const HIDDEN_PATHS = ["/register", "/login", "/come-funziona"];
+
 export function GlobalChat() {
+  const pathname = usePathname();
   const { user } = useAuth();
+
+  if (HIDDEN_PATHS.includes(pathname) || pathname.startsWith("/profile") || pathname.startsWith("/dashboard")) return null;
   const [open, setOpen]         = useState(false);
   const [city, setCity]         = useState<ChatCity>("Milano");
   const [messages, setMessages] = useState<ChatMessage[]>([]);

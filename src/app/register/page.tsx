@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { ClayButton } from "@/components/ui/clay-button";
 import { MerchantRegisterForm } from "@/components/home/merchant-register-form";
@@ -14,11 +14,19 @@ const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   unknown: "Qualcosa è andato storto. Riprova.",
 };
 
+type Mode = "cliente" | "commerciante";
+
+function initialModeFrom(param: string | null): Mode {
+  if (param === "locale" || param === "commerciante") return "commerciante";
+  return "cliente";
+}
+
 export default function RegisterPage() {
   const { register, loading, user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [mode, setMode] = useState<"cliente" | "commerciante">("cliente");
+  const [mode, setMode] = useState<Mode>(() => initialModeFrom(searchParams.get("mode")));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,7 +65,7 @@ export default function RegisterPage() {
             className={`reg-mode-toggle__btn ${mode === "cliente" ? "is-active" : ""}`}
             onClick={() => { setMode("cliente"); setError(null); }}
           >
-            Sono un cliente
+            Account personale
           </button>
           <button
             type="button"

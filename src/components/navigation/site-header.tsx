@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ClayLink } from "@/components/ui/clay-button";
 import { useAuth } from "@/lib/auth/context";
 import { useMobileMenu } from "@/lib/mobile-menu-context";
+import { useLang } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { getBees } from "@/lib/bees/store";
 import type { SVGProps } from "react";
@@ -17,13 +18,14 @@ type NavItem = {
   active?: boolean;
 };
 
-const NAV_ITEMS: NavItem[] = [
-  { href: "/",                           label: "Home" },
-  { href: "/search",                     label: "Scopri i locali" },
-  { href: "/events",                     label: "Eventi" },
-  { href: "/attivita",                   label: "Attività" },
-  { href: "/come-funziona",              label: "Come funziona" },
-  { href: "/#per-i-locali",              label: "Per i locali" },
+const NAV_HREFS = [
+  { href: "/",              key: "home"        as const },
+  { href: "/search",        key: "search"      as const },
+  { href: "/events",        key: "events"      as const },
+  { href: "/attivita",      key: "activities"  as const },
+  { href: "/come-funziona", key: "howItWorks"  as const },
+  { href: "/#per-i-locali", key: "forVenues"   as const },
+  { href: "/apejobs",       key: "forArtists"  as const },
 ];
 
 const CITIES_MOBILE = ["Milano", "Roma", "Firenze", "Venezia", "Napoli", "Torino", "Bologna"];
@@ -81,10 +83,37 @@ function ChevronDownIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+function FlagIT(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 3 2" aria-hidden="true" {...props}>
+      <rect width="1" height="2" fill="#009246" />
+      <rect x="1" width="1" height="2" fill="#fff" />
+      <rect x="2" width="1" height="2" fill="#ce2b37" />
+    </svg>
+  );
+}
+
+function FlagGB(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 60 30" aria-hidden="true" {...props}>
+      <rect width="60" height="30" fill="#012169" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4" />
+      <path d="M30,0 V30 M0,15 H60" stroke="#fff" strokeWidth="10" />
+      <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" strokeWidth="6" />
+    </svg>
+  );
+}
+
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [bees, setBees] = useState(0);
   const [mobileCity, setMobileCity] = useState("Milano");
+  const { lang, setLang, t } = useLang();
+
+  function toggleLang() {
+    setLang(lang === "it" ? "en" : "it");
+  }
 
   useEffect(() => {
     try {
@@ -117,11 +146,48 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Track which anchor section (if any) is currently in view, so anchor
+  // nav links only look "active" while their section is actually visible.
+  const [activeAnchor, setActiveAnchor] = useState<string | null>(null);
+  useEffect(() => {
+    if (pathname !== "/") { setActiveAnchor(null); return; }
+    const anchorIds = NAV_HREFS
+      .filter((item) => item.href.includes("#"))
+      .map((item) => item.href.split("#")[1]!);
+
+    function onScroll() {
+      const triggerY = 100; // just below the sticky header
+      let current: string | null = null;
+      for (const id of anchorIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= triggerY && rect.bottom > triggerY) {
+          current = id;
+          break;
+        }
+      }
+      setActiveAnchor(current);
+    }
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pathname]);
+
   useEffect(() => {
     if (user) setBees(getBees(user.id));
   }, [user]);
 
   useEffect(() => { close(); }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Merchants are confined to the dashboard: bounce back even if they
+  // navigate away via the browser back/forward buttons.
+  useEffect(() => {
+    if (!loading && user?.role === "commerciante" && !pathname.startsWith("/dashboard")) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, pathname, router]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -167,7 +233,11 @@ export function SiteHeader() {
 
   const isMerchant = user?.role === "commerciante";
   const isHome = pathname === "/";
-  const isProfilePage = pathname.startsWith("/profile");
+  const isProfilePage =
+    pathname.startsWith("/profile") ||
+    pathname === "/register" ||
+    pathname === "/login" ||
+    pathname === "/come-funziona";
 
   if (pathname.startsWith("/dashboard")) return null;
 
@@ -185,7 +255,8 @@ export function SiteHeader() {
           </Link>
 
           <nav className="desktop-nav" aria-label="Navigazione principale">
-            {NAV_ITEMS.map((item) => {
+            {NAV_HREFS.map((item) => {
+              const label = item.key === "home" ? "Home" : t.nav[item.key];
               const isAnchor = item.href.includes("#");
               const anchorId = isAnchor ? item.href.split("#")[1] : null;
               return (
@@ -194,8 +265,7 @@ export function SiteHeader() {
                   href={item.href}
                   className={cn(
                     "desktop-nav__link",
-                    (item.href === "/" ? pathname === "/" : isAnchor ? pathname === "/" : pathname.startsWith(item.href.split("?")[0]) && item.href !== "/") && "desktop-nav__link--home-active",
-                    item.active && pathname === "/" && "desktop-nav__link--home-active",
+                    (item.href === "/" ? pathname === "/" && !activeAnchor : isAnchor ? activeAnchor === anchorId : pathname.startsWith(item.href.split("?")[0]) && item.href !== "/") && "desktop-nav__link--home-active",
                   )}
                   onClick={isAnchor ? (e) => {
                     e.preventDefault();
@@ -205,15 +275,20 @@ export function SiteHeader() {
                     } else {
                       document.getElementById(anchorId!)?.scrollIntoView({ behavior: "smooth" });
                     }
+                  } : item.href === "/" ? (e) => {
+                    if (pathname === "/") {
+                      e.preventDefault();
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
                   } : undefined}
                 >
-                  {item.label}
+                  {label}
                 </Link>
               );
             })}
             {isMerchant && (
               <Link className="desktop-nav__link" href="/dashboard">
-                Dashboard
+                {t.nav.dashboard}
               </Link>
             )}
           </nav>
@@ -238,33 +313,44 @@ export function SiteHeader() {
                       </Link>
                     )}
                     <button className="logout-btn" onClick={handleLogout}>
-                      Esci
+                      {t.header.logout}
                     </button>
                   </div>
                 ) : (
                   <>
                     <Link className="header-auth-link header-auth-link--ghost" href="/login">
-                      Accedi
+                      {t.header.login}
                     </Link>
                     <Link className="header-auth-link header-auth-link--primary" href="/register">
-                      Registrati
+                      {t.header.register}
                     </Link>
                   </>
-                )}
-                {user && !isMerchant && (
-                  <ClayLink href="/booking" className="header-cta">
-                    Prenota ora
-                  </ClayLink>
-                )}
-                {isMerchant && (
-                  <ClayLink href="/dashboard" className="header-cta">
-                    Dashboard
-                  </ClayLink>
                 )}
               </>
             )}
             <button
-              className="menu-toggle"
+              type="button"
+              className="lang-toggle"
+              onClick={toggleLang}
+              aria-label={lang === "it" ? "Switch to English" : "Passa all'italiano"}
+            >
+              <span className={`lang-toggle__opt${lang === "it" ? " is-active" : ""}`}>
+                <FlagIT className="lang-toggle__flag" />
+                IT
+              </span>
+              <span className="lang-toggle__sep">|</span>
+              <span className={`lang-toggle__opt${lang === "en" ? " is-active" : ""}`}>
+                <FlagGB className="lang-toggle__flag" />
+                EN
+              </span>
+            </button>
+            {!loading && isMerchant && (
+              <ClayLink href="/dashboard" className="header-cta">
+                {t.nav.dashboard}
+              </ClayLink>
+            )}
+            <button
+              className={cn("menu-toggle", open && "is-open")}
               type="button"
               aria-label={open ? "Chiudi menu" : "Apri menu"}
               aria-expanded={open}
@@ -276,6 +362,25 @@ export function SiteHeader() {
             </button>
           </div>
         </div>
+
+        {/* Mobile-only: merchant sub-links — hidden in app mode */}
+        {!user && (
+          <div className="mobile-merchant-bar">
+            <div className="mobile-merchant-bar__side" />
+            <div className="mobile-merchant-bar__center">
+              <button type="button" className="mobile-lang-toggle" onClick={toggleLang} aria-label={lang === "it" ? "Switch to English" : "Passa all'italiano"}>
+                <span className={`mobile-lang-toggle__opt${lang === "it" ? " is-active" : ""}`}><FlagIT className="lang-toggle__flag" /> IT</span>
+                <span className="mobile-lang-toggle__sep">|</span>
+                <span className={`mobile-lang-toggle__opt${lang === "en" ? " is-active" : ""}`}><FlagGB className="lang-toggle__flag" /> EN</span>
+              </button>
+            </div>
+            <div className="mobile-merchant-bar__side mobile-merchant-bar__side--right">
+              <Link href="/register" className="mobile-merchant-bar__link">{t.merchantBar.hasVenue}</Link>
+              <span className="mobile-merchant-bar__sep" aria-hidden="true">·</span>
+              <Link href="/come-funziona" className="mobile-merchant-bar__link">{t.merchantBar.faq}</Link>
+            </div>
+          </div>
+        )}
 
         {/* Mobile-only: city selector + search bar (hidden on profile pages) */}
         <div className={`mobile-city-bar${isProfilePage ? " mobile-city-bar--hidden" : ""}`}>
@@ -333,10 +438,10 @@ export function SiteHeader() {
                   <polygon points="5.5,7.07 9.5,7.07 11.5,10.54 9.5,14 5.5,14 3.5,10.54" />
                   <polygon points="12.5,7.07 16.5,7.07 18.5,10.54 16.5,14 12.5,14 10.5,10.54" />
                 </svg>
-                <span className="mobile-search-btn__filtri-label">Filtri</span>
+                <span className="mobile-search-btn__filtri-label">{t.header.filters}</span>
                 {restaurantCount !== null && (
                   <span className="mobile-search-btn__filtri-count">
-                    {restaurantCount === 0 ? "nessun locale" : restaurantCount === 1 ? "1 locale" : `${restaurantCount} locali`}
+                    {t.restaurantCount(restaurantCount)}
                   </span>
                 )}
               </button>
@@ -347,7 +452,7 @@ export function SiteHeader() {
                 onClick={() => setSearchOverlay(true)}
               >
                 <SearchIcon className="mobile-search-btn__icon" aria-hidden="true" />
-                <span>Cerca bar, tipo di aperitivo...</span>
+                <span>{t.header.searchPlaceholder}</span>
               </button>
             )}
           </div>
@@ -519,9 +624,9 @@ export function SiteHeader() {
                 <div className="mobile-map-filter-panel__budget">
                   {([
                     { value: "" as const,     label: "Tutti",        budget: "",    imgSrc: "" },
-                    { value: "$$" as const,   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa.jpeg" },
-                    { value: "$$$" as const,  label: "Ape Plus",     budget: "€€",  imgSrc: "/plus.jpeg" },
-                    { value: "$$$$" as const, label: "Bombo Queen",  budget: "€€€", imgSrc: "/bombo.jpeg" },
+                    { value: "$$" as const,   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa.png" },
+                    { value: "$$$" as const,  label: "Ape Plus",     budget: "€€",  imgSrc: "/plus.png" },
+                    { value: "$$$$" as const, label: "Bombo Queen",  budget: "€€€", imgSrc: "/bombo.png" },
                   ]).map((opt) => (
                     <button
                       key={opt.value || "all"}
@@ -614,11 +719,12 @@ export function SiteHeader() {
         </div>
 
         <Link className="mobile-search" href="/search" onClick={close}>
-          Cerca il tuo aperitivo stasera
+          {lang === "it" ? "Cerca il tuo aperitivo stasera" : "Find your aperitivo tonight"}
         </Link>
 
         <nav className="mobile-nav" aria-label="Navigazione mobile">
-          {NAV_ITEMS.map((item) => {
+          {NAV_HREFS.map((item) => {
+            const label = item.key === "home" ? "Home" : t.nav[item.key];
             const isAnchor = item.href.includes("#");
             const anchorId = isAnchor ? item.href.split("#")[1] : null;
             if (isAnchor) {
@@ -637,19 +743,19 @@ export function SiteHeader() {
                     }
                   }}
                 >
-                  {item.label}
+                  {label}
                 </button>
               );
             }
             return (
               <Link key={item.href} href={item.href} onClick={close}>
-                {item.label}
+                {label}
               </Link>
             );
           })}
           {isMerchant && (
             <Link href="/dashboard" onClick={close}>
-              Dashboard
+              {t.nav.dashboard}
             </Link>
           )}
         </nav>
@@ -669,17 +775,21 @@ export function SiteHeader() {
                 </div>
               </Link>
               <button className="logout-btn" onClick={handleLogout}>
-                Esci dall&apos;account
+                {lang === "it" ? "Esci dall'account" : "Log out"}
               </button>
             </div>
           ) : (
             <div className="mobile-drawer__auth">
               <ClayLink href="/login" variant="secondary" className="mobile-drawer__cta" onClick={close}>
-                Accedi
+                {t.header.login}
               </ClayLink>
               <ClayLink href="/register" className="mobile-drawer__cta" onClick={close}>
-                Registrati gratis
+                {lang === "it" ? "Registrati gratis" : "Sign up free"}
               </ClayLink>
+              <div className="mobile-drawer__sub-links">
+                <Link href="/register" className="mobile-drawer__sub-link" onClick={close}>{t.merchantBar.hasVenue}</Link>
+                <Link href="/come-funziona" className="mobile-drawer__sub-link" onClick={close}>{t.merchantBar.faq}</Link>
+              </div>
             </div>
           )
         )}

@@ -1,141 +1,140 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { EVENTS } from "@/lib/data/events";
 
-export const metadata: Metadata = {
-  title: "Eventi — ApeHour",
-  description: "Aperitivi speciali, music festival, serate esclusive. Partecipa e guadagna BEES.",
-};
+const CATEGORIES = ["Tutti", "Festival", "Musica Live", "DJ Set", "Degustazione", "Speciale", "Cocktail"];
+const CITIES = ["Tutte le città", "Milano", "Roma", "Firenze", "Venezia", "Napoli", "Torino", "Bologna"];
 
-const EVENTS = [
-  {
-    id: "ev1",
-    title: "Ape in Vigna — Harvest Festival",
-    date: "Sab 24 Mag · 16:00",
-    location: "Franciacorta, Brescia",
-    image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=800&q=80",
-    category: "Festival",
-    price: "da €28",
-    bees: 50,
-    slug: "harvest-festival",
-  },
-  {
-    id: "ev2",
-    title: "Sunset Jazz & Spritz",
-    date: "Dom 25 Mag · 18:00",
-    location: "Milano, Navigli",
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=800&q=80",
-    category: "Musica Live",
-    price: "da €20",
-    bees: 35,
-    slug: "sunset-jazz-spritz",
-  },
-  {
-    id: "ev3",
-    title: "Rooftop Music Festival",
-    date: "Ven 30 Mag · 19:00",
-    location: "Roma, Prati",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
-    category: "DJ Set",
-    price: "da €35",
-    bees: 60,
-    slug: "rooftop-music-festival",
-  },
-  {
-    id: "ev4",
-    title: "Negroni Week Speciale",
-    date: "Gio 5 Giu · 19:30",
-    location: "Firenze, Oltrarno",
-    image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80",
-    category: "Degustazione",
-    price: "da €22",
-    bees: 40,
-    slug: "negroni-week",
-  },
-  {
-    id: "ev5",
-    title: "Aperitivo sotto le Stelle",
-    date: "Sab 7 Giu · 20:00",
-    location: "Torino, Colline",
-    image: "https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80",
-    category: "Speciale",
-    price: "da €18",
-    bees: 30,
-    slug: "aperitivo-stelle",
-  },
-  {
-    id: "ev6",
-    title: "Bollicine & Beats",
-    date: "Dom 8 Giu · 17:30",
-    location: "Venezia, Giudecca",
-    image: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=800&q=80",
-    category: "DJ Set",
-    price: "da €30",
-    bees: 45,
-    slug: "bollicine-beats",
-  },
-  {
-    id: "ev7",
-    title: "Ape Circus Night",
-    date: "Ven 13 Giu · 21:00",
-    location: "Bologna, Centro",
-    image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
-    category: "Speciale",
-    price: "da €25",
-    bees: 55,
-    slug: "ape-circus-night",
-  },
-  {
-    id: "ev8",
-    title: "Natural Wine Festival",
-    date: "Sab 14 Giu · 15:00",
-    location: "Napoli, Chiaia",
-    image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80",
-    category: "Festival",
-    price: "da €32",
-    bees: 65,
-    slug: "natural-wine-festival",
-  },
-];
+function PinIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11Z" />
+      <circle cx="12" cy="10" r="2.3" />
+    </svg>
+  );
+}
 
-const CATEGORIES = ["Tutti", "Festival", "Musica Live", "DJ Set", "Degustazione", "Speciale"];
+function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
 
 export default function EventsPage() {
+  const [activeCategory, setActiveCategory] = useState("Tutti");
+  const [activeCity, setActiveCity] = useState("Tutte le città");
+  const [cityDropdown, setCityDropdown] = useState(false);
+  const cityRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("apehour_city");
+      if (saved && CITIES.includes(saved)) setActiveCity(saved);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!cityDropdown) return;
+    function handler(e: MouseEvent) {
+      if (cityRef.current && !cityRef.current.contains(e.target as Node)) {
+        setCityDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [cityDropdown]);
+
+  const filtered = EVENTS.filter((e) => {
+    const matchesCategory = activeCategory === "Tutti" || e.category === activeCategory;
+    const matchesCity = activeCity === "Tutte le città" || e.location.split(",")[0]?.trim() === activeCity;
+    return matchesCategory && matchesCity;
+  });
+
   return (
     <div className="events-page">
 
-      {/* Category filter */}
+      {/* City + category filter */}
       <div className="events-page__filters">
+        <div className="events-city-wrap" ref={cityRef}>
+          <button
+            type="button"
+            className="events-city-btn"
+            onClick={() => setCityDropdown((v) => !v)}
+            aria-expanded={cityDropdown}
+          >
+            <PinIcon className="events-city-btn__icon" aria-hidden="true" />
+            <span>{activeCity}</span>
+            <ChevronDownIcon
+              className={`events-city-btn__chevron${cityDropdown ? " events-city-btn__chevron--up" : ""}`}
+              aria-hidden="true"
+            />
+          </button>
+          {cityDropdown && (
+            <ul className="events-city-dropdown" role="listbox">
+              {CITIES.map((c) => (
+                <li key={c} role="option" aria-selected={c === activeCity}>
+                  <button
+                    type="button"
+                    className={`events-city-dropdown__item${c === activeCity ? " is-active" : ""}`}
+                    onClick={() => { setActiveCity(c); setCityDropdown(false); }}
+                  >
+                    {c !== "Tutte le città" && <PinIcon className="events-city-dropdown__icon" aria-hidden="true" />}
+                    {c}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <span className="events-page__filters-sep" aria-hidden="true" />
+
         {CATEGORIES.map((cat) => (
-          <span key={cat} className={`events-filter-pill${cat === "Tutti" ? " is-active" : ""}`}>
+          <button
+            key={cat}
+            type="button"
+            className={`events-filter-pill${cat === activeCategory ? " is-active" : ""}`}
+            onClick={() => setActiveCategory(cat)}
+          >
             {cat}
-          </span>
+          </button>
         ))}
       </div>
 
       {/* Grid */}
       <div className="events-page__body">
-        <div className="event-grid events-page__grid">
-          {EVENTS.map((event) => (
-            <Link key={event.id} className="event-card" href={`/search?event=${event.slug}`}>
-              <div className="event-card__image">
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                />
-                <span className="event-card__category">{event.category}</span>
-                <span className="event-card__bees">+{event.bees} 🐝</span>
-              </div>
-              <div className="event-card__body">
-                <h3>{event.title}</h3>
-                <p>{event.date} · {event.location}</p>
-                <strong>{event.price}</strong>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {filtered.length === 0 ? (
+          <div className="events-page__empty">
+            <p>Nessun evento in questa categoria.</p>
+          </div>
+        ) : (
+          <div className="event-grid events-page__grid">
+            {filtered.map((event) => (
+              <Link key={event.id} className="event-card" href={`/events/${event.slug}`}>
+                <div className="event-card__image">
+                  <Image
+                    src={event.image}
+                    alt={event.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  />
+                  <span className="event-card__category">{event.category}</span>
+                  <span className="event-card__bees">+{event.bees} 🐝</span>
+                </div>
+                <div className="event-card__body">
+                  <h3>{event.title}</h3>
+                  <p>{event.date} · {event.location}</p>
+                  <strong>{event.price}</strong>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
     </div>

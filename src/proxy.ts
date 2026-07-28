@@ -7,6 +7,11 @@ const PROTECTED_ANY = ["/profile", "/favorites"];
 const PROTECTED_MERCHANT = ["/dashboard"];
 const AUTH_ROUTES = ["/login", "/register"];
 
+function homeFor(role: string | undefined): string {
+  if (role === "commerciante") return "/dashboard";
+  return "/profile";
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -30,8 +35,7 @@ export function proxy(request: NextRequest) {
   const isAuthenticated = !!(role && uid);
 
   if (AUTH_ROUTES.some((r) => pathname.startsWith(r)) && isAuthenticated) {
-    const dest = role === "commerciante" ? "/dashboard" : "/profile";
-    return NextResponse.redirect(new URL(dest, request.url));
+    return NextResponse.redirect(new URL(homeFor(role), request.url));
   }
 
   if (PROTECTED_MERCHANT.some((r) => pathname.startsWith(r))) {
@@ -41,7 +45,7 @@ export function proxy(request: NextRequest) {
       );
     }
     if (role !== "commerciante") {
-      return NextResponse.redirect(new URL("/profile", request.url));
+      return NextResponse.redirect(new URL(homeFor(role), request.url));
     }
   }
 

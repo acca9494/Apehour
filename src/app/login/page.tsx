@@ -43,7 +43,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace(user.role === "commerciante" ? "/dashboard" : from);
+      const dest = user.role === "commerciante" ? "/dashboard" : from;
+      router.replace(dest);
     }
   }, [user, loading, router, from]);
 

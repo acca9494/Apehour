@@ -11,6 +11,10 @@ export interface MerchantTable {
   capacity: number;
   zone: string;      // es. "Interno", "Esterno", "Terrazza"
   status: TableStatus;
+  x: number;         // posizione libera in sala, px
+  y: number;
+  width: number;     // dimensione libera, px
+  height: number;
 }
 
 export type DayKey = "lun" | "mar" | "mer" | "gio" | "ven" | "sab" | "dom";
@@ -57,18 +61,21 @@ export interface VenueSettings {
 function tablesKey(uid: string)       { return `appape_merchant_tables_${uid}`; }
 function availabilityKey(uid: string) { return `appape_merchant_availability_${uid}`; }
 function settingsKey(uid: string)     { return `appape_merchant_settings_${uid}`; }
+function zonesKey(uid: string)        { return `appape_merchant_zones_${uid}`; }
+
+const DEFAULT_ZONES = ["Interno", "Terrazza", "Bancone", "Esterno", "Privato"];
 
 // ── Default data (demo account: Spritz Brera rst-001) ───────────────────────
 
 const DEFAULT_TABLES: MerchantTable[] = [
-  { id: "tbl-001", name: "Tavolo 1", capacity: 2, zone: "Interno", status: "active" },
-  { id: "tbl-002", name: "Tavolo 2", capacity: 2, zone: "Interno", status: "active" },
-  { id: "tbl-003", name: "Tavolo 3", capacity: 4, zone: "Interno", status: "active" },
-  { id: "tbl-004", name: "Tavolo 4", capacity: 4, zone: "Interno", status: "active" },
-  { id: "tbl-005", name: "Terrazza A", capacity: 4, zone: "Terrazza", status: "active" },
-  { id: "tbl-006", name: "Terrazza B", capacity: 6, zone: "Terrazza", status: "active" },
-  { id: "tbl-007", name: "Bancone 1", capacity: 2, zone: "Bancone", status: "active" },
-  { id: "tbl-008", name: "Bancone 2", capacity: 2, zone: "Bancone", status: "inactive" },
+  { id: "tbl-001", name: "Tavolo 1",   capacity: 2, zone: "Interno",  status: "active",   x: 40,  y: 40,  width: 90,  height: 90 },
+  { id: "tbl-002", name: "Tavolo 2",   capacity: 2, zone: "Interno",  status: "active",   x: 180, y: 40,  width: 90,  height: 90 },
+  { id: "tbl-003", name: "Tavolo 3",   capacity: 4, zone: "Interno",  status: "active",   x: 40,  y: 180, width: 120, height: 90 },
+  { id: "tbl-004", name: "Tavolo 4",   capacity: 4, zone: "Interno",  status: "active",   x: 200, y: 180, width: 120, height: 90 },
+  { id: "tbl-005", name: "Terrazza A", capacity: 4, zone: "Terrazza", status: "active",   x: 560, y: 40,  width: 120, height: 90 },
+  { id: "tbl-006", name: "Terrazza B", capacity: 6, zone: "Terrazza", status: "active",   x: 720, y: 40,  width: 140, height: 100 },
+  { id: "tbl-007", name: "Bancone 1",  capacity: 2, zone: "Bancone",  status: "active",   x: 560, y: 220, width: 90,  height: 90 },
+  { id: "tbl-008", name: "Bancone 2",  capacity: 2, zone: "Bancone",  status: "inactive", x: 700, y: 220, width: 90,  height: 90 },
 ];
 
 const DEFAULT_AVAILABILITY: DayConfig[] = [
@@ -179,6 +186,25 @@ export function upsertTable(table: MerchantTable, userId: string): void {
 
 export function deleteTable(id: string, userId: string): void {
   saveTables(getTables(userId).filter((t) => t.id !== id), userId);
+}
+
+// ── Zones CRUD ───────────────────────────────────────────────────────────────
+
+export function getZones(userId: string): string[] {
+  try {
+    const raw = localStorage.getItem(zonesKey(userId));
+    return raw ? (JSON.parse(raw) as string[]) : DEFAULT_ZONES;
+  } catch {
+    return DEFAULT_ZONES;
+  }
+}
+
+export function addZone(name: string, userId: string): string[] {
+  const zones = getZones(userId);
+  if (zones.includes(name)) return zones;
+  const next = [...zones, name];
+  localStorage.setItem(zonesKey(userId), JSON.stringify(next));
+  return next;
 }
 
 // ── Availability CRUD ────────────────────────────────────────────────────────

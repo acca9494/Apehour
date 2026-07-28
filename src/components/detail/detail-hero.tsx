@@ -94,9 +94,9 @@ export function DetailHero({ restaurant }: { restaurant: Restaurant }) {
 
       {/* Type badges — bottom right */}
       <div className="detail-hero__type-badges">
-        <img src="/bombo.jpeg" alt="Bombo Queen" className="detail-hero__type-badge" />
-        <img src="/vespa.jpeg" alt="Vespa Sprint" className="detail-hero__type-badge" />
-        <img src="/plus.jpeg"  alt="Ape Plus"    className="detail-hero__type-badge" />
+        <img src="/bombo.png" alt="Bombo Queen" className="detail-hero__type-badge" />
+        <img src="/vespa.png" alt="Vespa Sprint" className="detail-hero__type-badge" />
+        <img src="/plus.png"  alt="Ape Plus"    className="detail-hero__type-badge" />
       </div>
     </div>
   );

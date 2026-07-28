@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/profile/prenotazioni",  icon: "≡",  label: "Prenotazioni" },
   { href: "/profile/attivita",      icon: "◷",  label: "Attività" },
   { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES" },
+  { href: "/profile/apejobs",       icon: "▣",  label: "ApeJobs" },
 ];
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
@@ -61,6 +62,23 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         )}
+
+        <div className="dashboard-sidebar__footer">
+          <div className="dashboard-sidebar__user">
+            <span className="dash-avatar">{user.name[0].toUpperCase()}</span>
+            <div className="dashboard-sidebar__user-info">
+              <strong>{user.name}</strong>
+              <span>{user.email}</span>
+            </div>
+            <button
+              className="dash-logout-btn"
+              onClick={() => { logout(); router.push("/"); }}
+              title="Esci"
+            >
+              Esci
+            </button>
+          </div>
+        </div>
 
       </div>
       </aside>

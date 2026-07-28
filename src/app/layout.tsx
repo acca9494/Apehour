@@ -11,6 +11,8 @@ import { SiteHeader } from "@/components/navigation/site-header";
 import { GlobalChat } from "@/components/chat/global-chat";
 import { SearchViewPill } from "@/components/search/search-view-pill";
 import { CookieBanner } from "@/components/ui/cookie-banner";
+import { AppModeBody } from "@/components/layout/app-mode-body";
+import { LanguageProvider } from "@/lib/i18n/context";
 import "./globals.css";
 
 const inter = Inter({
@@ -36,7 +38,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="it" className={inter.variable}>
       <body>
         <AuthProvider>
+          <LanguageProvider>
           <MobileMenuProvider>
+            <Suspense><AppModeBody /></Suspense>
             {!isMaintenance && <SiteHeader />}
             <main>
               {children}
@@ -47,6 +51,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             {!isMaintenance && <Suspense><SearchViewPill /></Suspense>}
             <CookieBanner />
           </MobileMenuProvider>
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>

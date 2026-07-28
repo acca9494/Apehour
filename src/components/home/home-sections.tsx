@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ClayLink } from "@/components/ui/clay-button";
 import { Reveal } from "@/components/ui/reveal";
@@ -6,6 +8,8 @@ import Image from "next/image";
 import type { Promotion, Review } from "@/lib/types";
 import { MerchantRegisterForm } from "@/components/home/merchant-register-form";
 import { ApeCardLink } from "@/components/home/ape-card-link";
+import { useLang } from "@/lib/i18n/context";
+import { EVENTS } from "@/lib/data/events";
 
 type HomeSectionsProps = {
   promotions: Promotion[];
@@ -48,53 +52,14 @@ const categories = [
 ];
 
 
-const MOCK_EVENTS = [
-  {
-    id: "e1",
-    title: "Aperitivo con Live Jazz",
-    date: "Sab 10 Mag · 18:00",
-    location: "Milano, Navigli",
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=800&q=80",
-    category: "Musica Live",
-    price: "da €15",
-    slug: "jazz-navigli",
-  },
-  {
-    id: "e2",
-    title: "Sunset DJ Set Rooftop",
-    date: "Dom 11 Mag · 17:30",
-    location: "Roma, Prati",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
-    category: "DJ Set",
-    price: "da €20",
-    slug: "dj-rooftop-roma",
-  },
-  {
-    id: "e3",
-    title: "Degustazione Vini Naturali",
-    date: "Ven 9 Mag · 19:00",
-    location: "Firenze, Oltrarno",
-    image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80",
-    category: "Degustazione",
-    price: "da €25",
-    slug: "vini-naturali-firenze",
-  },
-  {
-    id: "e4",
-    title: "Cocktail Night: Mezcal & Amaro",
-    date: "Gio 8 Mag · 20:00",
-    location: "Torino, Quadrilatero",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
-    category: "Cocktail",
-    price: "da €18",
-    slug: "mezcal-torino",
-  },
-];
+const HOME_EVENTS = EVENTS.filter((e) =>
+  ["jazz-navigli", "dj-rooftop-roma", "vini-naturali-firenze", "mezcal-torino"].includes(e.slug)
+);
 
 const APE_IMG: Record<string, string> = {
-  "vespa-sprint": "/vespa.jpeg",
-  "ape-plus":     "/plus.jpeg",
-  "bombo-queen":  "/bombo.jpeg",
+  "vespa-sprint": "/vespa.png",
+  "ape-plus":     "/plus.png",
+  "bombo-queen":  "/bombo.png",
 };
 const APE_BUDGET: Record<string, string> = {
   "vespa-sprint": "€",
@@ -113,13 +78,15 @@ const APE_PRICE_RANGE: Record<string, string> = {
 };
 
 export function OffersSection({ promotions }: { promotions: Promotion[] }) {
+  const { t } = useLang();
+  const h = t.home;
   return (
     <section className="page-section page-section--dark page-section--offers">
       <div className="offers-header">
-        <span className="eyebrow offers-header__eyebrow--desktop">Offerte</span>
-        <span className="offers-savings-badge offers-header__badge--desktop">Risparmia fino al 40%</span>
-        <span className="eyebrow offers-header__eyebrow--mobile">Prenota ora</span>
-        <h2 className="offers-header__title--mobile">Scegli il tuo budget</h2>
+        <span className="eyebrow offers-header__eyebrow--desktop">{h.offersEyebrow}</span>
+        <span className="offers-savings-badge offers-header__badge--desktop">{h.save40}</span>
+        <span className="eyebrow offers-header__eyebrow--mobile">{h.bookNowEyebrow}</span>
+        <h2 className="offers-header__title--mobile">{h.chooseTitle[0]}<span style={{ color: "var(--gold)" }}>{h.chooseTitle[1]}</span>{h.chooseTitle[2]}</h2>
       </div>
       <div className="offer-grid">
         {promotions.map((promotion) => (
@@ -136,26 +103,32 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
               <span>-{promotion.discount}%</span>
               <h3>{promotion.title}</h3>
               <p>{promotion.description}</p>
-              <strong>Prenota l&apos;offerta</strong>
+              <strong>{h.bookOffer}</strong>
             </Link>
           </div>
         ))}
+      </div>
+      <div className="section-cta">
+        <ClayLink href="/offers" variant="secondary">Tutte le offerte</ClayLink>
       </div>
     </section>
   );
 }
 
 export function EventsSection() {
+  const { t } = useLang();
+  const h = t.home;
   return (
     <section className="page-section page-section--with-deco">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/apeapplogo1.png" alt="" className="section-deco-logo" aria-hidden="true" />
-      <SectionHeading eyebrow="Eventi" title="Scegli l'evento che fa per te,">
-        <span className="events-copy-desktop">Serate speciali, festival, musica live — ogni evento ti porta BEES da spendere sui prossimi aperitivi.</span>
+      <SectionHeading eyebrow={h.eventsEyebrow} title={h.eventsTitle}>
+        <span className="events-copy-desktop">{h.eventsCopyDesktop}</span>
       </SectionHeading>
       <div className="event-grid">
-        {MOCK_EVENTS.map((event, index) => (
+        {HOME_EVENTS.map((event, index) => (
           <Reveal key={event.id} delay={index * 70}>
-            <Link className="event-card" href={`/search?event=${event.slug}`}>
+            <Link className="event-card" href={`/events/${event.slug}`}>
               <div className="event-card__image">
                 <Image
                   src={event.image}
@@ -175,18 +148,20 @@ export function EventsSection() {
         ))}
       </div>
       <div className="section-cta">
-        <ClayLink href="/search" variant="secondary">Tutti gli eventi</ClayLink>
+        <ClayLink href="/events" variant="secondary">{h.allEvents}</ClayLink>
       </div>
     </section>
   );
 }
 
 export function CategoriesSection() {
+  const { t } = useLang();
+  const h = t.home;
   return (
     <section className="page-section page-section--activities">
-      <SectionHeading eyebrow="Attività" title="Partecipa e guadagna BEES:">
-        <span className="activities-copy-desktop">Pulisci una spiaggia, un parco, un fiume — poi meritati l&apos;aperitivo. Ogni attività ti porta BEES: i punti con cui sblocchi sconti, posti esclusivi e molto altro.</span>
-        <span className="activities-copy-mobile">Ogni attività ti porta BEES: meritati il tuo aperitivo!</span>
+      <SectionHeading eyebrow={h.activitiesEyebrow} title={h.activitiesTitle}>
+        <span className="activities-copy-desktop">{h.activitiesCopyDesktop}</span>
+        <span className="activities-copy-mobile">{h.activitiesCopyMobile}</span>
       </SectionHeading>
       <div className="event-grid">
         {categories.map((cat) => (
@@ -209,18 +184,19 @@ export function CategoriesSection() {
         ))}
       </div>
       <div className="section-cta">
-        <ClayLink href="/attivita" variant="secondary">Tutte le attività</ClayLink>
+        <ClayLink href="/attivita" variant="secondary">{h.allActivities}</ClayLink>
       </div>
     </section>
   );
 }
 
 export function SocialProofSection({ reviews }: { reviews: Review[] }) {
+  const { t } = useLang();
   const doubled = [...reviews, ...reviews];
   return (
     <section className="page-section social-proof">
       <div className="reviews-layout">
-        <p className="eyebrow reviews-eyebrow">Recensioni</p>
+        <p className="eyebrow reviews-eyebrow">{t.home.reviewsEyebrow}</p>
         <div className="reviews-track-outer">
           <div className="reviews-track">
             {doubled.map((review, i) => (
@@ -239,35 +215,27 @@ export function SocialProofSection({ reviews }: { reviews: Review[] }) {
   );
 }
 
-const MERCHANT_BENEFITS = [
-  "Visibile a migliaia di utenti nella tua città",
-  "Prenotazioni in tempo reale, zero telefonate",
-  "Offerte happy hour per riempire i tavoli vuoti",
-  "Recensioni verificate che costruiscono fiducia",
-  "Nessuna commissione per i primi 30 giorni",
-];
-
 export function MerchantSection() {
+  const { t } = useLang();
+  const h = t.home;
   return (
     <section className="merchant-section" id="per-i-locali">
       <div className="merchant-section__inner">
         <div className="merchant-section__copy">
-          <p className="eyebrow merchant-section__eyebrow">Per i locali</p>
-          <h2>Il tuo locale merita tavoli pieni ogni sera</h2>
+          <p className="eyebrow merchant-section__eyebrow">{h.merchantEyebrow}</p>
+          <h2>{h.merchantTitle}</h2>
           <p className="merchant-section__sub">
-            Ogni giorno centinaia di persone cercano su ApeHour dove bere qualcosa nella tua città.
-            Registrati gratis, imposta gli orari e inizia a ricevere prenotazioni reali —
-            senza commissioni per i primi <strong style={{ color: "#fff" }}>30 giorni</strong>.
+            {h.merchantSub[0]}<strong style={{ color: "#fff" }}>{h.merchantSub[1]}</strong>{h.merchantSub[2]}
           </p>
           <ul className="merchant-section__list">
-            {MERCHANT_BENEFITS.map((b) => (
+            {h.merchantBenefits.map((b) => (
               <li key={b}>{b}</li>
             ))}
           </ul>
         </div>
         <div className="merchant-section__form-wrap-outer">
           <div className="merchant-section__form-wrap">
-            <p className="merchant-section__form-label">Prova gratis 30 giorni — nessuna carta richiesta</p>
+            <p className="merchant-section__form-label">{h.trialLabel}</p>
             <MerchantRegisterForm />
           </div>
         </div>

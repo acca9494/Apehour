@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import "leaflet/dist/leaflet.css";
 
 export type MapMarker = {
   lat: number;
@@ -11,6 +12,7 @@ export type MapMarker = {
   neighborhood: string;
   cuisine: string;
   budget: string;
+  rating: number;
 };
 
 type Props = {
@@ -19,16 +21,10 @@ type Props = {
   markers?: MapMarker[];
   className?: string;
   style?: React.CSSProperties;
+  fitToMarkers?: boolean;
 };
 
-function budgetLabel(budget: string): string {
-  if (budget === "$$") return "€";
-  if (budget === "$$$") return "€€";
-  if (budget === "$$$$") return "€€€";
-  return "€";
-}
-
-export default function LeafletMap({ center, zoom = 13, markers = [], className, style }: Props) {
+export default function LeafletMap({ center, zoom = 13, markers = [], className, style, fitToMarkers = true }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef       = useRef<ReturnType<typeof import("leaflet")["map"]> | null>(null);
   const LRef         = useRef<typeof import("leaflet") | null>(null);
@@ -50,9 +46,10 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
         .setView([center.lat, center.lng], zoom);
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap",
-        maxZoom: 19,
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        attribution: "© OpenStreetMap © CARTO",
+        subdomains: "abcd",
+        maxZoom: 20,
       }).addTo(map);
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -60,10 +57,30 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
       const layer = L.layerGroup().addTo(map);
       layerRef.current = layer;
 
+      // Click-to-expand delegation — close on map click
+      map.on("click", () => {
+        map.getContainer().querySelectorAll(".mcrd-wrap.is-open")
+          .forEach((el) => el.classList.remove("is-open"));
+      });
+
       // Let the browser finish layout before rendering markers
       requestAnimationFrame(() => {
         map.invalidateSize();
-        renderMarkers(L, map, layer, markers);
+        renderMarkers(L, map, layer, markers, fitToMarkers);
+
+        // Event delegation for pin clicks
+        map.getContainer().addEventListener("click", (e) => {
+          const target = e.target as HTMLElement;
+          const pin = target.closest(".mcrd-pin");
+          if (!pin) return;
+          e.stopPropagation();
+          const wrap = pin.closest(".mcrd-wrap");
+          if (!wrap) return;
+          map.getContainer().querySelectorAll(".mcrd-wrap.is-open").forEach((el) => {
+            if (el !== wrap) el.classList.remove("is-open");
+          });
+          wrap.classList.toggle("is-open");
+        }, true);
       });
     });
 
@@ -80,16 +97,19 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
   // ── Re-render markers whenever the prop changes ──
   useEffect(() => {
     if (!mapRef.current || !LRef.current || !layerRef.current) return;
-    renderMarkers(LRef.current, mapRef.current, layerRef.current, markers);
+    renderMarkers(LRef.current, mapRef.current, layerRef.current, markers, fitToMarkers);
   }, [markers]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Re-center when center/zoom props change (e.g. city filter) ──
+  useEffect(() => {
+    if (!mapRef.current) return;
+    mapRef.current.setView([center.lat, center.lng], zoom);
+  }, [center.lat, center.lng, zoom]);
+
   return (
-    <>
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-      <div className={className} style={{ position: "relative", height: "100%", width: "100%", ...style }}>
-        <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
-      </div>
-    </>
+    <div className={className} style={{ position: "relative", height: "100%", width: "100%", ...style }}>
+      <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
+    </div>
   );
 }
 
@@ -98,35 +118,39 @@ function renderMarkers(
   map: ReturnType<typeof import("leaflet")["map"]>,
   layer: ReturnType<typeof import("leaflet")["layerGroup"]>,
   markers: MapMarker[],
+  fitToMarkers = true,
 ) {
   layer.clearLayers();
   if (markers.length === 0) return;
 
-  markers.forEach(({ lat, lng, label, slug, image, neighborhood, cuisine, budget }) => {
-    const euros = budgetLabel(budget);
-    const cardHtml = `
-      <a class="mcrd" href="/restaurants/${slug}">
-        <img class="mcrd__img" src="${image}" alt="${label}" />
-        <div class="mcrd__body">
-          <span class="mcrd__budget">${euros}</span>
-          <strong class="mcrd__name">${label}</strong>
-          <span class="mcrd__tag">${cuisine}</span>
-          <span class="mcrd__hood">${neighborhood}</span>
-          <span class="mcrd__cta">Prenota</span>
+  markers.forEach(({ lat, lng, label, slug, image, neighborhood, cuisine, rating }) => {
+    const html = `
+      <div class="mcrd-wrap">
+        <a class="mcrd" href="/restaurants/${slug}" onclick="event.stopPropagation()">
+          <img class="mcrd__img" src="${image}" alt="${label}" />
+          <div class="mcrd__body">
+            <strong class="mcrd__name">${label}</strong>
+            <span class="mcrd__tag">${cuisine}</span>
+            <span class="mcrd__hood">${neighborhood}</span>
+            <span class="mcrd__cta">Prenota →</span>
+          </div>
+        </a>
+        <div class="mcrd-pin">
+          <span class="mcrd-pin__star">★</span>${rating.toFixed(1)}
         </div>
-      </a>`;
+      </div>`;
 
     const icon = L.divIcon({
-      html: cardHtml,
-      className: "mcrd-wrap",
-      iconSize: [160, 155],
-      iconAnchor: [80, 155],
+      html,
+      className: "",
+      iconSize: [170, 185],
+      iconAnchor: [85, 185],
     });
 
     L.marker([lat, lng], { icon }).addTo(layer);
   });
 
-  if (markers.length > 1) {
+  if (fitToMarkers && markers.length > 1) {
     const bounds = L.latLngBounds(markers.map(({ lat, lng }) => [lat, lng] as [number, number]));
     map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
   }

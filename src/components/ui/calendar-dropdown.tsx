@@ -70,29 +70,31 @@ export function CalendarDropdown({ value, onChange, compact = false }: Props) {
   if (compact) {
     return (
       <div ref={ref} className="filter-cal">
-        <button
-          type="button"
-          className={`filter-cal__trigger${open ? " is-open" : ""}${hasValue ? " has-value" : ""}`}
-          onClick={() => setOpen((v) => !v)}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-        >
-          <svg className="filter-cal__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 3.5v3M17 3.5v3" /><rect x="4" y="6.5" width="16" height="13" rx="2.5" /><path d="M4 10.5h16" />
-          </svg>
-          <span className="filter-cal__value">{displayValue}</span>
+        <div className="filter-cal__row">
+          <button
+            type="button"
+            className={`filter-cal__trigger${open ? " is-open" : ""}${hasValue ? " has-value" : ""}`}
+            onClick={() => setOpen((v) => !v)}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+          >
+            <svg className="filter-cal__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 3.5v3M17 3.5v3" /><rect x="4" y="6.5" width="16" height="13" rx="2.5" /><path d="M4 10.5h16" />
+            </svg>
+            <span className="filter-cal__value">{displayValue}</span>
+            <svg className={`filter-cal__chevron${open ? " is-open" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
           {hasValue && (
             <button
               type="button"
               className="filter-cal__clear"
-              onClick={(e) => { e.stopPropagation(); onChange(""); }}
+              onClick={() => onChange("")}
               aria-label="Rimuovi data"
             >✕</button>
           )}
-          <svg className={`filter-cal__chevron${open ? " is-open" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </button>
+        </div>
         {open && <CalendarPopup
           cells={cells} isPast={isPast} isToday={isToday} isSelected={isSelected}
           viewMonth={viewMonth} viewYear={viewYear} prevMonth={prevMonth} nextMonth={nextMonth}

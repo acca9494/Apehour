@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { SVGProps } from "react";
 import { todayInputValue } from "@/lib/utils";
 import { CalendarDropdown } from "@/components/ui/calendar-dropdown";
+import { useLang } from "@/lib/i18n/context";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -134,27 +135,11 @@ function SearchDropdown({ label, FieldIcon, options, value, onChange }: SearchDr
 }
 
 /* ── Data ──────────────────────────────────────────── */
-const CITY_OPTIONS: DropdownOption[] = [
-  { value: "",        label: "Tutta Italia", detail: "tutte le città",  Icon: MapPinIcon },
-  { value: "Milano",  label: "Milano",       detail: "48 locali",       Icon: MapPinIcon },
-  { value: "Roma",    label: "Roma",         detail: "61 locali",       Icon: MapPinIcon },
-  { value: "Firenze", label: "Firenze",      detail: "29 locali",       Icon: MapPinIcon },
-  { value: "Venezia", label: "Venezia",      detail: "17 locali",       Icon: MapPinIcon },
-  { value: "Napoli",  label: "Napoli",       detail: "34 locali",       Icon: MapPinIcon },
-  { value: "Torino",  label: "Torino",       detail: "22 locali",       Icon: MapPinIcon },
-  { value: "Bologna", label: "Bologna",      detail: "19 locali",       Icon: MapPinIcon },
-];
-
-const GUEST_OPTIONS: DropdownOption[] = [
-  { value: "1",  label: "1 persona",   detail: "solo",           Icon: UserIcon },
-  { value: "2",  label: "2 persone",   detail: "coppia",         Icon: UserIcon },
-  { value: "3",  label: "3 persone",   detail: "piccolo gruppo", Icon: UserIcon },
-  { value: "4",  label: "4 persone",   detail: "piccolo gruppo", Icon: UserIcon },
-  { value: "5",  label: "5 persone",   detail: "gruppo",         Icon: UserIcon },
-  { value: "6",  label: "6 persone",   detail: "gruppo",         Icon: UserIcon },
-  { value: "8",  label: "8 persone",   detail: "gruppo grande",  Icon: UserIcon },
-  { value: "10", label: "10+ persone", detail: "evento",         Icon: UserIcon },
-];
+const CITY_COUNTS: Record<string, string> = {
+  Milano: "48", Roma: "61", Firenze: "29",
+  Venezia: "17", Napoli: "34", Torino: "22", Bologna: "19",
+};
+const CITIES = ["Milano", "Roma", "Firenze", "Venezia", "Napoli", "Torino", "Bologna"];
 
 function GridIcon(props: IconProps) {
   return (
@@ -185,7 +170,7 @@ const TYPE_PILLS: {
     budget: "€",
     icon: (
       <img
-        src="/vespa.jpeg"
+        src="/vespa.png"
         alt=""
         className="hstp__pill-icon hstp__pill-icon--img"
       />
@@ -197,7 +182,7 @@ const TYPE_PILLS: {
     budget: "€€",
     icon: (
       <img
-        src="/plus.jpeg"
+        src="/plus.png"
         alt=""
         className="hstp__pill-icon hstp__pill-icon--img"
       />
@@ -209,7 +194,7 @@ const TYPE_PILLS: {
     budget: "€€€",
     icon: (
       <img
-        src="/bombo.jpeg"
+        src="/bombo.png"
         alt=""
         className="hstp__pill-icon hstp__pill-icon--img"
       />
@@ -217,10 +202,17 @@ const TYPE_PILLS: {
   },
 ];
 
-function TypeDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+type TypePill = { value: string; label: string; budget: string; icon: React.ReactNode };
+
+function TypeDropdownTranslated({ value, onChange, pills, budgetLabel }: {
+  value: string;
+  onChange: (v: string) => void;
+  pills: TypePill[];
+  budgetLabel: string;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const selected = TYPE_PILLS.find((o) => o.value === value) ?? TYPE_PILLS[0]!;
+  const selected = pills.find((o) => o.value === value) ?? pills[0]!;
 
   const close = useCallback(() => setOpen(false), []);
   useEffect(() => {
@@ -247,7 +239,7 @@ function TypeDropdown({ value, onChange }: { value: string; onChange: (v: string
         {selected.icon}
       </span>
       <span className="hero-search__copy">
-        <span className="hero-search__label">Budget</span>
+        <span className="hero-search__label">{budgetLabel}</span>
         <span className="hero-search__value">
           {selected.label}{selected.budget ? <span className="hero-search__budget">{selected.budget}</span> : null}
         </span>
@@ -258,7 +250,7 @@ function TypeDropdown({ value, onChange }: { value: string; onChange: (v: string
 
       {open && (
         <ul className="hsdd hsdd--type" role="listbox" onClick={(e) => e.stopPropagation()}>
-          {TYPE_PILLS.map((opt) => {
+          {pills.map((opt) => {
             const active = opt.value === value;
             return (
               <li
@@ -283,10 +275,25 @@ function TypeDropdown({ value, onChange }: { value: string; onChange: (v: string
 /* ── Form ──────────────────────────────────────────── */
 export function HeroSearchForm() {
   const router = useRouter();
+  const { t } = useLang();
   const [city,   setCity]   = useState("");
   const [date,   setDate]   = useState("");
   const [guests, setGuests] = useState("2");
   const [type,   setType]   = useState("");
+
+  const cityOptions: DropdownOption[] = [
+    { value: "", label: t.heroSearch.allItaly, detail: t.heroSearch.allCities, Icon: MapPinIcon },
+    ...CITIES.map((c) => ({ value: c, label: c, detail: `${CITY_COUNTS[c]} ${t.heroSearch.people.toLowerCase()}`, Icon: MapPinIcon })),
+  ];
+
+  const guestOptions: DropdownOption[] = t.guestOptions.map((o) => ({
+    value: o.value, label: o.label, detail: o.detail, Icon: UserIcon,
+  }));
+
+  const typePillsTranslated = [
+    { ...TYPE_PILLS[0]!, label: t.apetypes.all },
+    ...TYPE_PILLS.slice(1),
+  ];
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -301,17 +308,17 @@ export function HeroSearchForm() {
   return (
     <form className="hero-search" onSubmit={onSubmit}>
 
-      <SearchDropdown label="Dove?"   FieldIcon={MapPinIcon} options={CITY_OPTIONS}  value={city}   onChange={setCity}   />
+      <SearchDropdown label={t.heroSearch.where}   FieldIcon={MapPinIcon} options={cityOptions}  value={city}   onChange={setCity}   />
       <div className="hero-search__divider" />
       <CalendarDropdown value={date} onChange={setDate} />
       <div className="hero-search__divider" />
-      <SearchDropdown label="Persone" FieldIcon={UserIcon}   options={GUEST_OPTIONS} value={guests} onChange={setGuests} />
+      <SearchDropdown label={t.heroSearch.people} FieldIcon={UserIcon}   options={guestOptions} value={guests} onChange={setGuests} />
       <div className="hero-search__divider" />
-      <TypeDropdown value={type} onChange={setType} />
+      <TypeDropdownTranslated value={type} onChange={setType} pills={typePillsTranslated} budgetLabel={t.heroSearch.budget} />
 
       <button type="submit" className="hero-search__button">
         <SearchIcon aria-hidden="true" />
-        Cerca
+        {t.heroSearch.search}
       </button>
 
     </form>
