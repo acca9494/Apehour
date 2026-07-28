@@ -555,6 +555,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
 }
 
 .mobile-search-overlay__bar {
@@ -1376,7 +1377,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 240;
+  z-index: 1220;
   pointer-events: none;
   background: rgba(0, 0, 0, 0);
   transition: background-color 220ms ease;
@@ -1387,7 +1388,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
 .mobile-drawer {
   position: fixed;
   inset: 0 0 0 auto;
-  z-index: 250;
+  z-index: 1221;
   width: min(320px, 88vw);
   padding: 1.25rem;
   transform: translateX(102%);
@@ -1485,22 +1486,11 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
 .mobile-merchant-bar {
   display: none;
   align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   padding: 0.35rem 1.25rem;
   background: var(--bg-3);
   border-bottom: 1px solid var(--border);
-}
-.mobile-merchant-bar__side {
-  flex: 1;
-}
-.mobile-merchant-bar__side--right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.4rem;
-}
-.mobile-merchant-bar__center {
-  display: flex;
-  justify-content: center;
 }
 .mobile-merchant-bar__link {
   font-size: 0.75rem;
@@ -1542,7 +1532,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   display: flex;
   justify-content: center;
   gap: 1.5rem;
-  padding-top: 0.25rem;
+  padding-top: 0.75rem;
 }
 .mobile-drawer__sub-link {
   font-size: 0.8rem;
@@ -1552,8 +1542,14 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
 }
 .mobile-drawer__sub-link:hover { color: var(--gold-dk); }
 
-.mobile-drawer__user {
+.mobile-drawer__lang-toggle {
+  align-self: center;
   margin-top: auto;
+  margin-bottom: 0.5rem;
+  padding-top: 1rem;
+}
+
+.mobile-drawer__user {
   padding-top: 1rem;
   border-top: 1.5px solid var(--border);
 }
@@ -1580,7 +1576,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
 .bottom-nav {
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  z-index: 40;
+  z-index: 305;
   display: none;
   padding: 0.15rem 0 calc(0.15rem + env(safe-area-inset-bottom));
   background: rgba(255, 255, 255, 0.97);
@@ -2515,6 +2511,16 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   font-size: 0.76rem;
   margin-bottom: 0.35rem;
 }
+
+.restaurant-card__budget {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+.restaurant-card__budget-img { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+.restaurant-card__budget-label { font-size: 0.78rem; font-weight: 700; color: var(--text-2); }
+.restaurant-card__budget-symbol { font-size: 0.78rem; font-weight: 800; color: var(--gold-dk); }
 
 .trust-label {
   font-size: 0.74rem;
@@ -3984,6 +3990,18 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   gap: 0.15rem;
   padding: 0.5rem 0.6rem 0.55rem;
 }
+.mcrd__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+.mcrd__rating {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--gold, #f5c518);
+  white-space: nowrap;
+}
 .mcrd__name {
   font-size: 0.8rem;
   font-weight: 800;
@@ -4001,6 +4019,15 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   font-size: 0.62rem;
   color: rgba(255,255,255,0.4);
 }
+.mcrd__budget {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+}
+.mcrd__budget-img { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+.mcrd__budget-label { font-size: 0.66rem; font-weight: 700; color: rgba(255,255,255,0.75); }
+.mcrd__budget-symbol { font-size: 0.66rem; font-weight: 800; color: var(--gold, #f5c518); }
 .mcrd__cta {
   margin-top: 0.3rem;
   display: inline-block;
@@ -8504,6 +8531,11 @@ body:has(.search-page--map) > main {
   .menu-toggle        { display: none; }
   .bottom-nav { display: flex; }
   .mobile-city-bar    { display: block; }
+  .booking3-layout { grid-template-columns: 1fr; gap: 1.25rem; }
+  .booking-card { padding: 1.25rem; }
+  .checkout-summary { position: static; padding: 1.25rem; }
+  .restaurant-card__topline .restaurant-card__rating { font-size: 1.15rem; }
+  .restaurant-card__topline .restaurant-card__rating::before { font-size: 1rem; }
   .events-page__filters { display: flex; align-items: center; flex-wrap: nowrap; gap: 0.6rem; padding: 0.75rem 1rem; }
   .events-page__filters-sep { display: none; }
   .events-page__categories { display: none; }
@@ -8526,7 +8558,7 @@ body:has(.search-page--map) > main {
   .events-filtri-trigger .mobile-search-btn__filtri-count { font-size: 0.75rem; }
   .home-hero          { display: none; }
   /* Push chat above bottom nav */
-  .gchat { bottom: calc(4rem + env(safe-area-inset-bottom) + 0.75rem); right: 0.75rem; }
+  .gchat { bottom: calc(4rem + env(safe-area-inset-bottom) + 1.25rem); right: 0.75rem; }
   /* Mobile: start as icon-only, reveal label once after 5s, then stays hidden */
   .gchat__label {
     animation-name: gchat-label-reveal;
@@ -8552,7 +8584,7 @@ body:has(.search-page--map) > main {
   .search-body--hidden-mobile { display: none; }
   .search-view-pill {
     display: flex;
-    bottom: calc(4rem + env(safe-area-inset-bottom) + 0.75rem - 30px);
+    bottom: calc(4rem + env(safe-area-inset-bottom) + 1.25rem);
   }
   .search-page--map {
     min-height: unset;
@@ -8604,9 +8636,10 @@ body:has(.search-page--map) > main {
     overflow-x: auto;
     overflow-y: visible;
     scroll-snap-type: x mandatory;
+    scroll-padding-left: 1.25rem;
     -webkit-overflow-scrolling: touch;
     gap: 0.65rem;
-    padding: 0 1rem 0.75rem;
+    padding: 0 1rem 0.75rem 1.25rem;
     scrollbar-width: none;
   }
   .offer-grid::-webkit-scrollbar, .event-grid::-webkit-scrollbar { display: none; }
@@ -8983,12 +9016,12 @@ body:has(.search-page--map) > main {
 
 /* ── SEARCH PAGE: hide footer on mobile + tablet ── */
 @media (max-width: 1024px) {
-  body.is-search-page .site-footer,
-  body.is-search-page .bottom-nav { display: none !important; }
+  body.is-search-page .site-footer { display: none !important; }
 }
 
 /* ── SEARCH PAGE: map view fills the viewport, no footer at any width ── */
 body:has(.search-page--map) .site-footer { display: none !important; }
+body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
 
 /* ── TABLET: sidebar open state (overrides the 1024px hide) ── */
 @media (min-width: 769px) and (max-width: 1024px) {

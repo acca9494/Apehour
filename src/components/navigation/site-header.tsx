@@ -369,19 +369,11 @@ export function SiteHeader() {
         {/* Mobile-only: merchant sub-links — hidden in app mode */}
         {!user && (
           <div className="mobile-merchant-bar">
-            <div className="mobile-merchant-bar__side" />
-            <div className="mobile-merchant-bar__center">
-              <button type="button" className="mobile-lang-toggle" onClick={toggleLang} aria-label={lang === "it" ? "Switch to English" : "Passa all'italiano"}>
-                <span className={`mobile-lang-toggle__opt${lang === "it" ? " is-active" : ""}`}><FlagIT className="lang-toggle__flag" /> IT</span>
-                <span className="mobile-lang-toggle__sep">|</span>
-                <span className={`mobile-lang-toggle__opt${lang === "en" ? " is-active" : ""}`}><FlagGB className="lang-toggle__flag" /> EN</span>
-              </button>
-            </div>
-            <div className="mobile-merchant-bar__side mobile-merchant-bar__side--right">
-              <Link href="/register" className="mobile-merchant-bar__link">{t.merchantBar.hasVenue}</Link>
-              <span className="mobile-merchant-bar__sep" aria-hidden="true">·</span>
-              <Link href="/come-funziona" className="mobile-merchant-bar__link">{t.merchantBar.faq}</Link>
-            </div>
+            <Link href="/apejobs" className="mobile-merchant-bar__link">Cerchi lavoro?</Link>
+            <span className="mobile-merchant-bar__sep" aria-hidden="true">·</span>
+            <Link href="/register" className="mobile-merchant-bar__link">{t.merchantBar.hasVenue}</Link>
+            <span className="mobile-merchant-bar__sep" aria-hidden="true">·</span>
+            <Link href="/come-funziona" className="mobile-merchant-bar__link">{t.merchantBar.faq}</Link>
           </div>
         )}
 
@@ -763,6 +755,18 @@ export function SiteHeader() {
           )}
         </nav>
 
+        <button type="button" className="mobile-lang-toggle mobile-drawer__lang-toggle" onClick={toggleLang} aria-label={lang === "it" ? "Switch to English" : "Passa all'italiano"}>
+          <span className={`mobile-lang-toggle__opt${lang === "it" ? " is-active" : ""}`}><FlagIT className="lang-toggle__flag" /> IT</span>
+          <span className="mobile-lang-toggle__sep">|</span>
+          <span className={`mobile-lang-toggle__opt${lang === "en" ? " is-active" : ""}`}><FlagGB className="lang-toggle__flag" /> EN</span>
+        </button>
+
+        <div className="mobile-drawer__sub-links">
+          <Link href="/apejobs" className="mobile-drawer__sub-link" onClick={close}>Cerchi lavoro?</Link>
+          <Link href="/register" className="mobile-drawer__sub-link" onClick={close}>{t.merchantBar.hasVenue}</Link>
+          <Link href="/come-funziona" className="mobile-drawer__sub-link" onClick={close}>{t.merchantBar.faq}</Link>
+        </div>
+
         {!loading && (
           user ? (
             <div className="mobile-drawer__user">
@@ -789,10 +793,6 @@ export function SiteHeader() {
               <ClayLink href="/register" className="mobile-drawer__cta" onClick={close}>
                 {lang === "it" ? "Registrati gratis" : "Sign up free"}
               </ClayLink>
-              <div className="mobile-drawer__sub-links">
-                <Link href="/register" className="mobile-drawer__sub-link" onClick={close}>{t.merchantBar.hasVenue}</Link>
-                <Link href="/come-funziona" className="mobile-drawer__sub-link" onClick={close}>{t.merchantBar.faq}</Link>
-              </div>
             </div>
           )
         )}

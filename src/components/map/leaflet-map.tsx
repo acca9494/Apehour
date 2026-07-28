@@ -113,6 +113,12 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
   );
 }
 
+const PRICE_INFO: Record<string, { img: string; label: string; budget: string }> = {
+  "$$":   { img: "/vespa.png", label: "Vespa Sprint", budget: "€" },
+  "$$$":  { img: "/plus.png",  label: "Ape Plus",     budget: "€€" },
+  "$$$$": { img: "/bombo.png", label: "Bombo Queen",  budget: "€€€" },
+};
+
 function renderMarkers(
   L: typeof import("leaflet"),
   map: ReturnType<typeof import("leaflet")["map"]>,
@@ -123,15 +129,25 @@ function renderMarkers(
   layer.clearLayers();
   if (markers.length === 0) return;
 
-  markers.forEach(({ lat, lng, label, slug, image, neighborhood, cuisine, rating }) => {
+  markers.forEach(({ lat, lng, label, slug, image, neighborhood, cuisine, budget, rating }) => {
+    const priceInfo = PRICE_INFO[budget];
     const html = `
       <div class="mcrd-wrap">
         <a class="mcrd" href="/restaurants/${slug}" onclick="event.stopPropagation()">
           <img class="mcrd__img" src="${image}" alt="${label}" />
           <div class="mcrd__body">
+            <div class="mcrd__topline">
+              <span class="mcrd__tag">${cuisine}</span>
+              <strong class="mcrd__rating">★ ${rating.toFixed(1)}</strong>
+            </div>
             <strong class="mcrd__name">${label}</strong>
-            <span class="mcrd__tag">${cuisine}</span>
             <span class="mcrd__hood">${neighborhood}</span>
+            ${priceInfo ? `
+            <div class="mcrd__budget">
+              <img class="mcrd__budget-img" src="${priceInfo.img}" alt="" />
+              <span class="mcrd__budget-label">${priceInfo.label}</span>
+              <span class="mcrd__budget-symbol">${priceInfo.budget}</span>
+            </div>` : ""}
             <span class="mcrd__cta">Prenota →</span>
           </div>
         </a>

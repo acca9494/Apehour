@@ -9,8 +9,15 @@ type RestaurantCardProps = {
   priority?: boolean;
 };
 
+const PRICE_INFO: Record<string, { img: string; label: string; budget: string }> = {
+  "$$":   { img: "/vespa.png", label: "Vespa Sprint", budget: "€" },
+  "$$$":  { img: "/plus.png",  label: "Ape Plus",     budget: "€€" },
+  "$$$$": { img: "/bombo.png", label: "Bombo Queen",  budget: "€€€" },
+};
+
 export function RestaurantCard({ restaurant, priority = false }: RestaurantCardProps) {
   const firstSlot = restaurant.slots[0];
+  const priceInfo = PRICE_INFO[restaurant.priceRange];
 
   return (
     <article className="restaurant-card">
@@ -30,7 +37,7 @@ export function RestaurantCard({ restaurant, priority = false }: RestaurantCardP
       <div className="restaurant-card__body">
         <div className="restaurant-card__topline">
           <span>{restaurant.cuisine}</span>
-          <strong>{restaurant.rating.toFixed(1)}</strong>
+          <strong className="restaurant-card__rating">{restaurant.rating.toFixed(1)}</strong>
         </div>
 
         <h3>
@@ -38,8 +45,17 @@ export function RestaurantCard({ restaurant, priority = false }: RestaurantCardP
         </h3>
 
         <p className="restaurant-card__meta">
-          {formatReviewCount(restaurant.reviewCount)} recensioni · {restaurant.priceRange} · {restaurant.distance}
+          {formatReviewCount(restaurant.reviewCount)} recensioni · {restaurant.distance}
         </p>
+
+        {priceInfo && (
+          <div className="restaurant-card__budget">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={priceInfo.img} alt="" className="restaurant-card__budget-img" />
+            <span className="restaurant-card__budget-label">{priceInfo.label}</span>
+            <span className="restaurant-card__budget-symbol">{priceInfo.budget}</span>
+          </div>
+        )}
 
         <p className="trust-label">{restaurant.urgencyLabel}</p>
 
