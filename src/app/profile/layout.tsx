@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/profile",               icon: "◈",  label: "Panoramica" },
+  { href: "/profile",               icon: "◈",  label: "Dashboard" },
   { href: "/profile/prenotazioni",  icon: "≡",  label: "Prenotazioni" },
   { href: "/profile/attivita",      icon: "◷",  label: "Attività" },
   { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES" },

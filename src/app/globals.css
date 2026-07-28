@@ -485,7 +485,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   min-width: 160px;
   background: #fff;
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   list-style: none;
   padding: 0.35rem;
@@ -610,7 +610,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   gap: 0.75rem;
   margin: 0 1rem 0.5rem;
   padding: 0.9rem 1rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   background: #fff;
   border: 1.5px solid var(--border);
   box-shadow: 0 1px 6px rgba(0,0,0,0.05);
@@ -666,7 +666,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   width: 100%;
   padding: 0.8rem 1rem;
   margin-bottom: 0.35rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   background: #fff;
   border: 1px solid var(--border);
   font-size: 0.88rem;
@@ -2958,7 +2958,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   min-width: 180px;
   background: #fff;
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   list-style: none;
   padding: 0.35rem;
@@ -3172,25 +3172,20 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   gap: 1rem;
   background: var(--bg-2);
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   padding: 0.85rem 1.1rem;
   text-decoration: none;
   color: inherit;
   transition: border-color 140ms, background 140ms;
 }
 .artist-job-row:hover { border-color: var(--gold); background: var(--gold-soft); }
-.artist-job-row__main { display: flex; flex-direction: column; gap: 0.15rem; }
-.artist-job-row__main strong { font-size: 0.9rem; color: var(--text); }
-.artist-job-row__main span { font-size: 0.78rem; color: var(--text-3); }
+.artist-job-row__main { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.artist-job-row__main strong { font-size: 0.9rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.artist-job-row__main span { font-size: 0.78rem; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .artist-job-row__meta { display: flex; align-items: center; gap: 0.9rem; flex-shrink: 0; }
 .artist-job-row__date { font-size: 0.78rem; color: var(--text-4); }
 .artist-job-row__compenso { font-size: 0.9rem; font-weight: 800; color: var(--gold-dk); }
 
-.artist-preview-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
 .artist-preview-card {
   background: var(--bg-2);
   border: 1.5px solid var(--border);
@@ -3217,7 +3212,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
 .artist-payment-summary__card {
   background: var(--bg-2);
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   padding: 1rem 1.1rem;
   display: flex;
   flex-direction: column;
@@ -3233,7 +3228,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   justify-content: center;
   text-align: center;
   border: 2px dashed var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   padding: 1.5rem 1rem;
   font-size: 0.85rem;
   color: var(--text-3);
@@ -3245,6 +3240,10 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   border-color: var(--gold);
   background: var(--gold-soft);
   color: var(--gold-dk);
+}
+
+.apejobs-page {
+  min-height: 100%;
 }
 
 .apejobs-subnav {
@@ -3259,22 +3258,18 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   background: var(--bg);
 }
 /* Client profile pages still show the public site header above the content,
-   so the sub-nav needs to stick below it instead of at the very top; the
-   surrounding profile content area is dark-themed, not white. */
+   so the sub-nav needs to stick below it instead of at the very top. The bar
+   itself stays white/light — only the ApeJobs content area behind it is dark. */
 .profile-mobile-content .apejobs-subnav {
   top: 72px;
-  background: var(--bg-dark);
-  border-bottom-color: rgba(255,255,255,0.12);
+  background: var(--bg);
   margin: -2.5rem -2.5rem 1.5rem -2.5rem;
-  padding: 1rem 2.5rem 0;
+  padding: 0.35rem 2.5rem 0;
 }
-.profile-mobile-content .apejobs-subnav__item { color: rgba(255,255,255,0.55); }
-.profile-mobile-content .apejobs-subnav__item:hover { color: var(--gold); }
-.profile-mobile-content .apejobs-subnav__item.is-active { color: var(--gold); }
 .apejobs-subnav__item {
   padding: 0.75rem 1.1rem;
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 0.88rem;
+  font-weight: 600;
   color: var(--text-3);
   text-decoration: none;
   border-bottom: 2px solid transparent;
@@ -3349,7 +3344,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   gap: 0.65rem;
   background: var(--bg-2);
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   padding: 0.6rem 0.9rem;
   margin-bottom: 0.25rem;
 }
@@ -6431,7 +6426,7 @@ body:has(.search-page--map) > main {
   gap: 0.2rem;
   background: var(--bg);
   border: 2px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
   cursor: grab;
   user-select: none;
@@ -8674,19 +8669,16 @@ body:has(.search-page--map) > main {
     background: var(--bg);
   }
   .user-dash-sidebar { display: none; }
-  .user-dash-main    { margin-left: 0; padding: 0 0 calc(9rem + env(safe-area-inset-bottom)); }
+  .user-dash-main    { margin-left: 0; padding: 0 0 calc(4.5rem + env(safe-area-inset-bottom)); }
 
-  /* Horizontal tab nav — fixed above the site-wide white bottom-nav */
+  /* Horizontal tab nav — sticky right below the top site header */
   .profile-mobile-nav {
     display: flex;
-    position: fixed;
-    bottom: calc(3.4rem + env(safe-area-inset-bottom));
-    left: 0;
-    right: 0;
-    z-index: 40;
+    position: sticky;
+    top: 72px;
+    z-index: 30;
     background: var(--bg-dark);
-    border-top: 1px solid rgba(255,255,255,0.07);
-    border-bottom: none;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
     overflow-x: auto;
     scrollbar-width: none;
     flex-shrink: 0;
@@ -8697,12 +8689,12 @@ body:has(.search-page--map) > main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.2rem;
-    padding: 0.7rem 0.9rem;
+    gap: 0.15rem;
+    padding: 0.45rem 0.7rem;
     flex: 1;
     min-width: max-content;
     color: rgba(255,255,255,0.45);
-    font-size: 0.7rem;
+    font-size: 1.05rem;
     font-weight: 700;
     letter-spacing: 0.01em;
     white-space: nowrap;
@@ -8715,13 +8707,31 @@ body:has(.search-page--map) > main {
     color: var(--gold);
     border-bottom-color: var(--gold);
   }
-  .profile-mobile-nav__icon { font-size: 1rem; line-height: 1; }
+  .profile-mobile-nav__icon { font-size: 0.85rem; line-height: 1; }
+
+  /* ApeJobs sub-nav must stick below the profile tab bar, not on top of it */
+  .profile-mobile-content .apejobs-subnav { top: calc(72px + 3.7rem); }
 
   /* Profile content area padding */
   .profile-mobile-content { padding: 1.25rem 1rem; }
 
   /* Fix dark background on mobile: profile pages use light bg */
   main:has(.user-dash-layout) { background: var(--bg); }
+
+  /* ApeJobs: dark theme on mobile only (desktop/tablet stay on the light
+     profile background) — bleed full-width so there's no white strip on
+     either side, and extend past the parent's bottom padding too */
+  .apejobs-page {
+    background: var(--bg-dark);
+    margin: 0 -1rem calc(-1.25rem - 4.5rem - env(safe-area-inset-bottom)) -1rem;
+    padding: 0 1rem calc(1.25rem + 4.5rem + env(safe-area-inset-bottom)) 1rem;
+  }
+  .apejobs-page h1,
+  .apejobs-page h2,
+  .apejobs-page .dash-overview__title { color: #fff; }
+  .apejobs-page .dash-overview__title-name { color: var(--gold); }
+  .apejobs-page .dash-overview__date { color: rgba(255,255,255,0.5); }
+  .apejobs-page .artist-preview-card__head h3 { color: var(--text); }
 
   /* BEES hero card: stack vertically on mobile */
   .bees-hero-card { grid-template-columns: 1fr; }

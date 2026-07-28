@@ -57,7 +57,7 @@ export default function ApeJobsOverviewPage() {
       <div className="dash-overview__header">
         <div>
           <p className="dash-overview__date">{todayLabel()}</p>
-          <h1 className="dash-overview__title">Bentornato, {firstName}</h1>
+          <h1 className="dash-overview__title">Bentornato, <span className="dash-overview__title-name">{firstName}</span></h1>
         </div>
         <Link href="/profile/apejobs/cerca-lavoro" className="clay-button clay-button--secondary dash-overview__cta">
           Cerca un lavoro
@@ -92,42 +92,25 @@ export default function ApeJobsOverviewPage() {
       </div>
 
       {/* Specchietto: prossimi lavori + recenti */}
-      <div className="artist-preview-grid">
-        <div className="artist-preview-card">
-          <div className="artist-preview-card__head">
-            <h3>Prossimi lavori</h3>
-            <Link href="/profile/apejobs/pagamenti">Vedi tutti →</Link>
-          </div>
-          {jobsUpcoming.length === 0 ? (
-            <p className="events-page__empty">Nessun lavoro in programma.</p>
-          ) : (
-            <div className="artist-job-list">
-              {jobsUpcoming.slice(0, 2).map((j) => <JobRow key={j.id} job={j} />)}
-            </div>
-          )}
+      <div className="artist-preview-card">
+        <div className="artist-preview-card__head">
+          <h3>Prossimi lavori</h3>
+          <Link href="/profile/apejobs/pagamenti">Vedi tutti →</Link>
         </div>
-        <div className="artist-preview-card">
-          <div className="artist-preview-card__head">
-            <h3>Recenti</h3>
-            <Link href="/profile/apejobs/pagamenti">Vedi tutti →</Link>
+        {jobsUpcoming.length === 0 ? (
+          <p className="events-page__empty">Nessun lavoro in programma.</p>
+        ) : (
+          <div className="artist-job-list">
+            {jobsUpcoming.slice(0, 2).map((j) => <JobRow key={j.id} job={j} />)}
           </div>
-          {jobsDone.length === 0 ? (
-            <p className="events-page__empty">Nessun lavoro completato finora.</p>
-          ) : (
-            <div className="artist-job-list">
-              {jobsDone.slice(0, 2).map((j) => <JobRow key={j.id} job={j} />)}
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Lavori più recenti */}
-      <div className="attivita-section">
-        <div className="attivita-section__head">
-          <h2>Lavori più recenti</h2>
-          <Link href="/profile/apejobs/pagamenti" className="attivita-badge attivita-badge--muted">
-            Vedi tutti →
-          </Link>
+      <div className="artist-preview-card">
+        <div className="artist-preview-card__head">
+          <h3>Lavori più recenti</h3>
+          <Link href="/profile/apejobs/pagamenti">Vedi tutti →</Link>
         </div>
         <div className="artist-job-list">
           {jobsDone.length === 0

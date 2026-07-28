@@ -12,7 +12,7 @@ const POSITIONS = ["DJ set", "Musicista live", "Performer", "Bartender flair", "
 const CITIES = ["Milano", "Roma", "Firenze", "Torino", "Napoli", "Bologna", "Venezia", "Genova", "Palermo", "Bari"];
 
 const SUB_NAV = [
-  { href: "/profile/apejobs",              label: "Panoramica" },
+  { href: "/profile/apejobs",              label: "Dashboard ApeJobs" },
   { href: "/profile/apejobs/cerca-lavoro", label: "Cerca lavoro" },
   { href: "/profile/apejobs/pagamenti",    label: "Pagamenti" },
 ];
@@ -138,7 +138,7 @@ export default function ApeJobsLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div>
+    <div className="apejobs-page">
       <div className="apejobs-subnav">
         {SUB_NAV.map((item) => {
           const active = item.href === "/profile/apejobs" ? pathname === item.href : pathname.startsWith(item.href);
