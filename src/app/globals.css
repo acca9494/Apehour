@@ -144,7 +144,12 @@ label {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes sheet-slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.events-page) { animation: page-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 /* ── HEADER ──────────────────────────────────────── */
 .site-header {
@@ -441,8 +446,10 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
 /* ── MOBILE CITY BAR ────────────────────────────── */
 .mobile-city-bar {
   display: none;
+  position: relative;
+  z-index: 1;
   border-top: 1px solid var(--border);
-  background: inherit;
+  background: #fff;
 }
 
 .mobile-city-bar__inner {
@@ -1018,18 +1025,20 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
 /* fix map white space on desktop */
 .search-page--map .search-page { min-height: unset; }
 
-/* ── RESULTS SHEET (Filtri button → restaurant list) */
+/* ── RESULTS SHEET (Filtri button → restaurant list) ── slides in from the right as a 90%-width side panel on mobile */
 .results-sheet {
   position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 1101;
+  top: 0; right: 0; bottom: 0; left: auto;
+  z-index: 1211;
   background: var(--bg);
-  border-radius: 0 0 1.25rem 1.25rem;
-  border-bottom: 1.5px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+  border-radius: 1.25rem 0 0 1.25rem;
+  border-left: 1.5px solid var(--border);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.16);
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
+  width: 90vw;
+  max-height: none;
+  animation: sheet-slide-in-right 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .results-sheet__handle { display: none; }
 .results-sheet__header {
@@ -1211,32 +1220,27 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 1100;
+  z-index: 1210;
   background: rgba(0,0,0,0.45);
 }
 
 .mobile-filter-sheet {
   display: none;
   position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 1101;
+  top: 0; right: 0; bottom: 0; left: auto;
+  z-index: 1211;
   background: #fff;
-  border-radius: 0 0 1.25rem 1.25rem;
-  border-bottom: 1.5px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+  border-radius: 1.25rem 0 0 1.25rem;
+  border-left: 1.5px solid var(--border);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.16);
   flex-direction: column;
-  max-height: 90vh;
+  width: 90vw;
+  max-height: none;
   overflow-y: auto;
+  animation: sheet-slide-in-right 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.mobile-filter-sheet__handle {
-  width: 2.5rem;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
-  margin: 0.75rem auto 0;
-  flex-shrink: 0;
-}
+.mobile-filter-sheet__handle { display: none; }
 
 .mobile-filter-sheet__header {
   display: flex;
@@ -2920,6 +2924,8 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   background: var(--bg);
 }
 
+.events-filtri-trigger { display: none; flex: 0 0 auto; width: auto; }
+
 .events-page__filters-sep {
   width: 1.5px;
   align-self: stretch;
@@ -3002,6 +3008,14 @@ main > *:not(.dashboard-layout):not(.user-dash-layout) { animation: page-in 320m
   background: var(--bg-3);
 }
 .events-page__grid { grid-template-columns: repeat(4, 1fr); }
+.events-page__category-group { margin-bottom: 3rem; }
+.events-page__category-group:last-child { margin-bottom: 0; }
+.events-page__category-heading {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.25rem;
+}
 .events-page__empty {
   text-align: center;
   padding: 4rem 1rem;
@@ -8490,6 +8504,26 @@ body:has(.search-page--map) > main {
   .menu-toggle        { display: none; }
   .bottom-nav { display: flex; }
   .mobile-city-bar    { display: block; }
+  .events-page__filters { display: flex; align-items: center; flex-wrap: nowrap; gap: 0.6rem; padding: 0.75rem 1rem; }
+  .events-page__filters-sep { display: none; }
+  .events-page__categories { display: none; }
+  .events-city-wrap { flex: 0 0 auto; min-width: 0; }
+  .events-city-btn {
+    width: auto;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 1.05rem;
+    font-weight: 700;
+    background: var(--bg-3);
+  }
+  .events-filtri-trigger {
+    display: flex;
+    flex: 1;
+    border-radius: var(--radius);
+    padding: 0.7rem 0.9rem;
+  }
+  .events-filtri-trigger .mobile-search-btn__filtri-label { font-size: 0.75rem; }
+  .events-filtri-trigger .mobile-search-btn__filtri-count { font-size: 0.75rem; }
   .home-hero          { display: none; }
   /* Push chat above bottom nav */
   .gchat { bottom: calc(4rem + env(safe-area-inset-bottom) + 0.75rem); right: 0.75rem; }
@@ -8694,8 +8728,8 @@ body:has(.search-page--map) > main {
     flex: 1;
     min-width: max-content;
     color: rgba(255,255,255,0.45);
-    font-size: 1.05rem;
-    font-weight: 700;
+    font-size: 0.78rem;
+    font-weight: 600;
     letter-spacing: 0.01em;
     white-space: nowrap;
     border-bottom: 2px solid transparent;
@@ -8707,7 +8741,7 @@ body:has(.search-page--map) > main {
     color: var(--gold);
     border-bottom-color: var(--gold);
   }
-  .profile-mobile-nav__icon { font-size: 0.85rem; line-height: 1; }
+  .profile-mobile-nav__icon { font-size: 0.72rem; line-height: 1; }
 
   /* ApeJobs sub-nav must stick below the profile tab bar, not on top of it */
   .profile-mobile-content .apejobs-subnav { top: calc(72px + 3.7rem); }

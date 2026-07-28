@@ -237,7 +237,10 @@ export function SiteHeader() {
     pathname.startsWith("/profile") ||
     pathname === "/register" ||
     pathname === "/login" ||
-    pathname === "/come-funziona";
+    pathname === "/come-funziona" ||
+    pathname.startsWith("/offers") ||
+    pathname.startsWith("/events") ||
+    pathname.startsWith("/attivita");
 
   if (pathname.startsWith("/dashboard")) return null;
 

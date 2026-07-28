@@ -19,7 +19,7 @@ export const T = {
       logout:   "Esci",
       hasVenue: "Hai un Locale?",
       faq:      "FAQ",
-      searchPlaceholder: "Cerca bar, tipo di aperitivo...",
+      searchPlaceholder: "Cerca aperitivi vicino a te",
       filters:  "Filtri",
     },
     merchantBar: {
