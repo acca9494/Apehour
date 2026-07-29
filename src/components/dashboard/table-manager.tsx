@@ -78,19 +78,27 @@ function EditPanel({
             required
           />
         </label>
-        <label>
-          Capienza
-          <input
-            type="number"
-            value={form.capacity}
-            min={1}
-            max={50}
-            onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
-          />
-        </label>
+        {form.zone !== "Bancone" && (
+          <label>
+            Capienza
+            <input
+              type="number"
+              value={form.capacity}
+              min={1}
+              max={50}
+              onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
+            />
+          </label>
+        )}
         <label>
           Zona
-          <select value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })}>
+          <select
+            value={form.zone}
+            onChange={(e) => {
+              const zone = e.target.value;
+              setForm({ ...form, zone, capacity: zone === "Bancone" ? 1 : form.capacity });
+            }}
+          >
             {zones.map((z) => <option key={z} value={z}>{z}</option>)}
           </select>
         </label>
@@ -191,10 +199,12 @@ export function TableManager() {
 
   function handleAdd(zone?: string) {
     const spot = nextFreeSpot();
+    const finalZone = zone ?? zones[0] ?? EMPTY_TABLE.zone;
     const newTable: MerchantTable = {
       id: generateId(),
       ...EMPTY_TABLE,
-      zone: zone ?? zones[0] ?? EMPTY_TABLE.zone,
+      zone: finalZone,
+      capacity: finalZone === "Bancone" ? 1 : EMPTY_TABLE.capacity,
       x: spot.x,
       y: spot.y,
     };
@@ -361,7 +371,9 @@ export function TableManager() {
               onClick={() => setEditingId(table.id)}
             >
               <span className="floor-table__name">{table.name}</span>
-              <span className="floor-table__capacity">{table.capacity} 👤</span>
+              {table.zone !== "Bancone" && (
+                <span className="floor-table__capacity">{table.capacity} 👤</span>
+              )}
               <div
                 className="floor-table__resize"
                 onPointerDown={(e) => handleResizeDown(e, table)}

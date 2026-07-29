@@ -9,7 +9,7 @@ import { hasArtistProfile, saveArtistProfile } from "@/lib/artist/store";
 import { cn } from "@/lib/utils";
 
 const POSITIONS = ["DJ set", "Musicista live", "Performer", "Bartender flair", "Cameriere/a", "Barista", "Altro"];
-const CITIES = ["Milano", "Roma", "Firenze", "Torino", "Napoli", "Bologna", "Venezia", "Genova", "Palermo", "Bari"];
+const CITIES = ["Roma", "Ostia", "Fregene", "Ladispoli"];
 
 const SUB_NAV = [
   { href: "/profile/apejobs",              label: "Dashboard ApeJobs" },

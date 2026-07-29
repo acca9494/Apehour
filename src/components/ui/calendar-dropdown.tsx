@@ -10,9 +10,13 @@ type Props = {
   value: string;
   onChange: (v: string) => void;
   compact?: boolean;
+  /** Range mode: pass both to let the user pick a start+end day on one calendar, à la Airbnb. */
+  rangeEnd?: string;
+  onRangeEndChange?: (v: string) => void;
 };
 
-export function CalendarDropdown({ value, onChange, compact = false }: Props) {
+export function CalendarDropdown({ value, onChange, compact = false, rangeEnd, onRangeEndChange }: Props) {
+  const isRangeMode = onRangeEndChange !== undefined;
   const todayDate = new Date();
   todayDate.setHours(0, 0, 0, 0);
 
@@ -51,7 +55,34 @@ export function CalendarDropdown({ value, onChange, compact = false }: Props) {
     return viewYear === todayDate.getFullYear() && viewMonth === todayDate.getMonth() && day === todayDate.getDate();
   }
   function isSelected(day: number) {
+    if (isRangeMode) return value === toISO(day) || rangeEnd === toISO(day);
     return value === toISO(day);
+  }
+  function isInRange(day: number) {
+    if (!isRangeMode || !value || !rangeEnd) return false;
+    const iso = toISO(day);
+    return iso > value && iso < rangeEnd;
+  }
+
+  function handleDayClick(day: number) {
+    const iso = toISO(day);
+    if (!isRangeMode) {
+      onChange(iso);
+      setOpen(false);
+      return;
+    }
+    if (!value || (value && rangeEnd)) {
+      // Start a fresh selection
+      onChange(iso);
+      onRangeEndChange!("");
+    } else if (iso < value) {
+      // Picked a day before the current start — treat it as the new start
+      onChange(iso);
+      onRangeEndChange!("");
+    } else {
+      onRangeEndChange!(iso);
+      setOpen(false);
+    }
   }
 
   const daysInMonth  = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -61,9 +92,13 @@ export function CalendarDropdown({ value, onChange, compact = false }: Props) {
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
-  const displayValue = value
-    ? new Date(value + "T00:00:00").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" })
-    : "Seleziona data";
+  function formatShort(iso: string) {
+    return new Date(iso + "T00:00:00").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
+  }
+
+  const displayValue = isRangeMode
+    ? (value && rangeEnd ? `${formatShort(value)} → ${formatShort(rangeEnd)}` : value ? formatShort(value) : "Seleziona date")
+    : (value ? formatShort(value) : "Seleziona data");
 
   const hasValue = Boolean(value);
 
@@ -90,15 +125,15 @@ export function CalendarDropdown({ value, onChange, compact = false }: Props) {
             <button
               type="button"
               className="filter-cal__clear"
-              onClick={() => onChange("")}
+              onClick={() => { onChange(""); onRangeEndChange?.(""); }}
               aria-label="Rimuovi data"
             >✕</button>
           )}
         </div>
         {open && <CalendarPopup
-          cells={cells} isPast={isPast} isToday={isToday} isSelected={isSelected}
+          cells={cells} isPast={isPast} isToday={isToday} isSelected={isSelected} isInRange={isInRange}
           viewMonth={viewMonth} viewYear={viewYear} prevMonth={prevMonth} nextMonth={nextMonth}
-          toISO={toISO} onChange={onChange} setOpen={setOpen}
+          onDayClick={handleDayClick} onChange={onChange} setOpen={setOpen}
         />}
       </div>
     );
@@ -132,9 +167,9 @@ export function CalendarDropdown({ value, onChange, compact = false }: Props) {
         </svg>
       </span>
       {open && <CalendarPopup
-        cells={cells} isPast={isPast} isToday={isToday} isSelected={isSelected}
+        cells={cells} isPast={isPast} isToday={isToday} isSelected={isSelected} isInRange={isInRange}
         viewMonth={viewMonth} viewYear={viewYear} prevMonth={prevMonth} nextMonth={nextMonth}
-        toISO={toISO} onChange={onChange} setOpen={setOpen}
+        onDayClick={handleDayClick} onChange={onChange} setOpen={setOpen}
         onClick={(e) => e.stopPropagation()}
       />}
     </div>
@@ -146,17 +181,18 @@ type PopupProps = {
   isPast: (d: number) => boolean;
   isToday: (d: number) => boolean;
   isSelected: (d: number) => boolean;
+  isInRange: (d: number) => boolean;
   viewMonth: number;
   viewYear: number;
   prevMonth: () => void;
   nextMonth: () => void;
-  toISO: (d: number) => string;
+  onDayClick: (d: number) => void;
   onChange: (v: string) => void;
   setOpen: (v: boolean) => void;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 };
 
-function CalendarPopup({ cells, isPast, isToday, isSelected, viewMonth, viewYear, prevMonth, nextMonth, toISO, onChange, setOpen, onClick }: PopupProps) {
+function CalendarPopup({ cells, isPast, isToday, isSelected, isInRange, viewMonth, viewYear, prevMonth, nextMonth, onDayClick, onChange, setOpen, onClick }: PopupProps) {
   return (
     <div className="hscal" role="dialog" aria-label="Seleziona data" onClick={onClick}>
       <div className="hscal__header">
@@ -191,8 +227,9 @@ function CalendarPopup({ cells, isPast, isToday, isSelected, viewMonth, viewYear
                 isPast(day)     ? "hscal__day--past"     : "",
                 isToday(day)    ? "hscal__day--today"    : "",
                 isSelected(day) ? "hscal__day--selected" : "",
+                isInRange(day)  ? "hscal__day--in-range"  : "",
               ].filter(Boolean).join(" ")}
-              onClick={() => { onChange(toISO(day)); setOpen(false); }}
+              onClick={() => onDayClick(day)}
             >
               {day}
             </button>

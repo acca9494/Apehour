@@ -47,7 +47,13 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-export function BookingPanel({ restaurant, initialSlot }: { restaurant: Restaurant; initialSlot?: string }) {
+export function BookingPanel({
+  restaurant,
+  initialSlot,
+}: {
+  restaurant: Restaurant;
+  initialSlot?: string;
+}) {
   const { user } = useAuth();
 
   // Scroll to this panel when a slot was pre-selected from a card

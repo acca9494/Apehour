@@ -11,8 +11,8 @@ export function ApeCardLink({ priceRange, children }: Props) {
   const router = useRouter();
 
   function handleClick() {
-    let city = "Milano";
-    try { city = localStorage.getItem("apehour_city") ?? "Milano"; } catch {}
+    let city = "Roma";
+    try { city = localStorage.getItem("apehour_city") ?? "Roma"; } catch {}
     router.push(`/search?priceRange=${priceRange}&view=map&city=${encodeURIComponent(city)}`);
   }
 

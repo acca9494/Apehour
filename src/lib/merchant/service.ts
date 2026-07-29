@@ -7,13 +7,17 @@ import {
   getAvailability,
   getTables,
   getVenueSettings,
+  getOffers,
   saveAvailability,
   saveTables,
   saveVenueSettings,
   upsertTable,
+  upsertOffer,
   deleteTable as storeDeleteTable,
+  deleteOffer as storeDeleteOffer,
   type DayConfig,
   type MerchantTable,
+  type MerchantOffer,
   type VenueSettings,
 } from "./store";
 
@@ -55,6 +59,24 @@ export async function fetchAvailability(userId: string): Promise<DayConfig[]> {
 export async function updateAvailability(config: DayConfig[], userId: string): Promise<void> {
   await simulateLatency(250);
   saveAvailability(config, userId);
+}
+
+// ── Offerte ───────────────────────────────────────────────────────────────────
+// Supabase: SELECT * FROM promotions WHERE restaurant_id = $1
+
+export async function fetchOffers(userId: string): Promise<MerchantOffer[]> {
+  await simulateLatency(150);
+  return getOffers(userId);
+}
+
+export async function saveOffer(offer: MerchantOffer, userId: string): Promise<void> {
+  await simulateLatency(200);
+  upsertOffer(offer, userId);
+}
+
+export async function removeOffer(id: string, userId: string): Promise<void> {
+  await simulateLatency(150);
+  storeDeleteOffer(id, userId);
 }
 
 // ── Impostazioni locale ───────────────────────────────────────────────────────

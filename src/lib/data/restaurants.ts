@@ -174,7 +174,7 @@ export const restaurants: Restaurant[] = [
     neighborhood: "Prati",
     address: "Via Cola di Rienzo 114, Roma",
     heroImage:
-      "https://images.unsplash.com/photo-1564759298141-cef5ca4a5c38?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1600&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=1200&q=80",

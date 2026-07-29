@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ClayLink } from "@/components/ui/clay-button";
 import { useAuth } from "@/lib/auth/context";
@@ -28,7 +28,7 @@ const NAV_HREFS = [
   { href: "/apejobs",       key: "forArtists"  as const },
 ];
 
-const CITIES_MOBILE = ["Milano", "Roma", "Firenze", "Venezia", "Napoli", "Torino", "Bologna"];
+const CITIES_MOBILE = ["Tutto il Lazio", "Roma", "Ostia", "Fregene", "Ladispoli"];
 
 function PinIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -108,7 +108,7 @@ function FlagGB(props: SVGProps<SVGSVGElement>) {
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [bees, setBees] = useState(0);
-  const [mobileCity, setMobileCity] = useState("Milano");
+  const [mobileCity, setMobileCity] = useState("Roma");
   const { lang, setLang, t } = useLang();
 
   function toggleLang() {
@@ -223,10 +223,12 @@ export function SiteHeader() {
     router.push("/");
   }
 
+  const cityFilter = mobileCity === "Tutto il Lazio" ? "" : mobileCity;
+
   function handleSearchSubmit() {
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
-    params.set("city", mobileCity);
+    if (cityFilter) params.set("city", cityFilter);
     router.push(`/search?${params.toString()}`);
     setSearchOverlay(false);
   }
@@ -250,7 +252,7 @@ export function SiteHeader() {
         <div className={cn("site-header__inner", isHome && "site-header__inner--home")}>
           <Link className="brand" href="/" aria-label="ApeTable home">
             <span className="brand__mark" aria-hidden="true">
-              <Image src="/apeapplogo1.png" alt="" width={200} height={200} className="brand__logo-img" />
+              <Image src="/apeapplogo1.png" alt="" width={200} height={200} className="brand__logo-img" priority />
             </span>
             <span className="brand__text">
               Ape<span className="brand__text-accent">Hour</span>
@@ -388,7 +390,7 @@ export function SiteHeader() {
                 aria-expanded={cityDropdown}
               >
                 <PinIcon className="mobile-city-btn__icon" aria-hidden="true" />
-                <span>{mobileCity}, Italia</span>
+                <span>{mobileCity === "Tutto il Lazio" ? mobileCity : `${mobileCity}, Italia`}</span>
                 <ChevronDownIcon
                   className={cn("mobile-city-btn__chevron", cityDropdown && "mobile-city-btn__chevron--up")}
                   aria-hidden="true"
@@ -402,12 +404,14 @@ export function SiteHeader() {
                         type="button"
                         className={cn("mobile-city-dropdown__item", c === mobileCity && "is-active")}
                         onClick={() => {
+                          const cParam = c === "Tutto il Lazio" ? "" : c;
                           setMobileCity(c);
-                          try { localStorage.setItem("apehour_city", c); } catch {}
+                          try { localStorage.setItem("apehour_city", cParam); } catch {}
                           setCityDropdown(false);
                           if (pathname === "/search") {
                             const params = new URLSearchParams(window.location.search);
-                            params.set("city", c);
+                            if (cParam) params.set("city", cParam);
+                            else params.delete("city");
                             router.push(`/search?${params.toString()}`);
                           }
                         }}
@@ -484,27 +488,27 @@ export function SiteHeader() {
           <button
             className="mobile-search-overlay__locations"
             type="button"
-            onClick={() => { setSearchOverlay(false); router.push(`/search?view=map&city=${encodeURIComponent(mobileCity)}`); }}
+            onClick={() => { setSearchOverlay(false); router.push(`/search?view=map${cityFilter ? `&city=${encodeURIComponent(cityFilter)}` : ""}`); }}
           >
             <span className="mobile-search-overlay__locations-icon">
               <MapIcon aria-hidden="true" />
             </span>
             <span className="mobile-search-overlay__locations-text">
               <strong>Tutti i locali</strong>
-              <span>{mobileCity}, Italia</span>
+              <span>{mobileCity === "Tutto il Lazio" ? mobileCity : `${mobileCity}, Italia`}</span>
             </span>
             <ChevronRightIcon className="mobile-search-overlay__locations-arrow" aria-hidden="true" />
           </button>
 
           <div className="mobile-search-overlay__recents">
             <p className="mobile-search-overlay__recents-title">Ricerche recenti</p>
-            {["Aperitivo Milano", "Cocktail bar Roma", "Spritz Venezia"].map((q) => (
+            {["Aperitivo Roma", "Cocktail bar Ostia", "Spritz Fregene"].map((q) => (
               <button
                 key={q}
                 className="mobile-search-overlay__recent-item"
                 type="button"
                 onClick={() => {
-                  router.push(`/search?q=${encodeURIComponent(q)}&city=${mobileCity}`);
+                  router.push(`/search?q=${encodeURIComponent(q)}${cityFilter ? `&city=${encodeURIComponent(cityFilter)}` : ""}`);
                   setSearchOverlay(false);
                 }}
               >
@@ -533,7 +537,7 @@ export function SiteHeader() {
               <SearchIcon className="mobile-map-overlay__search-icon" aria-hidden="true" />
               <div className="mobile-map-overlay__search-text">
                 <strong>Tutti i locali</strong>
-                <span>{mobileCity}, Italia</span>
+                <span>{mobileCity === "Tutto il Lazio" ? mobileCity : `${mobileCity}, Italia`}</span>
               </div>
             </div>
           </div>
@@ -619,9 +623,9 @@ export function SiteHeader() {
                 <div className="mobile-map-filter-panel__budget">
                   {([
                     { value: "" as const,     label: "Tutti",        budget: "",    imgSrc: "" },
-                    { value: "$$" as const,   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa.png" },
-                    { value: "$$$" as const,  label: "Ape Plus",     budget: "€€",  imgSrc: "/plus.png" },
-                    { value: "$$$$" as const, label: "Bombo Queen",  budget: "€€€", imgSrc: "/bombo.png" },
+                    { value: "$$" as const,   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa-v2.png" },
+                    { value: "$$$" as const,  label: "Ape Plus",     budget: "€€",  imgSrc: "/plus-v2.png" },
+                    { value: "$$$$" as const, label: "Bombo Queen",  budget: "€€€", imgSrc: "/bombo-v2.png" },
                   ]).map((opt) => (
                     <button
                       key={opt.value || "all"}
@@ -668,7 +672,7 @@ export function SiteHeader() {
           )}
           <div className="mobile-map-overlay__map">
             <iframe
-              src={`https://maps.google.com/maps?q=aperitivo+bar+${encodeURIComponent(mobileCity)}&output=embed&z=14`}
+              src={`https://maps.google.com/maps?q=aperitivo+bar+${encodeURIComponent(cityFilter || "Lazio")}&output=embed&z=14`}
               title="Mappa locali"
               className="mobile-map-overlay__iframe"
               loading="lazy"
@@ -681,7 +685,7 @@ export function SiteHeader() {
                 className="search-view-pill__btn"
                 onClick={() => {
                   setMapOpen(false);
-                  router.push(`/search?city=${encodeURIComponent(mobileCity)}${mapBudget ? `&priceRange=${mapBudget}` : ""}`);
+                  router.push(`/search?${[cityFilter && `city=${encodeURIComponent(cityFilter)}`, mapBudget && `priceRange=${mapBudget}`].filter(Boolean).join("&")}`);
                 }}
               >
                 Lista
@@ -743,9 +747,16 @@ export function SiteHeader() {
               );
             }
             return (
-              <Link key={item.href} href={item.href} onClick={close}>
-                {label}
-              </Link>
+              <Fragment key={item.href}>
+                <Link href={item.href} onClick={close}>
+                  {label}
+                </Link>
+                {item.key === "activities" && (
+                  <Link href="/offers" onClick={close}>
+                    Offerte
+                  </Link>
+                )}
+              </Fragment>
             );
           })}
           {isMerchant && (

@@ -57,9 +57,9 @@ const HOME_EVENTS = EVENTS.filter((e) =>
 );
 
 const APE_IMG: Record<string, string> = {
-  "vespa-sprint": "/vespa.png",
-  "ape-plus":     "/plus.png",
-  "bombo-queen":  "/bombo.png",
+  "vespa-sprint": "/vespa-v2.png",
+  "ape-plus":     "/plus-v2.png",
+  "bombo-queen":  "/bombo-v2.png",
 };
 const APE_BUDGET: Record<string, string> = {
   "vespa-sprint": "€",
@@ -94,9 +94,11 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
             {promotion.apeType && (
               <ApeCardLink priceRange={APE_PRICE_RANGE[promotion.apeType]}>
                 <span className="offer-card__ape-name">{APE_LABEL[promotion.apeType]}</span>
-                <span className="offer-card__ape-budget">{APE_BUDGET[promotion.apeType]}</span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={APE_IMG[promotion.apeType]} alt={APE_LABEL[promotion.apeType]} className="offer-card__ape-img" />
+                <span className={`offer-card__ape-budget offer-card__ape-budget--${promotion.apeType}`}>{APE_BUDGET[promotion.apeType]}</span>
+                <div className="offer-card__ape-img-slot">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={APE_IMG[promotion.apeType]} alt={APE_LABEL[promotion.apeType]} className={`offer-card__ape-img offer-card__ape-img--${promotion.apeType}`} />
+                </div>
               </ApeCardLink>
             )}
             <Link className="offer-card__desktop" href={`/restaurants/${promotion.restaurantSlug}`}>
@@ -108,9 +110,10 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
           </div>
         ))}
       </div>
-      <div className="section-cta">
+      <div className="section-cta section-cta--desktop">
         <ClayLink href="/offers" variant="secondary">Tutte le offerte</ClayLink>
       </div>
+      <Link href="/offers" className="section-cta-link section-cta-link--mobile">Dai un&apos;occhiata alle nostre offerte →</Link>
     </section>
   );
 }

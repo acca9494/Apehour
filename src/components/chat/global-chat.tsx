@@ -41,8 +41,8 @@ const HIDDEN_PATHS = ["/register", "/login", "/come-funziona"];
 export function GlobalChat() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const hidden = HIDDEN_PATHS.includes(pathname) || pathname.startsWith("/profile") || pathname.startsWith("/dashboard");
 
-  if (HIDDEN_PATHS.includes(pathname) || pathname.startsWith("/profile") || pathname.startsWith("/dashboard")) return null;
   const [open, setOpen]         = useState(false);
   const [city, setCity]         = useState<ChatCity>("Milano");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -109,6 +109,8 @@ export function GlobalChat() {
   }
 
   const cities = CHAT_CITIES.filter((c) => c !== "Tutte");
+
+  if (hidden) return null;
 
   return (
     <div className="gchat">

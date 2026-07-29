@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { fetchVenueSettings, updateVenueSettings } from "@/lib/merchant/service";
 import type { VenueSettings } from "@/lib/merchant/store";
 import { useAuth } from "@/lib/auth/context";
+import { ImageUploadField } from "@/components/ui/image-upload-field";
 
 type Tab = "locale" | "caparra" | "contatti";
 
@@ -93,23 +94,13 @@ export function VenueSettingsPanel() {
               />
             </label>
 
-            <label className="settings-form__full">
-              Immagine hero (URL)
-              <input
-                type="url"
+            <div className="settings-form__full">
+              <ImageUploadField
+                label="Immagine hero"
                 value={settings.heroImage}
-                onChange={(e) => patch("heroImage", e.target.value)}
-                placeholder="https://..."
+                onChange={(dataUrl) => patch("heroImage", dataUrl)}
               />
-            </label>
-
-            {settings.heroImage && (
-              <div className="settings-hero-preview">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={settings.heroImage} alt="Hero preview" />
-                <span>Anteprima immagine hero</span>
-              </div>
-            )}
+            </div>
 
             <label>
               Indirizzo

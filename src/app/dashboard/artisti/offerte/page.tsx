@@ -7,7 +7,7 @@ import { getApplications, type JobApplication } from "@/lib/artist/applications"
 import { getAllAreaJobs, postAreaJob, type PostedAreaJob } from "@/lib/jobs/area-jobs-store";
 import { getAllAvailableArtists } from "@/lib/jobs/artist-listings-store";
 
-const CITIES = ["Tutte", "Milano", "Roma", "Firenze", "Torino", "Napoli", "Bologna", "Venezia"];
+const CITIES = ["Tutte", "Roma", "Ostia", "Fregene", "Ladispoli"];
 const CATEGORIES = ["DJ set", "Musicista live", "Performer", "Bartender flair"];
 
 function StarRating({ value }: { value: number }) {
@@ -126,10 +126,10 @@ export default function OfferteLavoroPage() {
         </form>
       )}
 
-      {/* I tuoi eventi */}
+      {/* Le mie offerte */}
       <div className="attivita-section">
         <div className="attivita-section__head">
-          <h2>I tuoi eventi</h2>
+          <h2>Le mie offerte</h2>
           <span className="attivita-badge attivita-badge--green">{myEvents.length} in programma</span>
         </div>
         {myEvents.length === 0 ? (

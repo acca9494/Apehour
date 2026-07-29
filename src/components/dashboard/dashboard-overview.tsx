@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth/context";
 import { ClayLink } from "@/components/ui/clay-button";
 import { fetchMerchantBookings, updateStatus } from "@/lib/bookings/service";
-import { fetchMerchantStats, type MerchantStats } from "@/lib/merchant/service";
+import { fetchMerchantStats, fetchOffers, type MerchantStats } from "@/lib/merchant/service";
+import { getMerchantEvents } from "@/lib/events/merchant-events-store";
 import type { MerchantBookingView } from "@/lib/bookings/types";
 
 const MERCHANT_RESTAURANT_IDS = ["rst-001"];
@@ -42,6 +43,8 @@ export function DashboardOverview() {
   const [recent, setRecent] = useState<MerchantBookingView[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [offersCount, setOffersCount] = useState(0);
+  const [eventsCount, setEventsCount] = useState(0);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -66,6 +69,12 @@ export function DashboardOverview() {
     load();
     return () => { cancelled = true; };
   }, [today]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchOffers(user.id).then((o) => setOffersCount(o.length));
+    setEventsCount(getMerchantEvents(user.id).length);
+  }, [user]);
 
   async function handleAction(bookingId: string, action: "confirmed" | "cancelled") {
     setActionId(bookingId);
@@ -234,6 +243,38 @@ export function DashboardOverview() {
             </tbody>
           </table>
         )}
+      </div>
+
+      {/* ── Offerte attive ──────────────────────────── */}
+      <div className="dash-card">
+        <div className="dash-card__header">
+          <div>
+            <h2>Offerte attive</h2>
+            <p>Sconti e promozioni pubblicati sul sito</p>
+          </div>
+        </div>
+        <div style={{ padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span className="dash-empty" style={{ padding: 0, margin: 0 }}>
+            {offersCount === 0 ? "Nessuna offerta pubblicata." : `${offersCount} ${offersCount === 1 ? "offerta attiva" : "offerte attive"}.`}
+          </span>
+          <Link href="/dashboard/offerte" className="dash-view-all">Le mie offerte →</Link>
+        </div>
+      </div>
+
+      {/* ── Eventi attivi ────────────────────────────── */}
+      <div className="dash-card">
+        <div className="dash-card__header">
+          <div>
+            <h2>Eventi attivi</h2>
+            <p>Eventi pubblicati sul sito</p>
+          </div>
+        </div>
+        <div style={{ padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span className="dash-empty" style={{ padding: 0, margin: 0 }}>
+            {eventsCount === 0 ? "Nessun evento pubblicato." : `${eventsCount} ${eventsCount === 1 ? "evento attivo" : "eventi attivi"}.`}
+          </span>
+          <Link href="/dashboard/eventi" className="dash-view-all">I miei eventi →</Link>
+        </div>
       </div>
 
       {/* ── Quick actions ───────────────────────────── */}

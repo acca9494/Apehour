@@ -1,32 +1,42 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getEventBySlug } from "@/lib/data/events";
+import { useParams } from "next/navigation";
+import { getEventBySlug, type EventItem } from "@/lib/data/events";
+import { getMerchantEventBySlug } from "@/lib/events/merchant-events-store";
 import { restaurants } from "@/lib/data/restaurants";
-import { BookingPanel } from "@/components/booking/booking-panel";
+import { TicketPurchaseForm } from "@/components/booking/ticket-purchase-form";
 
-type Props = { params: Promise<{ slug: string }> };
+export default function EventDetailPage() {
+  const params = useParams<{ slug: string }>();
+  const [event, setEvent] = useState<EventItem | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const event = getEventBySlug(slug);
-  if (!event) return { title: "Evento non trovato" };
-  return {
-    title: `${event.title} — ApeHour`,
-    description: event.description,
-  };
-}
+  useEffect(() => {
+    const slug = params.slug;
+    const staticEvent = getEventBySlug(slug);
+    setEvent(staticEvent ?? getMerchantEventBySlug(slug));
+    setLoading(false);
+  }, [params.slug]);
 
-export async function generateStaticParams() {
-  const { EVENTS } = await import("@/lib/data/events");
-  return EVENTS.map((e) => ({ slug: e.slug }));
-}
+  if (loading) return null;
 
-export default async function EventDetailPage({ params }: Props) {
-  const { slug } = await params;
-  const event = getEventBySlug(slug);
-  if (!event) notFound();
+  if (!event) {
+    return (
+      <div className="event-detail">
+        <div className="event-detail__body" style={{ paddingTop: "3rem" }}>
+          <div className="dash-empty">
+            <p>Evento non trovato.</p>
+            <div style={{ marginTop: "0.75rem" }}>
+              <Link href="/events" className="clay-button clay-button--primary">← Tutti gli eventi</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const restaurant = restaurants.find((r) => r.slug === event.restaurantSlug);
 
@@ -35,6 +45,11 @@ export default async function EventDetailPage({ params }: Props) {
 
       {/* ── Hero ── */}
       <div className="event-detail__hero">
+        <Link href="/events" className="detail-back-btn" aria-label="Torna agli eventi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </Link>
         <Image
           src={event.image}
           alt={event.title}
@@ -116,13 +131,11 @@ export default async function EventDetailPage({ params }: Props) {
           </section>
         )}
 
-        {/* ── Booking ── */}
-        {restaurant && (
-          <section className="event-detail__section" id="prenota">
-            <h2>Prenota</h2>
-            <BookingPanel restaurant={restaurant} />
-          </section>
-        )}
+        {/* ── Biglietti ── */}
+        <section className="event-detail__section" id="biglietti">
+          <h2>Biglietti</h2>
+          <TicketPurchaseForm event={event} />
+        </section>
 
         {/* ── Back link ── */}
         <div className="event-detail__cta">

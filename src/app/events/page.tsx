@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { EVENTS } from "@/lib/data/events";
+import { getAllMerchantEvents, type MerchantEvent } from "@/lib/events/merchant-events-store";
 
 const CATEGORIES = [
   "Festival", "Musica Live", "DJ Set", "Degustazione", "Speciale", "Cocktail",
   "Aperitivo", "Karaoke", "Quiz Night", "Silent Disco", "Stand-up Comedy", "Vinyl Night", "Workshop",
 ];
-const CITIES = ["Tutte le città", "Milano", "Roma", "Firenze", "Venezia", "Napoli", "Torino", "Bologna"];
+const CITIES = ["Tutte le città", "Roma", "Ostia", "Fregene", "Ladispoli"];
 
 function PinIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -37,6 +38,7 @@ export default function EventsPage() {
   const [activeCity, setActiveCity] = useState("Tutte le città");
   const [cityDropdown, setCityDropdown] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [merchantEvents, setMerchantEvents] = useState<MerchantEvent[]>([]);
   const cityRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,7 +46,10 @@ export default function EventsPage() {
       const saved = localStorage.getItem("apehour_city");
       if (saved && CITIES.includes(saved)) setActiveCity(saved);
     } catch {}
+    setMerchantEvents(getAllMerchantEvents());
   }, []);
+
+  const allEvents = [...EVENTS, ...merchantEvents];
 
   useEffect(() => {
     if (!cityDropdown) return;
@@ -57,7 +62,7 @@ export default function EventsPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, [cityDropdown]);
 
-  const filtered = EVENTS.filter((e) => {
+  const filtered = allEvents.filter((e) => {
     const matchesCategory = activeCategories.length === 0 || activeCategories.includes(e.category);
     const matchesCity = activeCity === "Tutte le città" || e.location.split(",")[0]?.trim() === activeCity;
     return matchesCategory && matchesCity;

@@ -1,6 +1,8 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Restaurant } from "@/lib/types";
 import { formatReviewCount } from "@/lib/utils";
+import { FavoriteHeartButton } from "@/components/favorites/favorite-heart-button";
 
 function Stars({ rating }: { rating: number }) {
   const full = Math.floor(rating);
@@ -22,6 +24,13 @@ function Stars({ rating }: { rating: number }) {
 export function DetailHero({ restaurant }: { restaurant: Restaurant }) {
   return (
     <div className="detail-hero">
+      <Link href="/search" className="detail-back-btn" aria-label="Torna alla ricerca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </Link>
+      <FavoriteHeartButton restaurantSlug={restaurant.slug} />
+
       {/* Background image */}
       <div className="detail-hero__img">
         <Image
@@ -92,11 +101,17 @@ export function DetailHero({ restaurant }: { restaurant: Restaurant }) {
         </div>
       </div>
 
-      {/* Type badges — bottom right */}
+      {/* Type badge — bottom right, only the one matching this venue's price tier */}
       <div className="detail-hero__type-badges">
-        <img src="/bombo.png" alt="Bombo Queen" className="detail-hero__type-badge" />
-        <img src="/vespa.png" alt="Vespa Sprint" className="detail-hero__type-badge" />
-        <img src="/plus.png"  alt="Ape Plus"    className="detail-hero__type-badge" />
+        {restaurant.priceRange === "$$" && (
+          <img src="/vespa-v2.png" alt="Vespa Sprint" className="detail-hero__type-badge" />
+        )}
+        {restaurant.priceRange === "$$$" && (
+          <img src="/plus-v2.png" alt="Ape Plus" className="detail-hero__type-badge" />
+        )}
+        {restaurant.priceRange === "$$$$" && (
+          <img src="/bombo-v2.png" alt="Bombo Queen" className="detail-hero__type-badge" />
+        )}
       </div>
     </div>
   );

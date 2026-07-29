@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { addBees } from "@/lib/bees/store";
@@ -70,6 +71,12 @@ export function ActivitiesBrowser() {
 
   return (
     <div className="attivita-dash">
+
+      <Link href="/" className="detail-back-btn detail-back-btn--static" aria-label="Torna alla home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </Link>
 
       {/* Header */}
       <div className="attivita-dash__header">

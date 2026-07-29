@@ -42,6 +42,16 @@ export interface DepositSettings {
   policy: string;
 }
 
+export type ApeType = "vespa-sprint" | "ape-plus" | "bombo-queen";
+
+export interface MerchantOffer {
+  id: string;
+  title: string;
+  description: string;
+  discount: number;
+  apeType?: ApeType;
+}
+
 export interface VenueSettings {
   restaurantId: string;
   name: string;
@@ -62,21 +72,13 @@ function tablesKey(uid: string)       { return `appape_merchant_tables_${uid}`; 
 function availabilityKey(uid: string) { return `appape_merchant_availability_${uid}`; }
 function settingsKey(uid: string)     { return `appape_merchant_settings_${uid}`; }
 function zonesKey(uid: string)        { return `appape_merchant_zones_${uid}`; }
+function offersKey(uid: string)       { return `appape_merchant_offers_${uid}`; }
 
-const DEFAULT_ZONES = ["Interno", "Terrazza", "Bancone", "Esterno", "Privato"];
+const DEFAULT_ZONES = ["Bancone", "Interno", "Terrazza", "Esterno", "Privato"];
 
 // ── Default data (demo account: Spritz Brera rst-001) ───────────────────────
 
-const DEFAULT_TABLES: MerchantTable[] = [
-  { id: "tbl-001", name: "Tavolo 1",   capacity: 2, zone: "Interno",  status: "active",   x: 40,  y: 40,  width: 90,  height: 90 },
-  { id: "tbl-002", name: "Tavolo 2",   capacity: 2, zone: "Interno",  status: "active",   x: 180, y: 40,  width: 90,  height: 90 },
-  { id: "tbl-003", name: "Tavolo 3",   capacity: 4, zone: "Interno",  status: "active",   x: 40,  y: 180, width: 120, height: 90 },
-  { id: "tbl-004", name: "Tavolo 4",   capacity: 4, zone: "Interno",  status: "active",   x: 200, y: 180, width: 120, height: 90 },
-  { id: "tbl-005", name: "Terrazza A", capacity: 4, zone: "Terrazza", status: "active",   x: 560, y: 40,  width: 120, height: 90 },
-  { id: "tbl-006", name: "Terrazza B", capacity: 6, zone: "Terrazza", status: "active",   x: 720, y: 40,  width: 140, height: 100 },
-  { id: "tbl-007", name: "Bancone 1",  capacity: 2, zone: "Bancone",  status: "active",   x: 560, y: 220, width: 90,  height: 90 },
-  { id: "tbl-008", name: "Bancone 2",  capacity: 2, zone: "Bancone",  status: "inactive", x: 700, y: 220, width: 90,  height: 90 },
-];
+const DEFAULT_TABLES: MerchantTable[] = [];
 
 const DEFAULT_AVAILABILITY: DayConfig[] = [
   {
@@ -137,6 +139,16 @@ const DEFAULT_AVAILABILITY: DayConfig[] = [
       { id: "s-dom-1", time: "12:00", label: "Pranzo", totalSeats: 20, active: false },
       { id: "s-dom-2", time: "18:30", label: "Aperitivo", totalSeats: 20, active: false },
     ],
+  },
+];
+
+const DEFAULT_OFFERS: MerchantOffer[] = [
+  {
+    id: "promo-003",
+    title: "Aperitivo romantico",
+    description: "Tavoli per due con slot serali e rating altissimo.",
+    discount: 30,
+    apeType: "bombo-queen",
   },
 ];
 
@@ -220,6 +232,33 @@ export function getAvailability(userId: string): DayConfig[] {
 
 export function saveAvailability(config: DayConfig[], userId: string): void {
   localStorage.setItem(availabilityKey(userId), JSON.stringify(config));
+}
+
+// ── Offerte CRUD ─────────────────────────────────────────────────────────────
+
+export function getOffers(userId: string): MerchantOffer[] {
+  try {
+    const raw = localStorage.getItem(offersKey(userId));
+    return raw ? (JSON.parse(raw) as MerchantOffer[]) : DEFAULT_OFFERS;
+  } catch {
+    return DEFAULT_OFFERS;
+  }
+}
+
+export function saveOffers(offers: MerchantOffer[], userId: string): void {
+  localStorage.setItem(offersKey(userId), JSON.stringify(offers));
+}
+
+export function upsertOffer(offer: MerchantOffer, userId: string): void {
+  const all = getOffers(userId);
+  const idx = all.findIndex((o) => o.id === offer.id);
+  if (idx === -1) all.push(offer);
+  else all[idx] = offer;
+  saveOffers(all, userId);
+}
+
+export function deleteOffer(id: string, userId: string): void {
+  saveOffers(getOffers(userId).filter((o) => o.id !== id), userId);
 }
 
 // ── Venue Settings ───────────────────────────────────────────────────────────

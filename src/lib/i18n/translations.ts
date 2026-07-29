@@ -33,8 +33,8 @@ export const T = {
       people:   "Persone",
       search:   "Cerca",
       budget:   "Budget",
-      allItaly: "Tutta Italia",
-      allCities: "tutte le città",
+      allItaly: "Tutto il Lazio",
+      allCities: "tutte le zone",
     },
     guestOptions: [
       { value: "1",  label: "1 persona",   detail: "solo" },
@@ -128,8 +128,8 @@ export const T = {
       people:   "People",
       search:   "Search",
       budget:   "Budget",
-      allItaly: "All Italy",
-      allCities: "all cities",
+      allItaly: "All of Lazio",
+      allCities: "all areas",
     },
     guestOptions: [
       { value: "1",  label: "1 person",    detail: "solo" },

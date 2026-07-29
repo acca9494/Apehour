@@ -9,7 +9,7 @@ import { applyToJob, getApplicationsForArtist, withdrawApplication } from "@/lib
 import { getMyArtistListing, upsertArtistListing, removeArtistListing } from "@/lib/jobs/artist-listings-store";
 import { slugify } from "@/lib/utils";
 
-const CITIES = ["Tutte", "Milano", "Roma", "Firenze", "Torino", "Napoli", "Bologna", "Venezia"];
+const CITIES = ["Tutte", "Roma", "Ostia", "Fregene", "Ladispoli"];
 
 export default function CercaLavoroPage() {
   const { user } = useAuth();

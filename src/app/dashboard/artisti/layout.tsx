@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const SUB_NAV = [
-  { href: "/dashboard/artisti",         label: "Panoramica" },
+  { href: "/dashboard/artisti",         label: "ApeJobs" },
   { href: "/dashboard/artisti/offerte", label: "Le mie offerte di lavoro" },
   { href: "/dashboard/artisti/pagamenti", label: "Pagamenti" },
 ];

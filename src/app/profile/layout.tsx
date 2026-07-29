@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/profile",               icon: "◈",  label: "Dashboard" },
   { href: "/profile/prenotazioni",  icon: "≡",  label: "Prenotazioni" },
+  { href: "/profile/eventi",        icon: "✦",  label: "Eventi" },
   { href: "/profile/attivita",      icon: "◷",  label: "Attività" },
   { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES" },
   { href: "/profile/apejobs",       icon: "▣",  label: "ApeJobs" },

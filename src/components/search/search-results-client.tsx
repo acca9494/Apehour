@@ -27,9 +27,9 @@ const CATEGORY_ICONS: Array<{ label: string; emoji: string; value: Cuisine | "Al
 
 const BUDGET_OPTIONS: Array<{ value: PriceRange | "All"; label: string; budget: string; imgSrc?: string }> = [
   { value: "All",  label: "Tutti",       budget: ""    },
-  { value: "$$",   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa.png" },
-  { value: "$$$",  label: "Ape Plus",    budget: "€€",  imgSrc: "/plus.png"  },
-  { value: "$$$$", label: "Bombo Queen", budget: "€€€", imgSrc: "/bombo.png" },
+  { value: "$$",   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa-v2.png" },
+  { value: "$$$",  label: "Ape Plus",    budget: "€€",  imgSrc: "/plus-v2.png"  },
+  { value: "$$$$", label: "Bombo Queen", budget: "€€€", imgSrc: "/bombo-v2.png" },
 ];
 
 const GUESTS_OPTIONS = [1, 2, 3, 4, 5, 6, 8, 10];
@@ -75,19 +75,13 @@ function togglePill<T>(arr: T[], value: T): T[] {
 }
 
 const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
-  Milano:  { lat: 45.464, lng: 9.188 },
-  Roma:    { lat: 41.894, lng: 12.482 },
-  Torino:  { lat: 45.070, lng: 7.687 },
-  Venezia: { lat: 45.437, lng: 12.335 },
-  Firenze: { lat: 43.769, lng: 11.256 },
-  Napoli:  { lat: 40.851, lng: 14.268 },
-  Bologna: { lat: 44.494, lng: 11.342 },
-  Genova:  { lat: 44.407, lng: 8.934 },
-  Palermo: { lat: 38.116, lng: 13.362 },
-  Bari:    { lat: 41.117, lng: 16.872 },
+  Roma:      { lat: 41.894, lng: 12.482 },
+  Ostia:     { lat: 41.732, lng: 12.286 },
+  Fregene:   { lat: 41.828, lng: 12.201 },
+  Ladispoli: { lat: 41.951, lng: 12.077 },
 };
 
-const ITALY_CENTER = { lat: 42.5, lng: 12.5 };
+const LAZIO_CENTER = { lat: 41.894, lng: 12.482 };
 
 export function SearchResultsClient({ initialFilters }: { initialFilters: SearchFilters }) {
   const todayISO = new Date().toISOString().split("T")[0]!;
@@ -97,7 +91,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
     date: initialFilters.date ?? todayISO,
     guests: initialFilters.guests ?? 2,
     cuisines: [],
-    priceRanges: [],
+    priceRanges: initialFilters.priceRange && initialFilters.priceRange !== "All" ? [initialFilters.priceRange] : [],
     foodTypes: [],
     times: [],
     characteristics: [],
@@ -133,9 +127,15 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
   // Sync base filters when URL changes
   useEffect(() => {
-    setFilters((prev) => ({ ...prev, city: initialFilters.city, date: initialFilters.date, guests: initialFilters.guests }));
+    setFilters((prev) => ({
+      ...prev,
+      city: initialFilters.city,
+      date: initialFilters.date,
+      guests: initialFilters.guests,
+      priceRanges: initialFilters.priceRange && initialFilters.priceRange !== "All" ? [initialFilters.priceRange] : prev.priceRanges,
+    }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialFilters.city, initialFilters.date, initialFilters.guests]);
+  }, [initialFilters.city, initialFilters.date, initialFilters.guests, initialFilters.priceRange]);
 
   useEffect(() => {
     let active = true;
@@ -404,9 +404,9 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
               center={
                 filters.city && CITY_COORDS[filters.city]
                   ? CITY_COORDS[filters.city]!
-                  : ITALY_CENTER
+                  : LAZIO_CENTER
               }
-              zoom={filters.city && CITY_COORDS[filters.city] ? 12.5 : 5.6}
+              zoom={filters.city && CITY_COORDS[filters.city] ? 12.5 : 10}
               fitToMarkers={false}
               markers={restaurants.map((r) => ({
                 lat: r.coordinates.lat,

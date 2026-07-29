@@ -135,11 +135,7 @@ function SearchDropdown({ label, FieldIcon, options, value, onChange }: SearchDr
 }
 
 /* ── Data ──────────────────────────────────────────── */
-const CITY_COUNTS: Record<string, string> = {
-  Milano: "48", Roma: "61", Firenze: "29",
-  Venezia: "17", Napoli: "34", Torino: "22", Bologna: "19",
-};
-const CITIES = ["Milano", "Roma", "Firenze", "Venezia", "Napoli", "Torino", "Bologna"];
+const CITIES = ["Roma", "Ostia", "Fregene", "Ladispoli"];
 
 function GridIcon(props: IconProps) {
   return (
@@ -151,6 +147,12 @@ function GridIcon(props: IconProps) {
     </svg>
   );
 }
+
+const TYPE_TO_PRICE_RANGE: Record<string, string> = {
+  "vespa-sprint": "$$",
+  "ape-plus": "$$$",
+  "bombo-queen": "$$$$",
+};
 
 const TYPE_PILLS: {
   value: string;
@@ -170,7 +172,7 @@ const TYPE_PILLS: {
     budget: "€",
     icon: (
       <img
-        src="/vespa.png"
+        src="/vespa-v2.png"
         alt=""
         className="hstp__pill-icon hstp__pill-icon--img"
       />
@@ -182,7 +184,7 @@ const TYPE_PILLS: {
     budget: "€€",
     icon: (
       <img
-        src="/plus.png"
+        src="/plus-v2.png"
         alt=""
         className="hstp__pill-icon hstp__pill-icon--img"
       />
@@ -194,7 +196,7 @@ const TYPE_PILLS: {
     budget: "€€€",
     icon: (
       <img
-        src="/bombo.png"
+        src="/bombo-v2.png"
         alt=""
         className="hstp__pill-icon hstp__pill-icon--img"
       />
@@ -283,7 +285,7 @@ export function HeroSearchForm() {
 
   const cityOptions: DropdownOption[] = [
     { value: "", label: t.heroSearch.allItaly, detail: t.heroSearch.allCities, Icon: MapPinIcon },
-    ...CITIES.map((c) => ({ value: c, label: c, detail: `${CITY_COUNTS[c]} ${t.heroSearch.people.toLowerCase()}`, Icon: MapPinIcon })),
+    ...CITIES.map((c) => ({ value: c, label: c, Icon: MapPinIcon })),
   ];
 
   const guestOptions: DropdownOption[] = t.guestOptions.map((o) => ({
@@ -300,7 +302,7 @@ export function HeroSearchForm() {
     const params = new URLSearchParams();
     if (city)  params.set("city",   city);
     if (date)  params.set("date",   date);
-    if (type)  params.set("type",   type);
+    if (type)  params.set("priceRange", TYPE_TO_PRICE_RANGE[type] ?? type);
     params.set("guests", guests);
     router.push(`/search?${params.toString()}`);
   }

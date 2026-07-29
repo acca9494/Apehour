@@ -10,9 +10,9 @@ type RestaurantCardProps = {
 };
 
 const PRICE_INFO: Record<string, { img: string; label: string; budget: string }> = {
-  "$$":   { img: "/vespa.png", label: "Vespa Sprint", budget: "€" },
-  "$$$":  { img: "/plus.png",  label: "Ape Plus",     budget: "€€" },
-  "$$$$": { img: "/bombo.png", label: "Bombo Queen",  budget: "€€€" },
+  "$$":   { img: "/vespa-v2.png", label: "Vespa Sprint", budget: "€" },
+  "$$$":  { img: "/plus-v2.png",  label: "Ape Plus",     budget: "€€" },
+  "$$$$": { img: "/bombo-v2.png", label: "Bombo Queen",  budget: "€€€" },
 };
 
 export function RestaurantCard({ restaurant, priority = false }: RestaurantCardProps) {
