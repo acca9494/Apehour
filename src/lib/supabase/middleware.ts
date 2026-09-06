@@ -31,5 +31,11 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  return { response, user };
+  let role: string | undefined;
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    role = profile?.role ?? (user.user_metadata?.role as string | undefined);
+  }
+
+  return { response, user, role };
 }

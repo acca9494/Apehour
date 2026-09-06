@@ -47,6 +47,7 @@ export function DashboardOverview() {
   const [eventsCount, setEventsCount] = useState(0);
   const [restaurantIds, setRestaurantIds] = useState<string[]>([]);
   const [likesCount, setLikesCount] = useState(0);
+  const [isVerified, setIsVerified] = useState(true);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -74,6 +75,7 @@ export function DashboardOverview() {
         const restaurant = await ensureRestaurantForOwner(user!.id);
         const ids = restaurant ? [restaurant.id] : [];
         setRestaurantIds(ids);
+        setIsVerified(restaurant?.is_verified ?? true);
         if (cancelled) return;
         await loadStatsAndBookings(ids);
       } finally {
@@ -112,6 +114,21 @@ export function DashboardOverview() {
 
   return (
     <div className="dash-overview">
+
+      {/* ── Verifica in corso ────────────────────────── */}
+      {!isVerified && (
+        <div className="dash-pending-alert" style={{ marginBottom: "1.5rem" }}>
+          <div className="dash-pending-alert__header">
+            <div>
+              <p className="dash-pending-alert__eyebrow">In attesa di verifica</p>
+              <h2>Il tuo locale non è ancora visibile ai clienti</h2>
+            </div>
+          </div>
+          <p style={{ padding: "0 1.5rem 1.25rem", margin: 0, color: "var(--text-2)" }}>
+            Il team ApeHour verifica ogni nuovo locale prima di pubblicarlo in ricerca. Ti contatteremo a breve per confermare i dati — nel frattempo puoi configurare tranquillamente tavoli, disponibilità e offerte.
+          </p>
+        </div>
+      )}
 
       {/* ── Header ──────────────────────────────────── */}
       <div className="dash-overview__header">

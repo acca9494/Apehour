@@ -33,8 +33,7 @@ export async function proxy(request: NextRequest) {
 
   // updateSession valida la sessione col server Auth di Supabase (mai un cookie
   // letto e basta) e rinfresca il refresh token se necessario.
-  const { response, user } = await updateSession(request);
-  const role = user?.user_metadata?.role as string | undefined;
+  const { response, user, role } = await updateSession(request);
   const isAuthenticated = !!user;
 
   if (AUTH_ROUTES.some((r) => pathname.startsWith(r)) && isAuthenticated) {

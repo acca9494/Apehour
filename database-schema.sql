@@ -717,10 +717,12 @@ CREATE POLICY "profiles: insert own"
 -- ═══════════════════════════════════════════════════════════════════════════
 --  POLICY: restaurants
 -- ═══════════════════════════════════════════════════════════════════════════
--- Chiunque (anche anonimo) può leggere i locali attivi
+-- Chiunque (anche anonimo) può leggere i locali attivi e verificati dal team
+-- (moderazione stile TheFork: il locale si registra ma resta invisibile
+-- finché non viene ricontattato e approvato manualmente).
 CREATE POLICY "restaurants: public read active"
   ON public.restaurants FOR SELECT
-  USING (is_active = TRUE);
+  USING (is_active = TRUE AND is_verified = TRUE);
 
 -- Il commerciante proprietario vede anche i propri locali non attivi
 CREATE POLICY "restaurants: owner read all own"
@@ -754,7 +756,7 @@ CREATE POLICY "images: public read"
   USING (
     EXISTS (
       SELECT 1 FROM public.restaurants r
-      WHERE r.id = restaurant_id AND r.is_active = TRUE
+      WHERE r.id = restaurant_id AND r.is_active = TRUE AND r.is_verified = TRUE
     )
   );
 
@@ -777,7 +779,7 @@ CREATE POLICY "tables: public read"
   USING (
     EXISTS (
       SELECT 1 FROM public.restaurants r
-      WHERE r.id = restaurant_id AND r.is_active = TRUE
+      WHERE r.id = restaurant_id AND r.is_active = TRUE AND r.is_verified = TRUE
     )
   );
 
@@ -987,10 +989,16 @@ CREATE POLICY "favorites: customer delete own"
 -- ═══════════════════════════════════════════════════════════════════════════
 --  POLICY: events
 -- ═══════════════════════════════════════════════════════════════════════════
--- Chiunque (anche anonimo) legge gli eventi attivi
+-- Chiunque (anche anonimo) legge gli eventi attivi di un locale verificato
 CREATE POLICY "events: public read active"
   ON public.events FOR SELECT
-  USING (is_active = TRUE);
+  USING (
+    is_active = TRUE
+    AND EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.is_active = TRUE AND r.is_verified = TRUE
+    )
+  );
 
 -- Il commerciante proprietario vede anche i propri eventi non attivi
 CREATE POLICY "events: owner read own"
