@@ -46,10 +46,10 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
         .setView([center.lat, center.lng], zoom);
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-        attribution: "© OpenStreetMap © CARTO",
-        subdomains: "abcd",
-        maxZoom: 20,
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+        subdomains: "abc",
+        maxZoom: 19,
       }).addTo(map);
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
