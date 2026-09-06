@@ -46,9 +46,16 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
         .setView([center.lat, center.lng], zoom);
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
-        subdomains: "abc",
+      const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
+      const tileUrl = maptilerKey
+        ? `https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=${maptilerKey}`
+        : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+      L.tileLayer(tileUrl, {
+        attribution: maptilerKey
+          ? "© MapTiler © OpenStreetMap contributors"
+          : "© OpenStreetMap contributors",
+        subdomains: maptilerKey ? undefined : "abc",
         maxZoom: 19,
       }).addTo(map);
 
