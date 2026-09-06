@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth/context";
 import { fetchMerchantBookings } from "@/lib/bookings/service";
+import { ensureRestaurantForOwner } from "@/lib/restaurants/service";
 import type { MerchantBookingView } from "@/lib/bookings/types";
-
-const MERCHANT_RESTAURANT_IDS = ["rst-001"];
 
 type PaymentStatus = "paid" | "unpaid" | "refunded";
 
@@ -42,29 +42,41 @@ const FILTER_TABS: { key: "all" | PaymentStatus; label: string }[] = [
 ];
 
 export function PaymentsPanel() {
+  const { user } = useAuth();
   const [rows, setRows] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | PaymentStatus>("all");
 
   useEffect(() => {
-    fetchMerchantBookings(MERCHANT_RESTAURANT_IDS).then((bookings) => {
-      const mapped: PaymentRow[] = bookings.map((b) => ({
-        bookingId: b.id,
-        bookingRef: b.bookingRef,
-        customerName: b.customerName,
-        date: b.date,
-        time: b.time,
-        guests: b.guests,
-        bookingStatus: b.status,
-        depositRequired: b.depositRequired,
-        depositAmount: b.depositAmount ?? 0,
-        depositPaid: b.depositPaid,
-        paymentStatus: derivePaymentStatus(b),
-      }));
-      setRows(mapped);
-      setLoading(false);
-    });
-  }, []);
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const restaurant = await ensureRestaurantForOwner(user.id);
+        const ids = restaurant ? [restaurant.id] : [];
+        const bookings = await fetchMerchantBookings(ids);
+        if (cancelled) return;
+        const mapped: PaymentRow[] = bookings.map((b) => ({
+          bookingId: b.id,
+          bookingRef: b.bookingRef,
+          customerName: b.customerName,
+          date: b.date,
+          time: b.time,
+          guests: b.guests,
+          bookingStatus: b.status,
+          depositRequired: b.depositRequired,
+          depositAmount: b.depositAmount ?? 0,
+          depositPaid: b.depositPaid,
+          paymentStatus: derivePaymentStatus(b),
+        }));
+        setRows(mapped);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const filtered = filter === "all" ? rows : rows.filter((r) => r.paymentStatus === filter);
 

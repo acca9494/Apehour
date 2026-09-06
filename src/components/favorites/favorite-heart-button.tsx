@@ -3,24 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
-import { isFavorite, toggleFavorite } from "@/lib/favorites/store";
+import { isFavorite, toggleFavorite } from "@/lib/favorites/service";
 
-export function FavoriteHeartButton({ restaurantSlug }: { restaurantSlug: string }) {
+export function FavoriteHeartButton({ restaurantId, restaurantSlug }: { restaurantId: string; restaurantSlug: string }) {
   const { user } = useAuth();
   const router = useRouter();
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (user) setSaved(isFavorite(user.id, restaurantSlug));
-  }, [user, restaurantSlug]);
+    if (user) isFavorite(user.id, restaurantId).then(setSaved).catch(() => {});
+  }, [user, restaurantId]);
 
-  function handleClick() {
+  async function handleClick() {
     if (!user) {
       router.push(`/login?from=${encodeURIComponent(`/restaurants/${restaurantSlug}`)}`);
       return;
     }
-    toggleFavorite(user.id, restaurantSlug);
-    setSaved((v) => !v);
+    const next = await toggleFavorite(user.id, restaurantId);
+    setSaved(next);
   }
 
   return (

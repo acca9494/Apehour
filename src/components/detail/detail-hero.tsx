@@ -29,7 +29,7 @@ export function DetailHero({ restaurant }: { restaurant: Restaurant }) {
           <path d="m15 18-6-6 6-6" />
         </svg>
       </Link>
-      <FavoriteHeartButton restaurantSlug={restaurant.slug} />
+      <FavoriteHeartButton restaurantId={restaurant.id} restaurantSlug={restaurant.slug} />
 
       {/* Background image */}
       <div className="detail-hero__img">

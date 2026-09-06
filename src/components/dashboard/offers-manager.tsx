@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchOffers, saveOffer, removeOffer } from "@/lib/merchant/service";
-import type { MerchantOffer, ApeType } from "@/lib/merchant/store";
+import { fetchOffers, saveOffer, removeOffer, fetchAvailability } from "@/lib/merchant/service";
+import type { MerchantOffer, ApeType, DayConfig } from "@/lib/merchant/store";
 import { useAuth } from "@/lib/auth/context";
 
 const APE_LABEL: Record<ApeType, string> = {
@@ -12,22 +12,29 @@ const APE_LABEL: Record<ApeType, string> = {
 };
 
 function emptyOffer(): MerchantOffer {
-  return { id: `offer-${Date.now()}`, title: "", description: "", discount: 10, apeType: undefined };
+  return { id: `offer-${Date.now()}`, title: "", description: "", discount: 10, apeType: undefined, slotIds: [] };
+}
+
+function toggleSlot(ids: string[], id: string): string[] {
+  return ids.includes(id) ? ids.filter((s) => s !== id) : [...ids, id];
 }
 
 export function OffersManager() {
   const { user } = useAuth();
   const [offers, setOffers] = useState<MerchantOffer[]>([]);
+  const [schedule, setSchedule] = useState<DayConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<MerchantOffer | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    fetchOffers(user.id).then((o) => {
-      setOffers(o);
-      setLoading(false);
-    });
+    let cancelled = false;
+    Promise.all([fetchOffers(user.id), fetchAvailability(user.id)])
+      .then(([o, s]) => { if (!cancelled) { setOffers(o); setSchedule(s); } })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user]);
 
   async function handleSave() {
@@ -118,6 +125,38 @@ export function OffersManager() {
                 ))}
               </select>
             </label>
+            <div>
+              <span className="auth-form__label" style={{ display: "block", marginBottom: "0.5rem" }}>
+                Slot orari <span style={{ fontWeight: 400, textTransform: "none" }}>(a quali orari si applica)</span>
+              </span>
+              {schedule.every((d) => d.slots.length === 0) ? (
+                <p style={{ fontSize: "0.82rem", opacity: 0.7, margin: 0 }}>
+                  Nessuno slot configurato — aggiungine in Disponibilità prima di collegarli a un&apos;offerta.
+                </p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                  {schedule.filter((d) => d.open && d.slots.length > 0).map((day) => (
+                    <div key={day.day}>
+                      <span style={{ display: "block", fontSize: "0.76rem", fontWeight: 700, opacity: 0.6, marginBottom: "0.3rem" }}>
+                        {day.label}
+                      </span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                        {day.slots.map((slot) => (
+                          <button
+                            key={slot.id}
+                            type="button"
+                            className={`events-filter-pill${editing.slotIds.includes(slot.id) ? " is-active" : ""}`}
+                            onClick={() => setEditing({ ...editing, slotIds: toggleSlot(editing.slotIds, slot.id) })}
+                          >
+                            {slot.time}{slot.label ? ` · ${slot.label}` : ""}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div style={{ display: "flex", gap: "0.6rem" }}>
               <button type="button" className="mreg__btn mreg__btn--primary" disabled={saving || !editing.title} onClick={handleSave}>
                 {saving ? "Salvataggio…" : "Salva offerta"}
@@ -140,6 +179,7 @@ export function OffersManager() {
                 <th>Titolo</th>
                 <th>Sconto</th>
                 <th>Tipo Ape</th>
+                <th>Slot</th>
                 <th></th>
               </tr>
             </thead>
@@ -152,6 +192,7 @@ export function OffersManager() {
                   </td>
                   <td>-{o.discount}%</td>
                   <td className="dash-table__muted">{o.apeType ? APE_LABEL[o.apeType] : "—"}</td>
+                  <td className="dash-table__center">{o.slotIds.length || "—"}</td>
                   <td>
                     <div style={{ display: "flex", gap: "0.4rem", justifyContent: "flex-end" }}>
                       <button type="button" className="mbk-action-btn" onClick={() => setEditing(o)}>Modifica</button>

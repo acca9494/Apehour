@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { fetchTables, saveTable, removeTable } from "@/lib/merchant/service";
-import { getZones, addZone } from "@/lib/merchant/store";
+import { fetchTables, saveTable, removeTable, fetchZones, addZoneForUser } from "@/lib/merchant/service";
 import type { MerchantTable, TableStatus } from "@/lib/merchant/store";
 import { useAuth } from "@/lib/auth/context";
 
@@ -19,7 +18,7 @@ const CANVAS_W = 900;
 const CANVAS_H = 520;
 
 function generateId() {
-  return `tbl-${Date.now()}`;
+  return crypto.randomUUID();
 }
 
 const EMPTY_TABLE: Omit<MerchantTable, "id"> = {
@@ -163,8 +162,13 @@ export function TableManager() {
 
   useEffect(() => {
     if (!user) return;
-    setZones(getZones(user.id));
-    fetchTables(user.id).then((t) => { setTables(t); setLoading(false); });
+    let cancelled = false;
+    fetchZones(user.id).then(setZones).catch(() => {});
+    fetchTables(user.id)
+      .then((t) => { if (!cancelled) setTables(t); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user]);
 
   async function persist(table: MerchantTable) {
@@ -213,10 +217,10 @@ export function TableManager() {
     void persist(newTable);
   }
 
-  function handleAddZone(e: React.FormEvent) {
+  async function handleAddZone(e: React.FormEvent) {
     e.preventDefault();
     if (!user || !newZoneName.trim()) return;
-    const updated = addZone(newZoneName.trim(), user.id);
+    const updated = await addZoneForUser(newZoneName.trim(), user.id);
     setZones(updated);
     setNewZoneName("");
     setAddingZone(false);

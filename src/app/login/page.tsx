@@ -21,6 +21,7 @@ function GoogleIcon() {
 const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   invalid_credentials: "Email o password non corretti. Riprova.",
   email_taken: "Email già registrata.",
+  email_confirmation_required: "Conferma prima la tua email dal link che ti abbiamo inviato.",
   unknown: "Qualcosa è andato storto. Riprova.",
 };
 

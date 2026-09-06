@@ -5,16 +5,11 @@ import { BookingPanel } from "@/components/booking/booking-panel";
 import { DetailHero } from "@/components/detail/detail-hero";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { restaurants } from "@/lib/data/restaurants";
 import { getReviews } from "@/lib/services/reviews";
 import { getRestaurantBySlug, getSimilarRestaurants } from "@/lib/services/restaurants";
 import { formatReviewCount } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
-
-export function generateStaticParams() {
-  return restaurants.map((r) => ({ slug: r.slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

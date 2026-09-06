@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonGrid } from "@/components/ui/skeleton";
-import { getRestaurantsClient } from "@/lib/services/restaurants";
+import { getRestaurantsClient } from "@/lib/services/restaurants.client";
 import type { Cuisine, FoodType, PriceRange, Restaurant, SearchFilters } from "@/lib/types";
 import { CalendarDropdown } from "@/components/ui/calendar-dropdown";
 
@@ -32,7 +32,7 @@ const BUDGET_OPTIONS: Array<{ value: PriceRange | "All"; label: string; budget: 
   { value: "$$$$", label: "Bombo Queen", budget: "€€€", imgSrc: "/bombo-v2.png" },
 ];
 
-const GUESTS_OPTIONS = [1, 2, 3, 4, 5, 6, 8, 10];
+const GUESTS_OPTIONS = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15];
 
 const FOOD_TYPE_OPTIONS: Array<{ value: FoodType | "All"; label: string; emoji: string }> = [
   { value: "All",           label: "Tutti",          emoji: "🍽️" },
@@ -194,6 +194,30 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
   const filterControls = (
     <>
+      {/* Città */}
+      <div className="search-sidebar__field">
+        <span>Città</span>
+        <div className="search-filter-toggles">
+          <button
+            type="button"
+            className={`search-filter-toggle${!filters.city ? " is-active" : ""}`}
+            onClick={() => setFilter("city", undefined)}
+          >
+            Tutto il Lazio
+          </button>
+          {Object.keys(CITY_COORDS).map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`search-filter-toggle${filters.city === c ? " is-active" : ""}`}
+              onClick={() => setFilter("city", c)}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Data */}
       <div className="search-sidebar__field">
         <span>Data</span>

@@ -36,8 +36,9 @@ export function downloadTicket(ticket: EventTicket): void {
       <div class="ticket__row"><span>Intestatario</span><span>${ticket.buyerName}</span></div>
       <div class="ticket__row"><span>Biglietti</span><span>${ticket.quantity}</span></div>
       <div class="ticket__row"><span>Totale</span><span>${ticket.isFree ? "Free entry" : `€${ticket.totalPrice.toFixed(2)}`}</span></div>
+      <div class="ticket__row"><span>Stato</span><span>${ticket.status === "pending" ? "In attesa di conferma" : "Confermato"}</span></div>
     </div>
-    <div class="ticket__footer">Presenta questo biglietto (anche su schermo) all'ingresso dell'evento.</div>
+    <div class="ticket__footer">${ticket.status === "pending" ? "Richiesta di prenotazione — il locale confermerà la tua presenza." : "Presenta questo biglietto (anche su schermo) all'ingresso dell'evento."}</div>
   </div>
   <script>window.onload = () => window.print();</script>
 </body>

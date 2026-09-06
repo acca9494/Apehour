@@ -12,9 +12,10 @@ const POSITIONS = ["DJ set", "Musicista live", "Performer", "Bartender flair", "
 const CITIES = ["Roma", "Ostia", "Fregene", "Ladispoli"];
 
 const SUB_NAV = [
-  { href: "/profile/apejobs",              label: "Dashboard ApeJobs" },
-  { href: "/profile/apejobs/cerca-lavoro", label: "Cerca lavoro" },
-  { href: "/profile/apejobs/pagamenti",    label: "Pagamenti" },
+  { href: "/profile/apejobs",               label: "Dashboard ApeJobs" },
+  { href: "/profile/apejobs/cerca-lavoro",  label: "Cerca lavoro" },
+  { href: "/profile/apejobs/pagamenti",     label: "Pagamenti" },
+  { href: "/profile/apejobs/impostazioni",  label: "Impostazioni" },
 ];
 
 export default function ApeJobsLayout({ children }: { children: ReactNode }) {

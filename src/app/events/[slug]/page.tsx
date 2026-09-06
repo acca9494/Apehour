@@ -4,24 +4,28 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { getEventBySlug, type EventItem } from "@/lib/data/events";
-import { getMerchantEventBySlug } from "@/lib/events/merchant-events-store";
-import { restaurants } from "@/lib/data/restaurants";
+import { getEventBySlug } from "@/lib/events/service";
+import { getRestaurantBySlugClient } from "@/lib/services/restaurants.client";
 import { TicketPurchaseForm } from "@/components/booking/ticket-purchase-form";
+import type { EventItem } from "@/lib/data/events";
+import type { Restaurant } from "@/lib/types";
 
 export default function EventDetailPage() {
   const params = useParams<{ slug: string }>();
-  const [event, setEvent] = useState<EventItem | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
+  const [event, setEvent] = useState<EventItem | null | undefined>(undefined);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
 
   useEffect(() => {
     const slug = params.slug;
-    const staticEvent = getEventBySlug(slug);
-    setEvent(staticEvent ?? getMerchantEventBySlug(slug));
-    setLoading(false);
+    getEventBySlug(slug).then(async (ev) => {
+      setEvent(ev);
+      if (ev?.restaurantSlug) {
+        setRestaurant(await getRestaurantBySlugClient(ev.restaurantSlug));
+      }
+    });
   }, [params.slug]);
 
-  if (loading) return null;
+  if (event === undefined) return null;
 
   if (!event) {
     return (
@@ -37,8 +41,6 @@ export default function EventDetailPage() {
       </div>
     );
   }
-
-  const restaurant = restaurants.find((r) => r.slug === event.restaurantSlug);
 
   return (
     <div className="event-detail">

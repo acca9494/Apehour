@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/context";
 import { ClayLink } from "@/components/ui/clay-button";
-import { checkAvailability } from "@/lib/bookings/service";
+import { checkAvailability, getSlotsForDate } from "@/lib/bookings/service";
 import type { Restaurant } from "@/lib/types";
 import { todayInputValue } from "@/lib/utils";
+
+type DaySlot = { time: string; availableSeats: number; totalSeats: number; discount?: number; label?: string };
 
 const FAQ = [
   {
@@ -65,14 +67,22 @@ export function BookingPanel({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [date, setDate] = useState(todayInputValue());
-  const [selectedSlot, setSelectedSlot] = useState(
-    (initialSlot && restaurant.slots.some((s) => s.time === initialSlot) ? initialSlot : null)
-    ?? restaurant.slots[0]?.time
-    ?? ""
-  );
+  const [slots, setSlots] = useState<DaySlot[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState(initialSlot ?? "");
   const [guests, setGuests] = useState(2);
   const [availMsg, setAvailMsg] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+
+  // Ricarica gli slot quando cambia la data — solo quelli del giorno scelto, non tutta la settimana.
+  useEffect(() => {
+    let cancelled = false;
+    getSlotsForDate(restaurant.id, date).then((s) => {
+      if (cancelled) return;
+      setSlots(s);
+      setSelectedSlot((prev) => (prev && s.some((x) => x.time === prev) ? prev : s[0]?.time ?? ""));
+    });
+    return () => { cancelled = true; };
+  }, [restaurant.id, date]);
 
   // Recheck when params change
   useEffect(() => {
@@ -87,7 +97,7 @@ export function BookingPanel({
       .finally(() => setChecking(false));
   }, [date, selectedSlot, guests, restaurant.id]);
 
-  const currentSlot = restaurant.slots.find((s) => s.time === selectedSlot);
+  const currentSlot = slots.find((s) => s.time === selectedSlot);
   const href = `/booking?restaurant=${restaurant.slug}&date=${date}&time=${selectedSlot}&guests=${guests}`;
 
   return (
@@ -113,11 +123,11 @@ export function BookingPanel({
       <div>
         <p className="bp-label-text">Orario</p>
         <div className="bp-slots">
-          {restaurant.slots.map((slot) => {
+          {slots.map((slot) => {
             const urgent = slot.availableSeats <= 3;
             return (
               <button
-                key={slot.id}
+                key={slot.time}
                 type="button"
                 className={`bp-slot${selectedSlot === slot.time ? " is-selected" : ""}${urgent ? " is-urgent" : ""}`}
                 onClick={() => setSelectedSlot(slot.time)}

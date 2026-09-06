@@ -1,13 +1,9 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { promotions } from "@/lib/data/restaurants";
-import { restaurants } from "@/lib/data/restaurants";
-
-export const metadata: Metadata = {
-  title: "Offerte — ApeHour",
-  description: "Tutte le offerte attive sui migliori locali. Prenota e risparmia fino al 40%.",
-};
+import { getAllActiveOffers, type PublicOffer } from "@/lib/offers/service";
 
 const APE_LABEL: Record<string, string> = {
   "vespa-sprint": "Vespa Sprint",
@@ -22,6 +18,16 @@ const APE_COLOR: Record<string, string> = {
 };
 
 export default function OffersPage() {
+  const [offers, setOffers] = useState<PublicOffer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getAllActiveOffers()
+      .then(setOffers)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="offers-page">
 
@@ -31,20 +37,22 @@ export default function OffersPage() {
         <p className="offers-page__sub">Sconti esclusivi sui migliori locali. Disponibilità limitata.</p>
       </div>
 
-      <div className="offers-page__grid">
-        {promotions.map((promo) => {
-          const restaurant = restaurants.find((r) => r.slug === promo.restaurantSlug);
-          if (!restaurant) return null;
-          return (
+      {loading ? (
+        <p className="dash-empty">Caricamento…</p>
+      ) : offers.length === 0 ? (
+        <p className="dash-empty">Nessuna offerta attiva al momento.</p>
+      ) : (
+        <div className="offers-page__grid">
+          {offers.map((promo) => (
             <Link
               key={promo.id}
-              href={`/restaurants/${restaurant.slug}`}
+              href={`/restaurants/${promo.restaurantSlug}`}
               className="offer-detail-card"
             >
               <div className="offer-detail-card__img-wrap">
                 <Image
-                  src={restaurant.heroImage}
-                  alt={restaurant.name}
+                  src={promo.restaurantImage}
+                  alt={promo.restaurantName}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="offer-detail-card__img"
@@ -63,21 +71,21 @@ export default function OffersPage() {
               </div>
               <div className="offer-detail-card__body">
                 <div className="offer-detail-card__venue">
-                  <h2>{restaurant.name}</h2>
-                  <span className="offer-detail-card__cuisine">{restaurant.cuisine}</span>
+                  <h2>{promo.restaurantName}</h2>
+                  <span className="offer-detail-card__cuisine">{promo.restaurantCuisine}</span>
                 </div>
                 <h3 className="offer-detail-card__promo-title">{promo.title}</h3>
                 <p className="offer-detail-card__desc">{promo.description}</p>
                 <div className="offer-detail-card__meta">
-                  <span className="offer-detail-card__rating">⭐ {restaurant.rating} ({restaurant.reviewCount})</span>
-                  <span className="offer-detail-card__address">{restaurant.address}</span>
+                  <span className="offer-detail-card__rating">⭐ {promo.restaurantRating} ({promo.restaurantReviewCount})</span>
+                  <span className="offer-detail-card__address">{promo.restaurantAddress}</span>
                 </div>
                 <span className="offer-detail-card__cta">Prenota con sconto →</span>
               </div>
             </Link>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
     </div>
   );

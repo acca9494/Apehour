@@ -50,6 +50,7 @@ export interface MerchantOffer {
   description: string;
   discount: number;
   apeType?: ApeType;
+  slotIds: string[]; // id degli slot di disponibilità a cui si applica l'offerta
 }
 
 export interface VenueSettings {
@@ -68,89 +69,9 @@ export interface VenueSettings {
 
 // ── Keys localStorage ────────────────────────────────────────────────────────
 
-function tablesKey(uid: string)       { return `appape_merchant_tables_${uid}`; }
-function availabilityKey(uid: string) { return `appape_merchant_availability_${uid}`; }
 function settingsKey(uid: string)     { return `appape_merchant_settings_${uid}`; }
-function zonesKey(uid: string)        { return `appape_merchant_zones_${uid}`; }
-function offersKey(uid: string)       { return `appape_merchant_offers_${uid}`; }
-
-const DEFAULT_ZONES = ["Bancone", "Interno", "Terrazza", "Esterno", "Privato"];
 
 // ── Default data (demo account: Spritz Brera rst-001) ───────────────────────
-
-const DEFAULT_TABLES: MerchantTable[] = [];
-
-const DEFAULT_AVAILABILITY: DayConfig[] = [
-  {
-    day: "lun", label: "Lunedì", open: true,
-    slots: [
-      { id: "s-lun-1", time: "17:30", label: "Early Bird", totalSeats: 12, discount: 20, active: true },
-      { id: "s-lun-2", time: "18:30", label: "Aperitivo", totalSeats: 20, active: true },
-      { id: "s-lun-3", time: "19:30", label: "Happy Hour", totalSeats: 20, active: true },
-    ],
-  },
-  {
-    day: "mar", label: "Martedì", open: true,
-    slots: [
-      { id: "s-mar-1", time: "17:30", label: "Early Bird", totalSeats: 12, discount: 20, active: true },
-      { id: "s-mar-2", time: "18:30", label: "Aperitivo", totalSeats: 20, active: true },
-      { id: "s-mar-3", time: "19:30", label: "Happy Hour", totalSeats: 20, active: true },
-    ],
-  },
-  {
-    day: "mer", label: "Mercoledì", open: true,
-    slots: [
-      { id: "s-mer-1", time: "17:30", label: "Early Bird", totalSeats: 12, discount: 20, active: true },
-      { id: "s-mer-2", time: "18:30", label: "Aperitivo", totalSeats: 20, active: true },
-      { id: "s-mer-3", time: "19:30", label: "Happy Hour", totalSeats: 20, active: true },
-    ],
-  },
-  {
-    day: "gio", label: "Giovedì", open: true,
-    slots: [
-      { id: "s-gio-1", time: "17:30", label: "Early Bird", totalSeats: 12, discount: 20, active: true },
-      { id: "s-gio-2", time: "18:30", label: "Aperitivo", totalSeats: 24, active: true },
-      { id: "s-gio-3", time: "19:30", label: "Happy Hour", totalSeats: 24, active: true },
-      { id: "s-gio-4", time: "20:30", label: "Serata", totalSeats: 16, active: true },
-    ],
-  },
-  {
-    day: "ven", label: "Venerdì", open: true,
-    slots: [
-      { id: "s-ven-1", time: "17:30", label: "Early Bird", totalSeats: 14, discount: 15, active: true },
-      { id: "s-ven-2", time: "18:30", label: "Aperitivo", totalSeats: 28, active: true },
-      { id: "s-ven-3", time: "19:30", label: "Happy Hour", totalSeats: 28, active: true },
-      { id: "s-ven-4", time: "20:30", label: "Serata", totalSeats: 20, active: true },
-    ],
-  },
-  {
-    day: "sab", label: "Sabato", open: true,
-    slots: [
-      { id: "s-sab-1", time: "12:00", label: "Pranzo", totalSeats: 20, active: true },
-      { id: "s-sab-2", time: "17:30", label: "Early Bird", totalSeats: 14, discount: 10, active: true },
-      { id: "s-sab-3", time: "18:30", label: "Aperitivo", totalSeats: 30, active: true },
-      { id: "s-sab-4", time: "19:30", label: "Happy Hour", totalSeats: 30, active: true },
-      { id: "s-sab-5", time: "20:30", label: "Serata", totalSeats: 24, active: true },
-    ],
-  },
-  {
-    day: "dom", label: "Domenica", open: false,
-    slots: [
-      { id: "s-dom-1", time: "12:00", label: "Pranzo", totalSeats: 20, active: false },
-      { id: "s-dom-2", time: "18:30", label: "Aperitivo", totalSeats: 20, active: false },
-    ],
-  },
-];
-
-const DEFAULT_OFFERS: MerchantOffer[] = [
-  {
-    id: "promo-003",
-    title: "Aperitivo romantico",
-    description: "Tavoli per due con slot serali e rating altissimo.",
-    discount: 30,
-    apeType: "bombo-queen",
-  },
-];
 
 const DEFAULT_SETTINGS: VenueSettings = {
   restaurantId: "rst-001",
@@ -172,94 +93,6 @@ const DEFAULT_SETTINGS: VenueSettings = {
     policy: "La caparra viene trattenuta in caso di no-show senza preavviso.",
   },
 };
-
-// ── Tables CRUD ──────────────────────────────────────────────────────────────
-
-export function getTables(userId: string): MerchantTable[] {
-  try {
-    const raw = localStorage.getItem(tablesKey(userId));
-    return raw ? (JSON.parse(raw) as MerchantTable[]) : DEFAULT_TABLES;
-  } catch {
-    return DEFAULT_TABLES;
-  }
-}
-
-export function saveTables(tables: MerchantTable[], userId: string): void {
-  localStorage.setItem(tablesKey(userId), JSON.stringify(tables));
-}
-
-export function upsertTable(table: MerchantTable, userId: string): void {
-  const all = getTables(userId);
-  const idx = all.findIndex((t) => t.id === table.id);
-  if (idx === -1) all.push(table);
-  else all[idx] = table;
-  saveTables(all, userId);
-}
-
-export function deleteTable(id: string, userId: string): void {
-  saveTables(getTables(userId).filter((t) => t.id !== id), userId);
-}
-
-// ── Zones CRUD ───────────────────────────────────────────────────────────────
-
-export function getZones(userId: string): string[] {
-  try {
-    const raw = localStorage.getItem(zonesKey(userId));
-    return raw ? (JSON.parse(raw) as string[]) : DEFAULT_ZONES;
-  } catch {
-    return DEFAULT_ZONES;
-  }
-}
-
-export function addZone(name: string, userId: string): string[] {
-  const zones = getZones(userId);
-  if (zones.includes(name)) return zones;
-  const next = [...zones, name];
-  localStorage.setItem(zonesKey(userId), JSON.stringify(next));
-  return next;
-}
-
-// ── Availability CRUD ────────────────────────────────────────────────────────
-
-export function getAvailability(userId: string): DayConfig[] {
-  try {
-    const raw = localStorage.getItem(availabilityKey(userId));
-    return raw ? (JSON.parse(raw) as DayConfig[]) : DEFAULT_AVAILABILITY;
-  } catch {
-    return DEFAULT_AVAILABILITY;
-  }
-}
-
-export function saveAvailability(config: DayConfig[], userId: string): void {
-  localStorage.setItem(availabilityKey(userId), JSON.stringify(config));
-}
-
-// ── Offerte CRUD ─────────────────────────────────────────────────────────────
-
-export function getOffers(userId: string): MerchantOffer[] {
-  try {
-    const raw = localStorage.getItem(offersKey(userId));
-    return raw ? (JSON.parse(raw) as MerchantOffer[]) : DEFAULT_OFFERS;
-  } catch {
-    return DEFAULT_OFFERS;
-  }
-}
-
-export function saveOffers(offers: MerchantOffer[], userId: string): void {
-  localStorage.setItem(offersKey(userId), JSON.stringify(offers));
-}
-
-export function upsertOffer(offer: MerchantOffer, userId: string): void {
-  const all = getOffers(userId);
-  const idx = all.findIndex((o) => o.id === offer.id);
-  if (idx === -1) all.push(offer);
-  else all[idx] = offer;
-  saveOffers(all, userId);
-}
-
-export function deleteOffer(id: string, userId: string): void {
-  saveOffers(getOffers(userId).filter((o) => o.id !== id), userId);
-}
 
 // ── Venue Settings ───────────────────────────────────────────────────────────
 

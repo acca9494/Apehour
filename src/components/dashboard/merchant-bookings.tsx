@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/context";
 import { fetchMerchantBookings, updateStatus } from "@/lib/bookings/service";
-import { restaurants } from "@/lib/data/restaurants";
+import { ensureRestaurantForOwner } from "@/lib/restaurants/service";
 import type { BookingStatus, MerchantBookingView } from "@/lib/bookings/types";
 
 const ALL_STATUSES: BookingStatus[] = ["pending", "confirmed", "cancelled", "completed", "no_show"];
@@ -36,20 +36,17 @@ export function MerchantBookings() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<BookingStatus | "all">("all");
 
-  // In a real app, we'd fetch only restaurants owned by this merchant.
-  // Mock: use all restaurants as if they belong to this commerciante.
-  const merchantRestaurantIds = restaurants.map((r) => r.id);
-
   const load = useCallback(async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const data = await fetchMerchantBookings(merchantRestaurantIds);
+      const restaurant = await ensureRestaurantForOwner(user.id);
+      const data = restaurant ? await fetchMerchantBookings([restaurant.id]) : [];
       setBookings(data);
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   useEffect(() => { load(); }, [load]);
 

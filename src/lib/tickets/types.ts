@@ -1,3 +1,5 @@
+export type TicketMode = "paid" | "free" | "waitlist";
+
 export interface EventTicket {
   id: string;
   ticketRef: string;
@@ -18,12 +20,14 @@ export interface EventTicket {
   unitPrice: number;
   totalPrice: number;
   isFree: boolean;
+  mode: TicketMode;
 
   purchasedAt: string;
-  status: "confirmed" | "cancelled";
+  status: "confirmed" | "pending" | "cancelled";
 }
 
 export interface TicketPurchaseFormData {
+  eventId: string;
   eventSlug: string;
   eventTitle: string;
   eventDate: string;
@@ -33,6 +37,7 @@ export interface TicketPurchaseFormData {
   quantity: number;
   unitPrice: number;
   isFree: boolean;
+  mode: TicketMode;
   buyerName: string;
   buyerEmail: string;
   buyerPhone: string;

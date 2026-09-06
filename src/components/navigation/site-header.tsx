@@ -26,6 +26,7 @@ const NAV_HREFS = [
   { href: "/come-funziona", key: "howItWorks"  as const },
   { href: "/#per-i-locali", key: "forVenues"   as const },
   { href: "/apejobs",       key: "forArtists"  as const },
+  { href: "/offers",        key: "offers"      as const },
 ];
 
 const CITIES_MOBILE = ["Tutto il Lazio", "Roma", "Ostia", "Fregene", "Ladispoli"];

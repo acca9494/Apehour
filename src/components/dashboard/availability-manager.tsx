@@ -81,7 +81,7 @@ function DayPanel({
 }) {
   function addSlot() {
     const newSlot: SlotConfig = {
-      id: `s-${Date.now()}`,
+      id: crypto.randomUUID(),
       time: "18:00",
       label: "Nuovo slot",
       totalSeats: 20,
@@ -148,15 +148,22 @@ export function AvailabilityManager() {
   const { user } = useAuth();
   const [config, setConfig] = useState<DayConfig[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    fetchAvailability(user.id).then((c) => {
-      setConfig(c);
-      setLoading(false);
-    });
+    let cancelled = false;
+    setLoadError(null);
+    fetchAvailability(user.id)
+      .then((c) => { if (!cancelled) setConfig(c); })
+      .catch((err) => {
+        console.error("[AvailabilityManager] load error:", err);
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : "Errore nel caricamento");
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user]);
 
   function updateDay(updated: DayConfig) {
@@ -183,6 +190,15 @@ export function AvailabilityManager() {
 
   if (loading) {
     return <div className="dash-loading">Caricamento disponibilità…</div>;
+  }
+
+  if (loadError) {
+    return (
+      <div className="dash-loading">
+        Errore nel caricamento della disponibilità: {loadError}
+        <br />Apri la console del browser (F12) per i dettagli, o ricarica la pagina.
+      </div>
+    );
   }
 
   return (

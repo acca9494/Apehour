@@ -7,6 +7,7 @@ export type EventItem = {
   image: string;
   category: string;
   price: string;
+  ticketMode?: "paid" | "free" | "waitlist";
   bees: number;
   description: string;
   restaurantSlug: string;

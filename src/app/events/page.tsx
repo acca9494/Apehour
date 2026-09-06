@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { EVENTS } from "@/lib/data/events";
-import { getAllMerchantEvents, type MerchantEvent } from "@/lib/events/merchant-events-store";
+import { getAllActiveEvents } from "@/lib/events/service";
+import type { EventItem } from "@/lib/data/events";
 
 const CATEGORIES = [
   "Festival", "Musica Live", "DJ Set", "Degustazione", "Speciale", "Cocktail",
@@ -38,7 +38,7 @@ export default function EventsPage() {
   const [activeCity, setActiveCity] = useState("Tutte le città");
   const [cityDropdown, setCityDropdown] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [merchantEvents, setMerchantEvents] = useState<MerchantEvent[]>([]);
+  const [allEvents, setAllEvents] = useState<EventItem[]>([]);
   const cityRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,10 +46,8 @@ export default function EventsPage() {
       const saved = localStorage.getItem("apehour_city");
       if (saved && CITIES.includes(saved)) setActiveCity(saved);
     } catch {}
-    setMerchantEvents(getAllMerchantEvents());
+    getAllActiveEvents().then(setAllEvents).catch(() => {});
   }, []);
-
-  const allEvents = [...EVENTS, ...merchantEvents];
 
   useEffect(() => {
     if (!cityDropdown) return;

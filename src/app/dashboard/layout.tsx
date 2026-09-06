@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
+import { ensureRestaurantForOwner } from "@/lib/restaurants/service";
 
 const NAV_ITEMS = [
   { href: "/dashboard",               icon: "◈",  label: "Panoramica" },
@@ -51,6 +52,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       router.replace("/login");
     }
   }, [user, loading, router]);
+
+  // Crea il locale su Supabase al primo accesso confermato, se la registrazione
+  // era rimasta "in sospeso" per la conferma email (vedi merchant-register-form).
+  useEffect(() => {
+    if (user?.role === "commerciante") {
+      void ensureRestaurantForOwner(user.id);
+    }
+  }, [user]);
 
   if (loading || !user) return null;
 

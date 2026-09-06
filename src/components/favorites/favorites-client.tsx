@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { ClayLink } from "@/components/ui/clay-button";
 import { RestaurantCard } from "@/components/restaurant-card";
-import { getFavorites } from "@/lib/favorites/store";
-import { restaurants } from "@/lib/data/restaurants";
+import { getFavoriteRestaurantIds } from "@/lib/favorites/service";
+import { getRestaurantsClient } from "@/lib/services/restaurants.client";
+import type { Restaurant } from "@/lib/types";
 
 export function FavoritesClient() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [slugs, setSlugs] = useState<string[]>([]);
+  const [saved, setSaved] = useState<Restaurant[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -20,12 +22,16 @@ export function FavoritesClient() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user) setSlugs(getFavorites(user.id));
+    if (!user) return;
+    Promise.all([getFavoriteRestaurantIds(user.id), getRestaurantsClient()])
+      .then(([ids, all]) => {
+        setSaved(all.filter((r) => ids.includes(r.id)));
+      })
+      .catch(() => {})
+      .finally(() => setLoadingSaved(false));
   }, [user]);
 
-  if (loading || !user) return null;
-
-  const saved = restaurants.filter((r) => slugs.includes(r.slug));
+  if (loading || !user || loadingSaved) return null;
 
   if (saved.length === 0) {
     return (

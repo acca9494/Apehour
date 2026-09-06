@@ -3,10 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/context";
-import { saveVenueSettings } from "@/lib/merchant/store";
+import { createRestaurant } from "@/lib/restaurants/service";
+import { Modal } from "@/components/ui/modal";
+import { LegalModal } from "@/components/legal/legal-modal";
+import type { PriceRange } from "@/lib/types";
 import type { AuthErrorCode } from "@/lib/auth/types";
 
-const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
+const ERROR_MESSAGES: Record<Exclude<AuthErrorCode, "email_confirmation_required">, string> = {
   invalid_credentials: "Credenziali non valide.",
   email_taken: "Email già registrata. Prova ad accedere.",
   unknown: "Qualcosa è andato storto. Riprova.",
@@ -14,6 +17,19 @@ const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
 
 const CITIES = ["Milano", "Roma", "Firenze", "Torino", "Napoli", "Bologna", "Venezia", "Genova", "Palermo", "Bari", "Altra città"];
 const PRICE_OPTIONS = ["< €15", "€15 – €25", "€25 – €40", "€40 – €60", "> €60"];
+
+function priceRangeFromAvgSpend(avgSpend: string): PriceRange {
+  switch (avgSpend) {
+    case "< €15":
+    case "€15 – €25":
+      return "$$";
+    case "€25 – €40":
+    case "€40 – €60":
+      return "$$$";
+    default:
+      return "$$$$";
+  }
+}
 const TIMES = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"];
 
 const MONTHS = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
@@ -152,7 +168,9 @@ export function MerchantRegisterForm() {
 
   const [step, setStep]           = useState(1);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError]         = useState<AuthErrorCode | null>(null);
+  const [error, setError]         = useState<Exclude<AuthErrorCode, "email_confirmation_required"> | null>(null);
+  const [showLegal, setShowLegal] = useState(false);
+  const [showConfirmEmail, setShowConfirmEmail] = useState(false);
 
   const [s1, setS1] = useState<Step1>({ nome: "", cognome: "", email: "", telefono: "", password: "", privacy: false });
   const [s2, setS2] = useState<Step2>({ venueName: "", address: "", city: "", avgSpend: "" });
@@ -166,30 +184,45 @@ export function MerchantRegisterForm() {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
+    const priceRange = priceRangeFromAvgSpend(s2.avgSpend);
     try {
       const session = await register({
         name: `${s1.nome} ${s1.cognome}`.trim(),
         email: s1.email,
         password: s1.password,
         role: "commerciante",
+        // Salvati in user_metadata: servono a creare il locale al primo accesso
+        // confermato, dato che la conferma email può avvenire dopo la registrazione.
+        metadata: {
+          venue_name: s2.venueName,
+          venue_address: s2.address,
+          venue_city: s2.city || "Roma",
+          venue_price_range: priceRange,
+        },
       });
-      saveVenueSettings({
-        restaurantId: `rst-${session.user.id}`,
-        name: s2.venueName,
-        description: "",
-        address: s2.address,
-        city: s2.city || "Milano",
-        phone: s1.telefono,
-        email: s1.email,
-        website: "",
-        instagram: "",
-        heroImage: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80",
-        deposit: { required: false, amount: 5, perPerson: true, policy: "La caparra viene trattenuta in caso di no-show senza preavviso." },
-      }, session.user.id);
+      // Se la sessione è già attiva (nessuna conferma email richiesta), crea subito
+      // il locale. Altrimenti ci pensa ensureRestaurantForOwner al primo accesso.
+      if (session.user) {
+        await createRestaurant({
+          ownerId: session.user.id,
+          name: s2.venueName,
+          address: s2.address,
+          city: s2.city || "Roma",
+          priceRange,
+          email: s1.email,
+          phone: s1.telefono,
+        }).catch(() => {});
+      }
       setStep(3);
     } catch (err) {
       const code = err instanceof Error ? err.message : "unknown";
-      setError(code as AuthErrorCode);
+      if (code === "email_confirmation_required") {
+        // L'account è stato creato comunque: manca solo la conferma email.
+        setShowConfirmEmail(true);
+        setStep(3);
+      } else {
+        setError(code as Exclude<AuthErrorCode, "email_confirmation_required">);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -231,7 +264,13 @@ export function MerchantRegisterForm() {
 
           <label className="mreg__checkbox">
             <input type="checkbox" checked={s1.privacy} onChange={e => setF1("privacy", e.target.checked)} required />
-            <span>Accetto l&apos;informativa sulla privacy di ApeHour</span>
+            <span>
+              Accetto l&apos;{" "}
+              <button type="button" className="mreg__privacy-link" onClick={() => setShowLegal(true)}>
+                informativa sulla privacy
+              </button>
+              {" "}di ApeHour
+            </span>
           </label>
 
           <button type="submit" className="mreg__btn mreg__btn--primary">Avanti</button>
@@ -280,6 +319,21 @@ export function MerchantRegisterForm() {
       )}
 
       {step === 3 && <CallCalendar venueName={s2.venueName} />}
+
+      <Modal open={showConfirmEmail} onClose={() => setShowConfirmEmail(false)} title="Account creato">
+        <div className="confirm-email-modal">
+          <div className="confirm-email-modal__icon" aria-hidden="true">✓</div>
+          <p>
+            Il tuo account è stato creato. Controlla la tua email e clicca sul link di conferma
+            prima di accedere.
+          </p>
+          <button type="button" className="mreg__btn mreg__btn--primary" onClick={() => setShowConfirmEmail(false)}>
+            Ho capito
+          </button>
+        </div>
+      </Modal>
+
+      <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
     </div>
   );
 }

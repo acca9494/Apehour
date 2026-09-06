@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { ClayButton, ClayLink } from "@/components/ui/clay-button";
-import { restaurants } from "@/lib/data/restaurants";
+import { getRestaurantBySlugClient } from "@/lib/services/restaurants.client";
+import type { Restaurant } from "@/lib/types";
 import { todayInputValue } from "@/lib/utils";
 import {
   cancelBooking,
@@ -75,22 +76,20 @@ export function BookingFlow() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
 
-  const restaurantSlug = searchParams.get("restaurant") ?? restaurants[0].slug;
-  const restaurant = restaurants.find((r) => r.slug === restaurantSlug) ?? restaurants[0];
+  const restaurantSlug = searchParams.get("restaurant");
   const modifyId = searchParams.get("modifyId") ?? null;
+
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [loadingRestaurant, setLoadingRestaurant] = useState(true);
 
   // Step state
   const [step, setStep] = useState<Step>(0);
 
   // Step 1 — Quando e quanti
   const [date, setDate] = useState(searchParams.get("date") ?? todayInputValue());
-  const [time, setTime] = useState(searchParams.get("time") ?? restaurant.slots[0]?.time ?? "");
+  const [time, setTime] = useState(searchParams.get("time") ?? "");
+  const [slots, setSlots] = useState<Array<{ time: string; availableSeats: number; totalSeats: number; discount?: number; label?: string }>>([]);
   const [guests, setGuests] = useState(Number(searchParams.get("guests") ?? 2));
-  const [slots, setSlots] = useState<Array<{ time: string; availableSeats: number; totalSeats: number; discount?: number; label?: string }>>(
-    restaurant.slots.map((s) => ({
-      time: s.time, availableSeats: s.availableSeats, totalSeats: s.availableSeats, discount: s.discount, label: s.label
-    }))
-  );
   const [availCheck, setAvailCheck] = useState<AvailabilityResult | null>(null);
   const [checkingAvail, setCheckingAvail] = useState(false);
 
@@ -113,25 +112,54 @@ export function BookingFlow() {
     }
   }, [user]);
 
+  // Carica il locale dallo slug in query string
+  useEffect(() => {
+    if (!restaurantSlug) { setLoadingRestaurant(false); return; }
+    let cancelled = false;
+    setLoadingRestaurant(true);
+    getRestaurantBySlugClient(restaurantSlug).then((r) => {
+      if (cancelled) return;
+      setRestaurant(r);
+      setLoadingRestaurant(false);
+    });
+    return () => { cancelled = true; };
+  }, [restaurantSlug]);
+
   // Reload slots when date changes
   useEffect(() => {
+    if (!restaurant) return;
     getSlotsForDate(restaurant.id, date).then(setSlots);
-  }, [date, restaurant.id]);
+  }, [date, restaurant]);
 
   // Recheck availability when time/guests/date changes
   useEffect(() => {
-    if (!time) return;
+    if (!restaurant || !time) return;
     setAvailCheck(null);
     setCheckingAvail(true);
     checkAvailability(restaurant.id, date, time, guests)
       .then(setAvailCheck)
       .finally(() => setCheckingAvail(false));
-  }, [restaurant.id, date, time, guests]);
+  }, [restaurant, date, time, guests]);
 
   const selectedSlot = useMemo(
     () => slots.find((s) => s.time === time),
     [slots, time]
   );
+
+  if (loadingRestaurant) return null;
+
+  if (!restaurant) {
+    return (
+      <div className="booking-confirmed">
+        <p className="eyebrow">Locale non trovato</p>
+        <h1>Non troviamo questo locale</h1>
+        <p className="booking-confirmed__note">Il link potrebbe non essere più valido.</p>
+        <div className="booking-confirmed__actions">
+          <ClayLink href="/search">Cerca locali</ClayLink>
+        </div>
+      </div>
+    );
+  }
 
   // ── Step transitions ────────────────────────────────────────────────────────
   function goToStep2() {
@@ -147,6 +175,7 @@ export function BookingFlow() {
 
   async function handleConfirm() {
     if (!user) { setBookingError("Devi essere loggato per prenotare."); return; }
+    if (!restaurant) return;
     setSubmitting(true);
     setBookingError(null);
     try {
@@ -259,19 +288,21 @@ export function BookingFlow() {
             <label>
               Persone
               <select value={guests} onChange={(e) => setGuests(Number(e.target.value))}>
-                {[1, 2, 3, 4, 5, 6, 8, 10].map((n) => (
+                {[1, 2, 3, 4, 5, 6, 8, 10, 12, 15].map((n) => (
                   <option key={n} value={n}>{n} {n === 1 ? "persona" : "persone"}</option>
                 ))}
               </select>
             </label>
 
-            <ClayButton
-              onClick={goToStep2}
-              disabled={!availCheck?.available || checkingAvail}
-              className="booking3-cta"
-            >
-              Continua →
-            </ClayButton>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "2rem" }}>
+              <ClayButton
+                onClick={goToStep2}
+                disabled={!availCheck?.available || checkingAvail}
+                className="booking3-cta"
+              >
+                Continua →
+              </ClayButton>
+            </div>
           </div>
         )}
 

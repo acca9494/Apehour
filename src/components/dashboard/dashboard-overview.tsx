@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/context";
 import { ClayLink } from "@/components/ui/clay-button";
 import { fetchMerchantBookings, updateStatus } from "@/lib/bookings/service";
 import { fetchMerchantStats, fetchOffers, type MerchantStats } from "@/lib/merchant/service";
-import { getMerchantEvents } from "@/lib/events/merchant-events-store";
+import { listMyEvents } from "@/lib/events/service";
+import { ensureRestaurantForOwner } from "@/lib/restaurants/service";
+import { getFavoritesCountForRestaurant } from "@/lib/favorites/service";
 import type { MerchantBookingView } from "@/lib/bookings/types";
-
-const MERCHANT_RESTAURANT_IDS = ["rst-001"];
 
 const STATUS_LABEL: Record<string, string> = {
   confirmed: "Confermata",
@@ -45,43 +45,15 @@ export function DashboardOverview() {
   const [actionId, setActionId] = useState<string | null>(null);
   const [offersCount, setOffersCount] = useState(0);
   const [eventsCount, setEventsCount] = useState(0);
+  const [restaurantIds, setRestaurantIds] = useState<string[]>([]);
+  const [likesCount, setLikesCount] = useState(0);
 
   const today = new Date().toISOString().slice(0, 10);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const [s, bookings] = await Promise.all([
-        fetchMerchantStats(MERCHANT_RESTAURANT_IDS),
-        fetchMerchantBookings(MERCHANT_RESTAURANT_IDS),
-      ]);
-      if (cancelled) return;
-      setStats(s);
-      setPending(bookings.filter((b) => b.status === "pending"));
-      setRecent(
-        bookings
-          .filter((b) => b.date >= today)
-          .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
-          .slice(0, 8)
-      );
-      setLoadingStats(false);
-    }
-    load();
-    return () => { cancelled = true; };
-  }, [today]);
-
-  useEffect(() => {
-    if (!user) return;
-    fetchOffers(user.id).then((o) => setOffersCount(o.length));
-    setEventsCount(getMerchantEvents(user.id).length);
-  }, [user]);
-
-  async function handleAction(bookingId: string, action: "confirmed" | "cancelled") {
-    setActionId(bookingId);
-    await updateStatus(bookingId, action);
+  const loadStatsAndBookings = useCallback(async (restaurantIds: string[]) => {
     const [s, bookings] = await Promise.all([
-      fetchMerchantStats(MERCHANT_RESTAURANT_IDS),
-      fetchMerchantBookings(MERCHANT_RESTAURANT_IDS),
+      fetchMerchantStats(restaurantIds),
+      fetchMerchantBookings(restaurantIds),
     ]);
     setStats(s);
     setPending(bookings.filter((b) => b.status === "pending"));
@@ -91,6 +63,48 @@ export function DashboardOverview() {
         .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
         .slice(0, 8)
     );
+  }, [today]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    async function load() {
+      setLoadingStats(true);
+      try {
+        const restaurant = await ensureRestaurantForOwner(user!.id);
+        const ids = restaurant ? [restaurant.id] : [];
+        setRestaurantIds(ids);
+        if (cancelled) return;
+        await loadStatsAndBookings(ids);
+      } finally {
+        if (!cancelled) setLoadingStats(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [user, loadStatsAndBookings]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchOffers(user.id).then((o) => setOffersCount(o.length));
+  }, [user]);
+
+  useEffect(() => {
+    const restaurantId = restaurantIds[0];
+    if (!restaurantId) return;
+    listMyEvents(restaurantId).then((evs) => setEventsCount(evs.length)).catch(() => {});
+  }, [restaurantIds]);
+
+  useEffect(() => {
+    const restaurantId = restaurantIds[0];
+    if (!restaurantId) return;
+    getFavoritesCountForRestaurant(restaurantId).then(setLikesCount).catch(() => {});
+  }, [restaurantIds]);
+
+  async function handleAction(bookingId: string, action: "confirmed" | "cancelled") {
+    setActionId(bookingId);
+    await updateStatus(bookingId, action);
+    await loadStatsAndBookings(restaurantIds);
     setActionId(null);
   }
 
@@ -113,7 +127,7 @@ export function DashboardOverview() {
       {/* ── KPI Stats ───────────────────────────────── */}
       <div className="dash-kpi-grid">
         {loadingStats ? (
-          Array.from({ length: 4 }).map((_, i) => (
+          Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="dash-kpi-card dash-kpi-card--loading" />
           ))
         ) : stats ? (
@@ -141,6 +155,12 @@ export function DashboardOverview() {
               <span className="dash-kpi-card__label">Occupazione</span>
               <span className="dash-kpi-card__value dash-kpi-card__value--gold">{stats.occupancyRate}%</span>
               <span className="dash-kpi-card__sub">{stats.conversionRate}% conversione</span>
+            </div>
+            <div className="dash-kpi-card">
+              <span className="dash-kpi-card__icon">♥</span>
+              <span className="dash-kpi-card__label">Likes ricevuti</span>
+              <span className="dash-kpi-card__value">{likesCount}</span>
+              <span className="dash-kpi-card__sub">Utenti che ti hanno salvato</span>
             </div>
           </>
         ) : null}

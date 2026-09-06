@@ -3,10 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/context";
-import { getTickets } from "@/lib/tickets/store";
+import { getMyTickets } from "@/lib/tickets/service";
 import { downloadTicket } from "@/lib/tickets/download";
 import type { EventTicket } from "@/lib/tickets/types";
-import { getEventBySlug } from "@/lib/data/events";
 
 const MONTHS: Record<string, number> = {
   gen: 0, feb: 1, mar: 2, apr: 3, mag: 4, giu: 5,
@@ -29,11 +28,14 @@ export default function ProfileEventiPage() {
   const [tickets, setTickets] = useState<EventTicket[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    setTickets(getTickets(user.id).filter((t) => t.status !== "cancelled"));
-    setLoading(false);
+    try {
+      setTickets(await getMyTickets(user.id));
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
@@ -71,15 +73,9 @@ export default function ProfileEventiPage() {
         ) : (
           <div className="attivita-events-grid">
             {upcoming.map((t) => {
-              const event = getEventBySlug(t.eventSlug);
               return (
                 <div key={t.id} className="attivita-event-card attivita-event-card--active">
                   <Link href={`/events/${t.eventSlug}`}>
-                    {event && (
-                      <div className="attivita-event-card__top">
-                        <span className="attivita-badge">{event.category}</span>
-                      </div>
-                    )}
                     <h3 className="attivita-event-card__title">{t.eventTitle}</h3>
                     <p className="attivita-event-card__location">📍 {t.restaurantName}</p>
                     <div className="attivita-event-card__footer">

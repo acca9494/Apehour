@@ -19,10 +19,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ── ENUMS ───────────────────────────────────────────────────────────────────
 CREATE TYPE user_role       AS ENUM ('cliente', 'commerciante');
-CREATE TYPE price_range     AS ENUM ('€', '€€', '€€€', '€€€€');
+CREATE TYPE price_range     AS ENUM ('$$', '$$$', '$$$$');  -- Vespa Sprint / Ape Plus / Bombo Queen
 CREATE TYPE booking_status  AS ENUM ('pending', 'confirmed', 'cancelled', 'no_show');
 CREATE TYPE payment_status  AS ENUM ('not_required', 'pending', 'paid', 'refunded', 'failed');
 CREATE TYPE day_of_week     AS ENUM ('lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom');
+CREATE TYPE ticket_mode     AS ENUM ('paid', 'free', 'waitlist');  -- fase pilota: solo 'waitlist' è usato dall'app
+CREATE TYPE ticket_status   AS ENUM ('pending', 'confirmed', 'cancelled');
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -71,17 +73,25 @@ CREATE TABLE public.restaurants (
   phone            TEXT,
   website          TEXT,
   email            TEXT,
+  instagram        TEXT,
 
   -- Prenotazione
-  price_range      price_range NOT NULL DEFAULT '€€',
+  price_range      price_range NOT NULL DEFAULT '$$',
   deposit_required BOOLEAN     NOT NULL DEFAULT FALSE,
   deposit_amount   NUMERIC(8, 2),                        -- importo caparra in EUR
+  deposit_per_person BOOLEAN   NOT NULL DEFAULT TRUE,
+  deposit_policy   TEXT,
   max_party_size   INTEGER     NOT NULL DEFAULT 10,
   booking_window_days INTEGER  NOT NULL DEFAULT 30,      -- quanti giorni avanti si può prenotare
 
   -- Metriche (aggiornate da trigger)
   rating           NUMERIC(3, 2) DEFAULT 0,
   review_count     INTEGER       DEFAULT 0,
+
+  -- Zone della planimetria tavoli (gestite dal commerciante in dashboard/tavoli)
+  zone_names       TEXT[]      NOT NULL DEFAULT ARRAY['Bancone','Interno','Terrazza','Esterno','Privato'],
+  -- Giorni della settimana chiusi (es. ARRAY['dom']) — dashboard/disponibilità
+  closed_days      day_of_week[] NOT NULL DEFAULT '{}',
 
   -- Immagine di copertina (URL diretto, in attesa di restaurant_images)
   cover_image_url  TEXT,
@@ -146,6 +156,11 @@ CREATE TABLE public.tables (
   capacity_min         SMALLINT    NOT NULL DEFAULT 1,
   capacity_max         SMALLINT    NOT NULL DEFAULT 4,
   location_description TEXT,                         -- es. 'Sala interna', 'Dehor'
+  zone                 TEXT        NOT NULL DEFAULT 'Interno',  -- zona nella planimetria (dashboard/tavoli)
+  pos_x                NUMERIC     NOT NULL DEFAULT 40,          -- posizione libera nell'editor planimetria (px)
+  pos_y                NUMERIC     NOT NULL DEFAULT 40,
+  pos_width            NUMERIC     NOT NULL DEFAULT 100,
+  pos_height           NUMERIC     NOT NULL DEFAULT 90,
   is_outdoor           BOOLEAN     NOT NULL DEFAULT FALSE,
   is_active            BOOLEAN     NOT NULL DEFAULT TRUE,
   notes                TEXT,                         -- note interne del commerciante
@@ -377,6 +392,75 @@ CREATE INDEX idx_favorites_restaurant  ON public.favorites(restaurant_id);
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
+--  10. EVENTS
+-- ═══════════════════════════════════════════════════════════════════════════
+CREATE TABLE public.events (
+  id             UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+  restaurant_id  UUID        NOT NULL REFERENCES public.restaurants(id) ON DELETE CASCADE,
+
+  title          TEXT        NOT NULL,
+  slug           TEXT        NOT NULL UNIQUE,
+  category       TEXT        NOT NULL,
+  description    TEXT,
+  image_url      TEXT,
+
+  event_date     DATE        NOT NULL,
+  event_end_date DATE,                       -- null = evento di un solo giorno
+  start_time     TIME        NOT NULL,
+  location       TEXT        NOT NULL,        -- testo libero (quartiere/indirizzo), oltre al locale collegato
+
+  ticket_mode    ticket_mode NOT NULL DEFAULT 'waitlist',
+  price_label    TEXT        NOT NULL DEFAULT 'Su prenotazione',  -- es. 'da €20', 'Free entry', 'Su prenotazione'
+  bees_reward    INTEGER     NOT NULL DEFAULT 0,
+
+  is_active      BOOLEAN     NOT NULL DEFAULT TRUE,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT chk_event_dates CHECK (event_end_date IS NULL OR event_end_date >= event_date)
+);
+
+COMMENT ON TABLE public.events IS
+  'Eventi pubblicati dai locali. In fase pilota ticket_mode è sempre waitlist (nessun pagamento in app).';
+
+CREATE INDEX idx_events_restaurant ON public.events(restaurant_id);
+CREATE INDEX idx_events_date       ON public.events(event_date);
+CREATE INDEX idx_events_active     ON public.events(is_active, event_date) WHERE is_active = TRUE;
+CREATE INDEX idx_events_category   ON public.events(category);
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+--  11. TICKET_REQUESTS (prenotazioni/waitlist evento — nessun pagamento in app)
+-- ═══════════════════════════════════════════════════════════════════════════
+CREATE TABLE public.ticket_requests (
+  id             UUID           PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ticket_ref     TEXT           NOT NULL UNIQUE,       -- es. APE-TIX-1234
+  event_id       UUID           NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
+  customer_id    UUID           NOT NULL REFERENCES public.profiles(id),
+
+  quantity       SMALLINT       NOT NULL DEFAULT 1,
+  status         ticket_status  NOT NULL DEFAULT 'pending',
+
+  -- Snapshot cliente al momento della richiesta
+  buyer_name     TEXT           NOT NULL,
+  buyer_email    TEXT           NOT NULL,
+  buyer_phone    TEXT,
+
+  requested_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT chk_ticket_quantity CHECK (quantity BETWEEN 1 AND 10)
+);
+
+COMMENT ON TABLE public.ticket_requests IS
+  'Richieste di posto per un evento (waitlist). Il locale conferma/rifiuta cambiando status.';
+
+CREATE INDEX idx_tickets_event    ON public.ticket_requests(event_id);
+CREATE INDEX idx_tickets_customer ON public.ticket_requests(customer_id);
+CREATE INDEX idx_tickets_status   ON public.ticket_requests(status);
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
 --  FUNZIONI HELPER
 -- ═══════════════════════════════════════════════════════════════════════════
 
@@ -406,6 +490,16 @@ BEGIN
     FROM public.bookings
     WHERE booking_ref LIKE 'APE-' || yr || '-%';
   RETURN 'APE-' || yr || '-' || LPAD(seq::TEXT, 5, '0');
+END;
+$$;
+
+-- Genera ticket_ref nel formato APE-TIX-NNNN
+CREATE OR REPLACE FUNCTION public.generate_ticket_ref()
+RETURNS TEXT
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN 'APE-TIX-' || LPAD((FLOOR(RANDOM() * 9000) + 1000)::TEXT, 4, '0');
 END;
 $$;
 
@@ -506,6 +600,31 @@ CREATE TRIGGER trg_reviews_updated_at
   BEFORE UPDATE ON public.reviews
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+CREATE TRIGGER trg_events_updated_at
+  BEFORE UPDATE ON public.events
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE TRIGGER trg_tickets_updated_at
+  BEFORE UPDATE ON public.ticket_requests
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- ticket_ref auto-generato
+CREATE OR REPLACE FUNCTION public.set_ticket_ref()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF NEW.ticket_ref IS NULL OR NEW.ticket_ref = '' THEN
+    NEW.ticket_ref := public.generate_ticket_ref();
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_tickets_ref
+  BEFORE INSERT ON public.ticket_requests
+  FOR EACH ROW EXECUTE FUNCTION public.set_ticket_ref();
+
 -- booking_ref auto-generato
 CREATE OR REPLACE FUNCTION public.set_booking_ref()
 RETURNS TRIGGER
@@ -571,6 +690,8 @@ ALTER TABLE public.bookings           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.favorites          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.events             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ticket_requests    ENABLE ROW LEVEL SECURITY;
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -705,8 +826,26 @@ CREATE POLICY "slots: owner read all"
     )
   );
 
-CREATE POLICY "slots: owner manage"
-  ON public.availability_slots FOR INSERT, UPDATE, DELETE
+CREATE POLICY "slots: owner insert"
+  ON public.availability_slots FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.owner_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "slots: owner update"
+  ON public.availability_slots FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.owner_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "slots: owner delete"
+  ON public.availability_slots FOR DELETE
   USING (
     EXISTS (
       SELECT 1 FROM public.restaurants r
@@ -747,7 +886,7 @@ CREATE POLICY "bookings: customer cancel"
   USING (auth.uid() = customer_id)
   WITH CHECK (
     auth.uid() = customer_id
-    AND NEW.status = 'cancelled'   -- il cliente può solo cancellare
+    AND status = 'cancelled'   -- il cliente può solo cancellare (RLS non usa NEW/OLD, riferisce la riga direttamente)
   );
 
 -- Commerciante: può aggiornare status (confermare, assegnare tavolo, ecc.)
@@ -846,6 +985,98 @@ CREATE POLICY "favorites: customer delete own"
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
+--  POLICY: events
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Chiunque (anche anonimo) legge gli eventi attivi
+CREATE POLICY "events: public read active"
+  ON public.events FOR SELECT
+  USING (is_active = TRUE);
+
+-- Il commerciante proprietario vede anche i propri eventi non attivi
+CREATE POLICY "events: owner read own"
+  ON public.events FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.owner_id = auth.uid()
+    )
+  );
+
+-- Solo il proprietario del locale crea/modifica/elimina i propri eventi
+CREATE POLICY "events: owner insert"
+  ON public.events FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.owner_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "events: owner update"
+  ON public.events FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.owner_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "events: owner delete"
+  ON public.events FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.owner_id = auth.uid()
+    )
+  );
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+--  POLICY: ticket_requests
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Cliente vede solo le proprie richieste
+CREATE POLICY "tickets: customer read own"
+  ON public.ticket_requests FOR SELECT
+  USING (auth.uid() = customer_id);
+
+-- Il commerciante vede le richieste per i propri eventi
+CREATE POLICY "tickets: owner read venue"
+  ON public.ticket_requests FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.events e
+      JOIN public.restaurants r ON r.id = e.restaurant_id
+      WHERE e.id = event_id AND r.owner_id = auth.uid()
+    )
+  );
+
+-- Cliente autenticato può richiedere un posto
+CREATE POLICY "tickets: customer insert"
+  ON public.ticket_requests FOR INSERT
+  WITH CHECK (
+    auth.uid() = customer_id
+    AND public.get_my_role() = 'cliente'
+  );
+
+-- Cliente: può solo annullare la propria richiesta
+CREATE POLICY "tickets: customer cancel"
+  ON public.ticket_requests FOR UPDATE
+  USING (auth.uid() = customer_id)
+  WITH CHECK (auth.uid() = customer_id AND status = 'cancelled');
+
+-- Commerciante: conferma/rifiuta le richieste per i propri eventi
+CREATE POLICY "tickets: owner update status"
+  ON public.ticket_requests FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.events e
+      JOIN public.restaurants r ON r.id = e.restaurant_id
+      WHERE e.id = event_id AND r.owner_id = auth.uid()
+    )
+  );
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
 --  VIEWS UTILI (read-only, sicure)
 -- ═══════════════════════════════════════════════════════════════════════════
 
@@ -933,7 +1164,7 @@ WHERE s.is_active = TRUE
       'Spritz Bar',
       'Brera',
       'Milano',
-      '€€',
+      '$$',
       4.8,
       124,
       'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80',
@@ -996,4 +1227,6 @@ WHERE s.is_active = TRUE
   payments              | –            | read own          | read own venue
   reviews               | read public  | CRUD own          | –
   favorites             | –            | CRUD own          | –
+  events                | read active  | read active       | CRUD own
+  ticket_requests       | –            | insert+cancel own | read own venue / update status
 */

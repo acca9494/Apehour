@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
 const MAINTENANCE = false;
 
@@ -12,7 +13,7 @@ function homeFor(role: string | undefined): string {
   return "/profile";
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Maintenance mode ──────────────────────────────
@@ -30,9 +31,11 @@ export function proxy(request: NextRequest) {
     return res;
   }
 
-  const role = request.cookies.get("appape_role")?.value;
-  const uid = request.cookies.get("appape_uid")?.value;
-  const isAuthenticated = !!(role && uid);
+  // updateSession valida la sessione col server Auth di Supabase (mai un cookie
+  // letto e basta) e rinfresca il refresh token se necessario.
+  const { response, user } = await updateSession(request);
+  const role = user?.user_metadata?.role as string | undefined;
+  const isAuthenticated = !!user;
 
   if (AUTH_ROUTES.some((r) => pathname.startsWith(r)) && isAuthenticated) {
     return NextResponse.redirect(new URL(homeFor(role), request.url));
@@ -57,7 +60,7 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

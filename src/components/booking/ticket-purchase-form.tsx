@@ -4,14 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/context";
 import { ClayLink } from "@/components/ui/clay-button";
-import { purchaseTicket, parsePrice } from "@/lib/tickets/service";
+import { purchaseTicket } from "@/lib/tickets/service";
 import { downloadTicket } from "@/lib/tickets/download";
 import type { EventTicket } from "@/lib/tickets/types";
 import type { EventItem } from "@/lib/data/events";
 
+// Fase pilota: nessun pagamento biglietti in app, solo prenotazione/waitlist.
+const mode = "waitlist" as const;
+const isFree = true;
+const isWaitlist = true;
+const unitPrice = 0;
+
 export function TicketPurchaseForm({ event }: { event: EventItem }) {
   const { user } = useAuth();
-  const { unitPrice, isFree } = parsePrice(event.price);
 
   const [quantity, setQuantity] = useState(1);
   const [name, setName] = useState(user?.name ?? "");
@@ -21,8 +26,6 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState<EventTicket | null>(null);
 
-  const total = isFree ? 0 : unitPrice * quantity;
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
@@ -31,6 +34,7 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
     try {
       const ticket = await purchaseTicket(
         {
+          eventId: event.id,
           eventSlug: event.slug,
           eventTitle: event.title,
           eventDate: event.date,
@@ -40,6 +44,7 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
           quantity,
           unitPrice,
           isFree,
+          mode,
           buyerName: name,
           buyerEmail: email,
           buyerPhone: phone,
@@ -58,23 +63,21 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
     return (
       <aside className="booking-panel" aria-label="Biglietto confermato">
         <div className="booking-confirmed" style={{ padding: 0 }}>
-          <div className="booking-confirmed__icon" aria-hidden="true">✓</div>
-          <p className="eyebrow">{confirmed.isFree ? "Iscrizione confermata" : "Acquisto confermato"}</p>
+          <div className="booking-confirmed__icon" aria-hidden="true">⏳</div>
+          <p className="eyebrow">Richiesta inviata</p>
           <h1>{confirmed.eventTitle}</h1>
           <p className="booking-confirmed__ref">{confirmed.ticketRef}</p>
           <div className="booking-confirmed__details">
-            <span>{confirmed.quantity} {confirmed.quantity === 1 ? "biglietto" : "biglietti"}</span>
+            <span>{confirmed.quantity} {confirmed.quantity === 1 ? "posto" : "posti"}</span>
             <span>·</span>
-            <span>{confirmed.isFree ? "Free entry" : `€${confirmed.totalPrice.toFixed(2)}`}</span>
+            <span>Nessun pagamento in app</span>
           </div>
           <p className="booking-confirmed__note">
-            {confirmed.isFree
-              ? <>Conferma inviata a <strong>{confirmed.buyerEmail}</strong>. Presentala all'ingresso.</>
-              : <>Ricevuta e biglietto inviati a <strong>{confirmed.buyerEmail}</strong>.</>}
+            Il locale confermerà la tua presenza a breve. Riceverai una conferma a <strong>{confirmed.buyerEmail}</strong>.
           </p>
           <div className="booking-confirmed__actions">
             <button type="button" className="clay-button clay-button--primary" onClick={() => downloadTicket(confirmed)}>
-              Scarica biglietto
+              Scarica richiesta
             </button>
             <ClayLink href="/profile/eventi" variant="secondary">I miei eventi</ClayLink>
           </div>
@@ -86,12 +89,12 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
   return (
     <aside className="booking-panel" id="biglietti" aria-label="Acquista il biglietto">
       <div className="bp-header">
-        <p className="eyebrow">{isFree ? "Ingresso gratuito" : "Acquista il biglietto"}</p>
+        <p className="eyebrow">Prenotazione senza pagamento</p>
         <p className="bp-social-proof">{event.date} · {event.location}</p>
       </div>
 
       <div>
-        <p className="bp-label-text">Quantità</p>
+        <p className="bp-label-text">Posti richiesti</p>
         <div className="bp-guests">
           <button
             type="button"
@@ -103,7 +106,7 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
             −
           </button>
           <span className="bp-guests__count">
-            {quantity} {quantity === 1 ? "biglietto" : "biglietti"}
+            {quantity} {quantity === 1 ? "posto" : "posti"}
           </span>
           <button
             type="button"
@@ -117,12 +120,9 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
         </div>
       </div>
 
-      {!isFree && (
-        <div className="bp-offer">
-          <strong>Totale: €{total.toFixed(2)}</strong>
-          <span>€{unitPrice.toFixed(2)} a biglietto</span>
-        </div>
-      )}
+      <p className="bp-social-proof" style={{ marginTop: "-0.5rem" }}>
+        Nessun pagamento in app: il locale confermerà la tua presenza. Eventuale pagamento in loco.
+      </p>
 
       {user ? (
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -142,7 +142,7 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
           {error && <div className="auth-error" role="alert">{error}</div>}
 
           <button type="submit" className="clay-button clay-button--primary bp-cta" disabled={submitting}>
-            {submitting ? "Elaborazione…" : isFree ? "Conferma iscrizione gratuita" : `Paga €${total.toFixed(2)} e acquista`}
+            {submitting ? "Elaborazione…" : "Richiedi il tuo posto"}
           </button>
         </form>
       ) : (
@@ -155,7 +155,7 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
       )}
 
       <div className="bp-trust">
-        <span>✓ Conferma immediata</span>
+        <span>✓ Nessun pagamento in app</span>
         <span>✓ Ricevuta via email</span>
       </div>
     </aside>

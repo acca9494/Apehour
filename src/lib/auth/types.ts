@@ -24,9 +24,13 @@ export interface RegisterData {
   email: string;
   password: string;
   role: UserRole;
+  // Extra da salvare in user_metadata (es. dati del locale per i commercianti,
+  // usati per creare il record restaurants al primo accesso confermato).
+  metadata?: Record<string, string>;
 }
 
 export type AuthErrorCode =
   | "invalid_credentials"
   | "email_taken"
+  | "email_confirmation_required"
   | "unknown";

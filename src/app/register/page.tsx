@@ -6,9 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { ClayButton } from "@/components/ui/clay-button";
 import { MerchantRegisterForm } from "@/components/home/merchant-register-form";
+import { Modal } from "@/components/ui/modal";
+import { LegalModal } from "@/components/legal/legal-modal";
 import type { AuthErrorCode } from "@/lib/auth/types";
 
-const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
+const ERROR_MESSAGES: Record<Exclude<AuthErrorCode, "email_confirmation_required">, string> = {
   invalid_credentials: "Credenziali non valide.",
   email_taken: "Email già registrata. Prova ad accedere.",
   unknown: "Qualcosa è andato storto. Riprova.",
@@ -30,8 +32,11 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [privacy, setPrivacy] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<AuthErrorCode | null>(null);
+  const [error, setError] = useState<Exclude<AuthErrorCode, "email_confirmation_required"> | null>(null);
+  const [showLegal, setShowLegal] = useState(false);
+  const [showConfirmEmail, setShowConfirmEmail] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
@@ -47,7 +52,11 @@ export default function RegisterPage() {
       await register({ name, email, password, role: "cliente" });
     } catch (err) {
       const code = err instanceof Error ? err.message : "unknown";
-      setError(code as AuthErrorCode);
+      if (code === "email_confirmation_required") {
+        setShowConfirmEmail(true);
+      } else {
+        setError(code as Exclude<AuthErrorCode, "email_confirmation_required">);
+      }
       setSubmitting(false);
     }
   }
@@ -104,6 +113,17 @@ export default function RegisterPage() {
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="minimo 6 caratteri" required autoComplete="new-password" minLength={6} />
               </label>
 
+              <label className="mreg__checkbox">
+                <input type="checkbox" checked={privacy} onChange={e => setPrivacy(e.target.checked)} required />
+                <span>
+                  Accetto l&apos;{" "}
+                  <button type="button" className="mreg__privacy-link" onClick={() => setShowLegal(true)}>
+                    informativa sulla privacy
+                  </button>
+                  {" "}di ApeHour
+                </span>
+              </label>
+
               <ClayButton type="submit" className="auth-form__submit" disabled={submitting}>
                 {submitting ? "Creazione account…" : "Crea account"}
               </ClayButton>
@@ -130,6 +150,21 @@ export default function RegisterPage() {
         )}
 
       </div>
+
+      <Modal open={showConfirmEmail} onClose={() => setShowConfirmEmail(false)} title="Account creato">
+        <div className="confirm-email-modal">
+          <div className="confirm-email-modal__icon" aria-hidden="true">✓</div>
+          <p>
+            Il tuo account è stato creato. Controlla la tua email e clicca sul link di conferma
+            prima di accedere.
+          </p>
+          <button type="button" className="mreg__btn mreg__btn--primary" onClick={() => setShowConfirmEmail(false)}>
+            Ho capito
+          </button>
+        </div>
+      </Modal>
+
+      <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
     </div>
   );
 }
