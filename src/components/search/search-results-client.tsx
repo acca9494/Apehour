@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -106,6 +106,22 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
   const searchParams = useSearchParams();
   const router = useRouter();
   const viewMode = (searchParams.get("view") ?? "list") as "list" | "map";
+
+  const mapMarkers = useMemo(
+    () =>
+      restaurants.map((r) => ({
+        lat: r.coordinates.lat,
+        lng: r.coordinates.lng,
+        label: r.name,
+        slug: r.slug,
+        image: r.heroImage,
+        neighborhood: r.neighborhood,
+        cuisine: r.cuisine,
+        budget: r.priceRange,
+        rating: r.rating,
+      })),
+    [restaurants]
+  );
 
   function switchView(mode: "list" | "map") {
     const params = new URLSearchParams(searchParams.toString());
@@ -432,17 +448,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
               }
               zoom={filters.city && CITY_COORDS[filters.city] ? 12.5 : 10}
               fitToMarkers={false}
-              markers={restaurants.map((r) => ({
-                lat: r.coordinates.lat,
-                lng: r.coordinates.lng,
-                label: r.name,
-                slug: r.slug,
-                image: r.heroImage,
-                neighborhood: r.neighborhood,
-                cuisine: r.cuisine,
-                budget: r.priceRange,
-                rating: r.rating,
-              }))}
+              markers={mapMarkers}
               style={{ height: "100%", width: "100%" }}
             />
           </div>
