@@ -123,7 +123,6 @@ export async function getSlotsForDate(restaurantId: string, date: string): Promi
     console.error("[getSlotsForDate] error:", rowsErr.message, { restaurantId, date, dayKey });
     throw new Error(rowsErr.message);
   }
-  console.log("[getSlotsForDate]", { restaurantId, date, dayKey, rowsFound: (rows ?? []).length, rows });
 
   const { data: bookings, error: bookErr } = await supabase
     .from("bookings")

@@ -119,6 +119,15 @@ const PRICE_INFO: Record<string, { img: string; label: string; budget: string }>
   "$$$$": { img: "/bombo-v2.png", label: "Bombo Queen",  budget: "€€€" },
 };
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function renderMarkers(
   L: typeof import("leaflet"),
   map: ReturnType<typeof import("leaflet")["map"]>,
@@ -131,22 +140,27 @@ function renderMarkers(
 
   markers.forEach(({ lat, lng, label, slug, image, neighborhood, cuisine, budget, rating }) => {
     const priceInfo = PRICE_INFO[budget];
+    const safeLabel = escapeHtml(label);
+    const safeSlug = escapeHtml(slug);
+    const safeImage = escapeHtml(image);
+    const safeNeighborhood = escapeHtml(neighborhood);
+    const safeCuisine = escapeHtml(cuisine);
     const html = `
       <div class="mcrd-wrap">
-        <a class="mcrd" href="/restaurants/${slug}" onclick="event.stopPropagation()">
-          <img class="mcrd__img" src="${image}" alt="${label}" />
+        <a class="mcrd" href="/restaurants/${safeSlug}" onclick="event.stopPropagation()">
+          <img class="mcrd__img" src="${safeImage}" alt="${safeLabel}" />
           <div class="mcrd__body">
             <div class="mcrd__topline">
-              <span class="mcrd__tag">${cuisine}</span>
+              <span class="mcrd__tag">${safeCuisine}</span>
               <strong class="mcrd__rating">★ ${rating.toFixed(1)}</strong>
             </div>
-            <strong class="mcrd__name">${label}</strong>
-            <span class="mcrd__hood">${neighborhood}</span>
+            <strong class="mcrd__name">${safeLabel}</strong>
+            <span class="mcrd__hood">${safeNeighborhood}</span>
             ${priceInfo ? `
             <div class="mcrd__budget">
-              <img class="mcrd__budget-img" src="${priceInfo.img}" alt="" />
-              <span class="mcrd__budget-label">${priceInfo.label}</span>
-              <span class="mcrd__budget-symbol">${priceInfo.budget}</span>
+              <img class="mcrd__budget-img" src="${escapeHtml(priceInfo.img)}" alt="" />
+              <span class="mcrd__budget-label">${escapeHtml(priceInfo.label)}</span>
+              <span class="mcrd__budget-symbol">${escapeHtml(priceInfo.budget)}</span>
             </div>` : ""}
             <span class="mcrd__cta">Prenota →</span>
           </div>
