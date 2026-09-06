@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BookingPanel } from "@/components/booking/booking-panel";
 import { DetailHero } from "@/components/detail/detail-hero";
+import { MapClient } from "@/components/map/map-client";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getReviews } from "@/lib/services/reviews";
@@ -130,14 +131,22 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
               </dl>
             </div>
             <div className="detail-map-wrap">
-              <iframe
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(`${restaurant.address}, ${restaurant.city}`)}&output=embed&z=16`}
-                title={`Mappa ${restaurant.name}`}
+              <MapClient
+                center={restaurant.coordinates}
+                zoom={15}
+                markers={[{
+                  lat: restaurant.coordinates.lat,
+                  lng: restaurant.coordinates.lng,
+                  label: restaurant.name,
+                  slug: restaurant.slug,
+                  image: restaurant.heroImage,
+                  neighborhood: restaurant.neighborhood,
+                  cuisine: restaurant.cuisine,
+                  budget: restaurant.priceRange,
+                  rating: restaurant.rating,
+                }]}
                 className="detail-map-iframe"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
               />
-              <div className="detail-map-cover" aria-hidden="true" />
             </div>
           </section>
 

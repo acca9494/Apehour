@@ -10,7 +10,15 @@ import { useMobileMenu } from "@/lib/mobile-menu-context";
 import { useLang } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { getBees } from "@/lib/bees/store";
+import { MapClient } from "@/components/map/map-client";
 import type { SVGProps } from "react";
+
+const LAZIO_CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
+  "Roma": { lat: 41.9028, lng: 12.4964 },
+  "Ostia": { lat: 41.7313, lng: 12.2887 },
+  "Fregene": { lat: 41.8283, lng: 12.2015 },
+  "Ladispoli": { lat: 41.956, lng: 12.0745 },
+};
 
 type NavItem = {
   href: string;
@@ -672,11 +680,10 @@ export function SiteHeader() {
             </div>
           )}
           <div className="mobile-map-overlay__map">
-            <iframe
-              src={`https://maps.google.com/maps?q=aperitivo+bar+${encodeURIComponent(cityFilter || "Lazio")}&output=embed&z=14`}
-              title="Mappa locali"
+            <MapClient
+              center={LAZIO_CITY_CENTERS[cityFilter] ?? LAZIO_CITY_CENTERS["Roma"]!}
+              zoom={cityFilter ? 14 : 10}
               className="mobile-map-overlay__iframe"
-              loading="lazy"
             />
           </div>
           <div className="mobile-map-overlay__footer">
