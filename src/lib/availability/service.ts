@@ -124,18 +124,20 @@ export async function getSlotsForDate(restaurantId: string, date: string): Promi
     throw new Error(rowsErr.message);
   }
 
-  const { data: bookings, error: bookErr } = await supabase
-    .from("bookings")
-    .select("start_time, guests")
+  // La tabella bookings è protetta da RLS (un cliente vede solo le proprie
+  // prenotazioni): per il conteggio posti serve una vista aggregata pubblica
+  // che non espone dati del singolo cliente, solo il totale ospiti per slot.
+  const { data: occupancy, error: bookErr } = await supabase
+    .from("booking_occupancy")
+    .select("start_time, booked_guests")
     .eq("restaurant_id", restaurantId)
-    .eq("date", date)
-    .neq("status", "cancelled");
+    .eq("date", date);
   if (bookErr) throw new Error(bookErr.message);
 
   const bookedByTime = new Map<string, number>();
-  for (const b of bookings ?? []) {
+  for (const b of occupancy ?? []) {
     const t = (b.start_time as string).slice(0, 5);
-    bookedByTime.set(t, (bookedByTime.get(t) ?? 0) + (b.guests as number));
+    bookedByTime.set(t, (bookedByTime.get(t) ?? 0) + (b.booked_guests as number));
   }
 
   return ((rows ?? []) as ScheduleRow[]).map((r) => {

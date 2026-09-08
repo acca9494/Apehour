@@ -475,20 +475,33 @@ AS $$
   SELECT role::TEXT FROM public.profiles WHERE id = auth.uid();
 $$;
 
+-- Contatore atomico per anno: evita collisioni quando una prenotazione viene
+-- cancellata/eliminata (MAX(booking_ref)+1 su bookings può riassegnare un
+-- numero già usato) o sotto richieste concorrenti (race condition su MAX()).
+CREATE TABLE IF NOT EXISTS public.booking_ref_counters (
+  year        INTEGER PRIMARY KEY,
+  next_value  INTEGER NOT NULL DEFAULT 1
+);
+
 -- Genera booking_ref nel formato APE-YYYY-NNNNN
+-- SECURITY DEFINER: booking_ref_counters è una tabella puramente interna
+-- (nessun input utente, solo l'anno corrente), va scritta a prescindere dal
+-- ruolo del chiamante — RLS sulla tabella bookings resta comunque invariata.
 CREATE OR REPLACE FUNCTION public.generate_booking_ref()
 RETURNS TEXT
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   seq     INTEGER;
   yr      TEXT;
 BEGIN
-  yr  := TO_CHAR(NOW(), 'YYYY');
-  SELECT COALESCE(MAX(CAST(SPLIT_PART(booking_ref, '-', 3) AS INTEGER)), 0) + 1
-    INTO seq
-    FROM public.bookings
-    WHERE booking_ref LIKE 'APE-' || yr || '-%';
+  yr := TO_CHAR(NOW(), 'YYYY');
+  INSERT INTO public.booking_ref_counters (year, next_value)
+    VALUES (CAST(yr AS INTEGER), 2)
+  ON CONFLICT (year) DO UPDATE SET next_value = public.booking_ref_counters.next_value + 1
+  RETURNING next_value - 1 INTO seq;
   RETURN 'APE-' || yr || '-' || LPAD(seq::TEXT, 5, '0');
 END;
 $$;
@@ -900,6 +913,24 @@ CREATE POLICY "bookings: owner update"
       WHERE r.id = restaurant_id AND r.owner_id = auth.uid()
     )
   );
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+--  VIEW: booking_occupancy
+-- ═══════════════════════════════════════════════════════════════════════════
+-- La tabella bookings è protetta da RLS (un cliente vede solo le proprie
+-- prenotazioni, il commerciante solo quelle del proprio locale): per calcolare
+-- i posti disponibili di uno slot serve però il totale ospiti di TUTTI i
+-- clienti. Questa vista espone solo l'aggregato (nessun dato personale) ed è
+-- leggibile pubblicamente, ignorando la RLS di riga sulla tabella sottostante
+-- (comportamento di default di una VIEW: esegue coi permessi del proprietario).
+CREATE VIEW public.booking_occupancy AS
+  SELECT restaurant_id, date, start_time, SUM(guests) AS booked_guests
+  FROM public.bookings
+  WHERE status <> 'cancelled'
+  GROUP BY restaurant_id, date, start_time;
+
+GRANT SELECT ON public.booking_occupancy TO anon, authenticated;
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
