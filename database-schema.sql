@@ -461,6 +461,76 @@ CREATE INDEX idx_tickets_status   ON public.ticket_requests(status);
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
+--  12. OFFERS
+--  Nota: questa tabella era stata creata live su Supabase con SQL ad-hoc
+--  durante lo sviluppo e non era mai stata sincronizzata in questo file —
+--  causa diretta di un bug di moderazione (due policy SELECT con nomi
+--  diversi che si somma(va)no in OR, lasciando visibili le offerte di
+--  locali non ancora verificati). Definizione riportata qui allineata
+--  allo stato reale del database dopo il fix.
+-- ═══════════════════════════════════════════════════════════════════════════
+CREATE TABLE public.offers (
+  id             UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+  restaurant_id  UUID        NOT NULL REFERENCES public.restaurants(id) ON DELETE CASCADE,
+
+  title          TEXT        NOT NULL,
+  description    TEXT,
+  discount       INTEGER     NOT NULL,
+  ape_type       TEXT,                        -- 'vespa-sprint' | 'ape-plus' | 'bombo-queen'
+  slot_ids       UUID[]      NOT NULL DEFAULT '{}',  -- id di availability_schedules collegati
+
+  is_active      BOOLEAN     NOT NULL DEFAULT TRUE,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+COMMENT ON TABLE public.offers IS
+  'Offerte/sconti pubblicati dai locali, opzionalmente collegati a slot di disponibilità specifici.';
+
+CREATE INDEX idx_offers_restaurant ON public.offers(restaurant_id);
+CREATE INDEX idx_offers_active     ON public.offers(is_active) WHERE is_active = TRUE;
+
+ALTER TABLE public.offers ENABLE ROW LEVEL SECURITY;
+
+-- Pubblico: solo offerte di locali attivi E verificati dal team
+CREATE POLICY "offers: public read"
+  ON public.offers FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.is_active = TRUE AND r.is_verified = TRUE
+    )
+  );
+
+-- Il commerciante proprietario vede anche le proprie offerte non attive
+CREATE POLICY "offers: owner read own"
+  ON public.offers FOR SELECT
+  USING (
+    EXISTS (SELECT 1 FROM public.restaurants r WHERE r.id = restaurant_id AND r.owner_id = auth.uid())
+  );
+
+CREATE POLICY "offers: owner insert"
+  ON public.offers FOR INSERT
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.restaurants r WHERE r.id = restaurant_id AND r.owner_id = auth.uid())
+  );
+
+CREATE POLICY "offers: owner update"
+  ON public.offers FOR UPDATE
+  USING (
+    EXISTS (SELECT 1 FROM public.restaurants r WHERE r.id = restaurant_id AND r.owner_id = auth.uid())
+  );
+
+CREATE POLICY "offers: owner delete"
+  ON public.offers FOR DELETE
+  USING (
+    EXISTS (SELECT 1 FROM public.restaurants r WHERE r.id = restaurant_id AND r.owner_id = auth.uid())
+  );
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.offers TO anon, authenticated;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
 --  FUNZIONI HELPER
 -- ═══════════════════════════════════════════════════════════════════════════
 
