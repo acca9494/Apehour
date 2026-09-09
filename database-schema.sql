@@ -1093,6 +1093,13 @@ CREATE POLICY "favorites: customer delete own"
   ON public.favorites FOR DELETE
   USING (auth.uid() = customer_id);
 
+-- Il commerciante conta i preferiti ricevuti dal proprio locale ("Likes ricevuti")
+CREATE POLICY "favorites: owner read venue"
+  ON public.favorites FOR SELECT
+  USING (
+    EXISTS (SELECT 1 FROM public.restaurants r WHERE r.id = restaurant_id AND r.owner_id = auth.uid())
+  );
+
 
 -- ═══════════════════════════════════════════════════════════════════════════
 --  POLICY: events
