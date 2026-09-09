@@ -506,13 +506,20 @@ BEGIN
 END;
 $$;
 
--- Genera ticket_ref nel formato APE-TIX-NNNN
+-- Contatore atomico globale per i biglietti: il generatore precedente usava
+-- un numero casuale a 4 cifre senza controllo di unicità (RANDOM() * 9000),
+-- destinato a collidere e far fallire l'acquisto con un errore generico.
+CREATE SEQUENCE IF NOT EXISTS public.ticket_ref_seq;
+
+-- Genera ticket_ref nel formato APE-TIX-NNNNNN
 CREATE OR REPLACE FUNCTION public.generate_ticket_ref()
 RETURNS TEXT
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
-  RETURN 'APE-TIX-' || LPAD((FLOOR(RANDOM() * 9000) + 1000)::TEXT, 4, '0');
+  RETURN 'APE-TIX-' || LPAD(NEXTVAL('public.ticket_ref_seq')::TEXT, 6, '0');
 END;
 $$;
 
