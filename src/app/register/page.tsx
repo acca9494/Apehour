@@ -49,7 +49,10 @@ export default function RegisterPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await register({ name, email, password, role: "cliente" });
+      await register({
+        name, email, password, role: "cliente",
+        metadata: { privacy_accepted_at: new Date().toISOString() },
+      });
     } catch (err) {
       const code = err instanceof Error ? err.message : "unknown";
       if (code === "email_confirmation_required") {

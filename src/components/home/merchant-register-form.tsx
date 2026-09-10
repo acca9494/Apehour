@@ -198,6 +198,7 @@ export function MerchantRegisterForm() {
           venue_address: s2.address,
           venue_city: s2.city || "Roma",
           venue_price_range: priceRange,
+          privacy_accepted_at: new Date().toISOString(),
         },
       });
       // Se la sessione è già attiva (nessuna conferma email richiesta), crea subito

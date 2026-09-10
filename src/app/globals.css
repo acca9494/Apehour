@@ -8086,6 +8086,9 @@ body:has(.search-page--map) > main {
   color: #666;
   line-height: 1.5;
   cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
 }
 .mreg__checkbox input { margin-top: 3px; accent-color: var(--gold); width: 1rem; height: 1rem; }
 .mreg__checkbox span { display: block; }
