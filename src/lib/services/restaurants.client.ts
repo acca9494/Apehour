@@ -1,6 +1,6 @@
 import type { Restaurant, SearchFilters, Cuisine, BookingSlot } from "@/lib/types";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
-import { getAllActiveRestaurants, getRestaurantBySlug as getRestaurantRowBySlug, type RestaurantRow } from "@/lib/restaurants/service";
+import { getAllActiveRestaurants, getRestaurantBySlug as getRestaurantRowBySlug, type PublicRestaurantRow } from "@/lib/restaurants/service";
 
 interface ScheduleRow {
   id: string;
@@ -11,7 +11,7 @@ interface ScheduleRow {
   discount_percent: number | null;
 }
 
-function mapRow(row: RestaurantRow, slots: BookingSlot[] = []): Restaurant {
+function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = []): Restaurant {
   return {
     id: row.id,
     slug: row.slug,

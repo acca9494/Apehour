@@ -79,7 +79,7 @@ function applyRestaurantFilters(items: Restaurant[], filters?: SearchFilters): R
 
 async function fetchActiveRestaurantsServer(): Promise<Restaurant[]> {
   const supabase = await createServerClient();
-  const { data: restaurantRows, error } = await supabase.from("restaurants").select("*").eq("is_active", true);
+  const { data: restaurantRows, error } = await supabase.from("restaurants_public").select("*");
   if (error) throw new Error(error.message);
 
   const ids = (restaurantRows ?? []).map((r) => r.id as string);
@@ -115,7 +115,7 @@ export async function getTonightRestaurants(): Promise<Restaurant[]> {
 
 export async function getRestaurantBySlug(slug: string): Promise<Restaurant | null> {
   const supabase = await createServerClient();
-  const { data, error } = await supabase.from("restaurants").select("*").eq("slug", slug).maybeSingle();
+  const { data, error } = await supabase.from("restaurants_public").select("*").eq("slug", slug).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
 

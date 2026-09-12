@@ -12,16 +12,15 @@ interface OfferRow {
   slot_ids: string[];
 }
 
-interface PublicOfferRow extends OfferRow {
-  restaurants: {
-    slug: string;
-    name: string;
-    cuisine: string;
-    address: string | null;
-    rating: number;
-    review_count: number;
-    cover_image_url: string | null;
-  } | null;
+interface PublicRestaurantInfo {
+  id: string;
+  slug: string;
+  name: string;
+  cuisine: string;
+  address: string | null;
+  rating: number;
+  review_count: number;
+  cover_image_url: string | null;
 }
 
 export interface PublicOffer {
@@ -89,28 +88,44 @@ export async function deleteOffer(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+// Nota: niente embedding "offers.restaurants(...)" — quel join passa comunque
+// dalla tabella restaurants, che non ha più una policy SELECT pubblica (per
+// non esporre iban/vat_number/legal_name). Il locale va letto separatamente
+// dalla vista pubblica restaurants_public.
 export async function getAllActiveOffers(): Promise<PublicOffer[]> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  const { data: offers, error } = await supabase
     .from("offers")
-    .select("*, restaurants(slug, name, cuisine, address, rating, review_count, cover_image_url)")
+    .select("*")
     .eq("is_active", true)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown as PublicOfferRow[])
-    .filter((row) => row.restaurants)
-    .map((row) => ({
+  const rows = (offers ?? []) as OfferRow[];
+  if (rows.length === 0) return [];
+
+  const restaurantIds = [...new Set(rows.map((r) => r.restaurant_id))];
+  const { data: restaurants, error: rErr } = await supabase
+    .from("restaurants_public")
+    .select("id, slug, name, cuisine, address, rating, review_count, cover_image_url")
+    .in("id", restaurantIds);
+  if (rErr) throw new Error(rErr.message);
+  const byId = new Map((restaurants as PublicRestaurantInfo[] ?? []).map((r) => [r.id, r]));
+
+  return rows
+    .map((row) => ({ row, restaurant: byId.get(row.restaurant_id) }))
+    .filter((x): x is { row: OfferRow; restaurant: PublicRestaurantInfo } => !!x.restaurant)
+    .map(({ row, restaurant }) => ({
       id: row.id,
       title: row.title,
       description: row.description ?? "",
       discount: row.discount,
       apeType: row.ape_type ?? undefined,
-      restaurantSlug: row.restaurants!.slug,
-      restaurantName: row.restaurants!.name,
-      restaurantCuisine: row.restaurants!.cuisine,
-      restaurantAddress: row.restaurants!.address ?? "",
-      restaurantRating: row.restaurants!.rating ?? 0,
-      restaurantReviewCount: row.restaurants!.review_count ?? 0,
-      restaurantImage: row.restaurants!.cover_image_url ?? "/apeapplogo1.png",
+      restaurantSlug: restaurant.slug,
+      restaurantName: restaurant.name,
+      restaurantCuisine: restaurant.cuisine,
+      restaurantAddress: restaurant.address ?? "",
+      restaurantRating: restaurant.rating ?? 0,
+      restaurantReviewCount: restaurant.review_count ?? 0,
+      restaurantImage: restaurant.cover_image_url ?? "/apeapplogo1.png",
     }));
 }

@@ -32,19 +32,32 @@ interface BookingRow {
   cancel_reason: string | null;
   created_at: string;
   updated_at: string;
-  restaurants: { name: string; slug: string; city: string } | null;
 }
 
-const SELECT_WITH_RESTAURANT = "*, restaurants(name, slug, city)";
+// Nota: niente embedding "bookings.restaurants(...)" — quel join passa
+// comunque dalla tabella restaurants, che non ha più una policy SELECT
+// pubblica (per non esporre iban/vat_number/legal_name), quindi si romperebbe
+// anche per un cliente autenticato che vede le proprie prenotazioni. Il
+// locale va letto separatamente dalla vista pubblica restaurants_public.
+async function attachRestaurants(
+  rows: BookingRow[]
+): Promise<Map<string, { name: string; slug: string; city: string }>> {
+  const restaurantIds = [...new Set(rows.map((r) => r.restaurant_id))];
+  if (restaurantIds.length === 0) return new Map();
+  const supabase = createClient();
+  const { data, error } = await supabase.from("restaurants_public").select("id, name, slug, city").in("id", restaurantIds);
+  if (error) throw new Error(error.message);
+  return new Map((data ?? []).map((r) => [r.id as string, { name: r.name as string, slug: r.slug as string, city: r.city as string }]));
+}
 
-function mapRow(row: BookingRow): ClientBooking {
+function mapRow(row: BookingRow, restaurant?: { name: string; slug: string; city: string }): ClientBooking {
   return {
     id: row.id,
     bookingRef: row.booking_ref,
     restaurantId: row.restaurant_id,
-    restaurantName: row.restaurants?.name ?? "",
-    restaurantSlug: row.restaurants?.slug ?? "",
-    restaurantCity: row.restaurants?.city ?? "",
+    restaurantName: restaurant?.name ?? "",
+    restaurantSlug: restaurant?.slug ?? "",
+    restaurantCity: restaurant?.city ?? "",
     customerId: row.customer_id,
     date: row.date,
     time: row.start_time.slice(0, 5),
@@ -148,11 +161,13 @@ export async function createBooking(
       deposit_required: false,
       confirmed_at: now,
     })
-    .select(SELECT_WITH_RESTAURANT)
+    .select("*")
     .single();
   if (error) throw new Error(error.message);
 
-  return mapRow(data as unknown as BookingRow);
+  const row = data as unknown as BookingRow;
+  const restaurants = await attachRestaurants([row]);
+  return mapRow(row, restaurants.get(row.restaurant_id));
 }
 
 // ── 3. Cancella prenotazione ─────────────────────────────────────────────────
@@ -168,10 +183,12 @@ export async function cancelBooking(
     .from("bookings")
     .update({ status: "cancelled", cancelled_at: new Date().toISOString(), cancel_reason: reason })
     .eq("id", bookingId)
-    .select(SELECT_WITH_RESTAURANT)
+    .select("*")
     .single();
   if (error) throw new Error(error.message);
-  return mapRow(data as unknown as BookingRow);
+  const row = data as unknown as BookingRow;
+  const restaurants = await attachRestaurants([row]);
+  return mapRow(row, restaurants.get(row.restaurant_id));
 }
 
 // ── 4. Aggiorna stato (commerciante) ─────────────────────────────────────────
@@ -191,10 +208,12 @@ export async function updateStatus(
       ...(status === "cancelled" ? { cancelled_at: now, cancel_reason: reason } : {}),
     })
     .eq("id", bookingId)
-    .select(SELECT_WITH_RESTAURANT)
+    .select("*")
     .single();
   if (error) throw new Error(error.message);
-  return mapRow(data as unknown as BookingRow);
+  const row = data as unknown as BookingRow;
+  const restaurants = await attachRestaurants([row]);
+  return mapRow(row, restaurants.get(row.restaurant_id));
 }
 
 // ── 5. Storico cliente ───────────────────────────────────────────────────────
@@ -203,11 +222,13 @@ export async function fetchClientBookings(customerId: string): Promise<ClientBoo
   const supabase = createClient();
   const { data, error } = await supabase
     .from("bookings")
-    .select(SELECT_WITH_RESTAURANT)
+    .select("*")
     .eq("customer_id", customerId)
     .order("date", { ascending: false });
   if (error) throw new Error(error.message);
-  return (data as unknown as BookingRow[]).map(mapRow);
+  const rows = (data ?? []) as unknown as BookingRow[];
+  const restaurants = await attachRestaurants(rows);
+  return rows.map((r) => mapRow(r, restaurants.get(r.restaurant_id)));
 }
 
 // ── 6. Storico commerciante ──────────────────────────────────────────────────
@@ -217,11 +238,13 @@ export async function fetchMerchantBookings(restaurantIds: string[]): Promise<Me
   const supabase = createClient();
   const { data, error } = await supabase
     .from("bookings")
-    .select(SELECT_WITH_RESTAURANT)
+    .select("*")
     .in("restaurant_id", restaurantIds)
     .order("date", { ascending: false });
   if (error) throw new Error(error.message);
-  return (data as unknown as BookingRow[]).map(mapRow);
+  const rows = (data ?? []) as unknown as BookingRow[];
+  const restaurants = await attachRestaurants(rows);
+  return rows.map((r) => mapRow(r, restaurants.get(r.restaurant_id)));
 }
 
 // ── 7. Singola prenotazione ──────────────────────────────────────────────────
@@ -230,9 +253,12 @@ export async function fetchBookingById(id: string): Promise<ClientBooking | null
   const supabase = createClient();
   const { data, error } = await supabase
     .from("bookings")
-    .select(SELECT_WITH_RESTAURANT)
+    .select("*")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return data ? mapRow(data as unknown as BookingRow) : null;
+  if (!data) return null;
+  const row = data as unknown as BookingRow;
+  const restaurants = await attachRestaurants([row]);
+  return mapRow(row, restaurants.get(row.restaurant_id));
 }

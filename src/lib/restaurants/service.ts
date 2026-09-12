@@ -171,18 +171,23 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
   return data as RestaurantRow;
 }
 
-export async function getAllActiveRestaurants(): Promise<RestaurantRow[]> {
+// Locali pubblici (ricerca, mappa, pagina locale): letti da restaurants_public,
+// una vista senza le colonne sensibili (legal_name/vat_number/iban) — mai
+// dalla tabella restaurants, che le espone tramite select("*").
+export type PublicRestaurantRow = Omit<RestaurantRow, "owner_id" | "legal_name" | "vat_number" | "iban">;
+
+export async function getAllActiveRestaurants(): Promise<PublicRestaurantRow[]> {
   const supabase = createClient();
-  const { data, error } = await supabase.from("restaurants").select("*").eq("is_active", true);
+  const { data, error } = await supabase.from("restaurants_public").select("*");
   if (error) throw new Error(error.message);
-  return (data ?? []) as RestaurantRow[];
+  return (data ?? []) as PublicRestaurantRow[];
 }
 
-export async function getRestaurantBySlug(slug: string): Promise<RestaurantRow | null> {
+export async function getRestaurantBySlug(slug: string): Promise<PublicRestaurantRow | null> {
   const supabase = createClient();
-  const { data, error } = await supabase.from("restaurants").select("*").eq("slug", slug).maybeSingle();
+  const { data, error } = await supabase.from("restaurants_public").select("*").eq("slug", slug).maybeSingle();
   if (error) throw new Error(error.message);
-  return data as RestaurantRow | null;
+  return data as PublicRestaurantRow | null;
 }
 
 // Crea il locale del commerciante al primo accesso confermato, usando i dati

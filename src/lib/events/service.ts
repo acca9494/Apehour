@@ -38,7 +38,8 @@ export function formatEventDateLabel(eventDate: string, eventEndDate: string | n
   return `${dateLabel} · ${startTime.slice(0, 5)}`;
 }
 
-function mapRow(row: EventRow): EventItem {
+function mapRow(row: EventRow, restaurant?: { slug: string; name: string }): EventItem {
+  const rest = restaurant ?? row.restaurants;
   return {
     id: row.id,
     slug: row.slug,
@@ -51,8 +52,8 @@ function mapRow(row: EventRow): EventItem {
     ticketMode: row.ticket_mode,
     bees: row.bees_reward,
     description: row.description ?? "",
-    restaurantSlug: row.restaurants?.slug ?? "",
-    restaurantName: row.restaurants?.name ?? "",
+    restaurantSlug: rest?.slug ?? "",
+    restaurantName: rest?.name ?? "",
   };
 }
 
@@ -76,7 +77,7 @@ export async function listMyEvents(restaurantId: string): Promise<EventItem[]> {
     .eq("restaurant_id", restaurantId)
     .order("event_date", { ascending: true });
   if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown as EventRow[]).map(mapRow);
+  return ((data ?? []) as unknown as EventRow[]).map((r) => mapRow(r));
 }
 
 export async function upsertEvent(id: string | null, input: EventInput, restaurantId: string): Promise<void> {
@@ -112,26 +113,45 @@ export async function deleteEvent(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+// Nota: niente embedding "events.restaurants(...)" per il pubblico — quel join
+// passa comunque dalla tabella restaurants, che non ha più una policy SELECT
+// pubblica (per non esporre iban/vat_number/legal_name). Il locale va letto
+// separatamente dalla vista pubblica restaurants_public.
+async function attachRestaurants(rows: EventRow[]): Promise<EventItem[]> {
+  if (rows.length === 0) return [];
+  const supabase = createClient();
+  const restaurantIds = [...new Set(rows.map((r) => r.restaurant_id))];
+  const { data: restaurants, error } = await supabase
+    .from("restaurants_public")
+    .select("id, slug, name")
+    .in("id", restaurantIds);
+  if (error) throw new Error(error.message);
+  const byId = new Map((restaurants ?? []).map((r) => [r.id as string, { slug: r.slug as string, name: r.name as string }]));
+  return rows.map((row) => mapRow(row, byId.get(row.restaurant_id)));
+}
+
 export async function getAllActiveEvents(): Promise<EventItem[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("events")
-    .select(SELECT_WITH_RESTAURANT)
+    .select("*")
     .eq("is_active", true)
     .order("event_date", { ascending: true });
   if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown as EventRow[]).map(mapRow);
+  return attachRestaurants((data ?? []) as EventRow[]);
 }
 
 export async function getEventBySlug(slug: string): Promise<EventItem | null> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("events")
-    .select(SELECT_WITH_RESTAURANT)
+    .select("*")
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return data ? mapRow(data as unknown as EventRow) : null;
+  if (!data) return null;
+  const [item] = await attachRestaurants([data as EventRow]);
+  return item ?? null;
 }
 
 export async function getParticipantsForEvent(eventId: string): Promise<number> {

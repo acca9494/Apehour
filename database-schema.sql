@@ -132,6 +132,44 @@ CREATE INDEX idx_restaurants_fts ON public.restaurants
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
+--  FUNZIONI HELPER (parte 1 — dipendono solo da profiles/restaurants,
+--  definite qui perché usate dalle policy di tabelle create più sotto)
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Ruolo dell'utente corrente (usato nelle policy RLS per evitare JOIN ripetuti)
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS TEXT
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT role::TEXT FROM public.profiles WHERE id = auth.uid();
+$$;
+
+-- Verifica se un locale è pubblico (attivo + verificato) SENZA esporne le
+-- colonne. Usata dalle policy di tables/events/offers/restaurant_images al
+-- posto di un EXISTS diretto contro restaurants: un EXISTS diretto è comunque
+-- soggetto alla RLS di restaurants, quindi se quella tabella smette di avere
+-- una policy SELECT permissiva per anon/cliente (per non esporre IBAN/P.IVA)
+-- l'EXISTS smetterebbe di funzionare anche per righe legittimamente pubbliche.
+-- SECURITY DEFINER bypassa quel problema restituendo solo un booleano.
+CREATE OR REPLACE FUNCTION public.is_restaurant_public(rid UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.restaurants r WHERE r.id = rid AND r.is_active = TRUE AND r.is_verified = TRUE
+  );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_restaurant_public(UUID) TO anon, authenticated;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
 --  3. RESTAURANT_IMAGES
 -- ═══════════════════════════════════════════════════════════════════════════
 CREATE TABLE public.restaurant_images (
@@ -504,12 +542,7 @@ ALTER TABLE public.offers ENABLE ROW LEVEL SECURITY;
 -- Pubblico: solo offerte di locali attivi E verificati dal team
 CREATE POLICY "offers: public read"
   ON public.offers FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.restaurants r
-      WHERE r.id = restaurant_id AND r.is_active = TRUE AND r.is_verified = TRUE
-    )
-  );
+  USING (public.is_restaurant_public(restaurant_id));
 
 -- Il commerciante proprietario vede anche le proprie offerte non attive
 CREATE POLICY "offers: owner read own"
@@ -540,19 +573,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.offers TO anon, authenticated;
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
---  FUNZIONI HELPER
+--  FUNZIONI HELPER (parte 2 — usate da trigger/generatori più sotto)
 -- ═══════════════════════════════════════════════════════════════════════════
-
--- Ruolo dell'utente corrente (usato nelle policy RLS per evitare JOIN ripetuti)
-CREATE OR REPLACE FUNCTION public.get_my_role()
-RETURNS TEXT
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT role::TEXT FROM public.profiles WHERE id = auth.uid();
-$$;
 
 -- Contatore atomico per anno: evita collisioni quando una prenotazione viene
 -- cancellata/eliminata (MAX(booking_ref)+1 su bookings può riassegnare un
@@ -816,12 +838,13 @@ CREATE POLICY "profiles: insert own"
 -- ═══════════════════════════════════════════════════════════════════════════
 --  POLICY: restaurants
 -- ═══════════════════════════════════════════════════════════════════════════
--- Chiunque (anche anonimo) può leggere i locali attivi e verificati dal team
--- (moderazione stile TheFork: il locale si registra ma resta invisibile
--- finché non viene ricontattato e approvato manualmente).
-CREATE POLICY "restaurants: public read active"
-  ON public.restaurants FOR SELECT
-  USING (is_active = TRUE AND is_verified = TRUE);
+-- NOTA: nessuna policy SELECT pubblica sulla tabella base. Selezionare "*" su
+-- questa tabella espone anche legal_name/vat_number/iban (dati fiscali del
+-- commerciante) a chiunque abbia la anon key — che è per forza pubblica lato
+-- client. Il pubblico legge i locali attivi/verificati tramite la vista
+-- public.restaurants_public (solo colonne non sensibili, vedi sotto), mentre
+-- l'esistenza/stato di un locale per le policy di tabelle collegate passa da
+-- public.is_restaurant_public().
 
 -- Il commerciante proprietario vede anche i propri locali non attivi
 CREATE POLICY "restaurants: owner read all own"
@@ -846,18 +869,30 @@ CREATE POLICY "restaurants: owner delete"
   ON public.restaurants FOR DELETE
   USING (auth.uid() = owner_id);
 
+-- Vista pubblica: solo le colonne non sensibili dei locali attivi/verificati.
+-- Le query pubbliche (ricerca, pagina locale, mappa) leggono da qui, mai
+-- direttamente dalla tabella restaurants — così legal_name/vat_number/iban
+-- non finiscono mai in una risposta anonima, indipendentemente da come viene
+-- interrogata (app o chiamata REST diretta con la anon key).
+CREATE OR REPLACE VIEW public.restaurants_public AS
+  SELECT id, name, slug, description, cuisine, tags, address, neighborhood, city, country,
+         lat, lng, phone, website, email, instagram, opening_hours,
+         price_range, deposit_required, deposit_amount, deposit_per_person, deposit_policy,
+         max_party_size, booking_window_days, rating, review_count,
+         zone_names, closed_days, cover_image_url, urgency_label, social_proof,
+         is_active, is_verified, created_at, updated_at
+  FROM public.restaurants
+  WHERE is_active = TRUE AND is_verified = TRUE;
+
+GRANT SELECT ON public.restaurants_public TO anon, authenticated;
+
 
 -- ═══════════════════════════════════════════════════════════════════════════
 --  POLICY: restaurant_images
 -- ═══════════════════════════════════════════════════════════════════════════
 CREATE POLICY "images: public read"
   ON public.restaurant_images FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.restaurants r
-      WHERE r.id = restaurant_id AND r.is_active = TRUE AND r.is_verified = TRUE
-    )
-  );
+  USING (public.is_restaurant_public(restaurant_id));
 
 CREATE POLICY "images: owner manage"
   ON public.restaurant_images FOR ALL
@@ -875,12 +910,7 @@ CREATE POLICY "images: owner manage"
 -- Tavoli pubblici (lettura): visibili a tutti per i locali attivi
 CREATE POLICY "tables: public read"
   ON public.tables FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.restaurants r
-      WHERE r.id = restaurant_id AND r.is_active = TRUE AND r.is_verified = TRUE
-    )
-  );
+  USING (public.is_restaurant_public(restaurant_id));
 
 -- Solo il proprietario del locale gestisce i tavoli
 CREATE POLICY "tables: owner manage"
@@ -1116,13 +1146,7 @@ CREATE POLICY "favorites: owner read venue"
 -- Chiunque (anche anonimo) legge gli eventi attivi di un locale verificato
 CREATE POLICY "events: public read active"
   ON public.events FOR SELECT
-  USING (
-    is_active = TRUE
-    AND EXISTS (
-      SELECT 1 FROM public.restaurants r
-      WHERE r.id = restaurant_id AND r.is_active = TRUE AND r.is_verified = TRUE
-    )
-  );
+  USING (is_active = TRUE AND public.is_restaurant_public(restaurant_id));
 
 -- Il commerciante proprietario vede anche i propri eventi non attivi
 CREATE POLICY "events: owner read own"

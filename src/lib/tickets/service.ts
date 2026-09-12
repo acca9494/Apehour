@@ -18,13 +18,29 @@ interface TicketRow {
     event_end_date: string | null;
     start_time: string;
     location: string;
-    restaurants: { slug: string; name: string } | null;
+    restaurant_id: string;
   } | null;
 }
 
-const SELECT_WITH_EVENT = "*, events(slug, title, event_date, event_end_date, start_time, location, restaurants(slug, name))";
+// Nota: niente embedding annidato fino a "restaurants" — quel join passa
+// comunque dalla tabella restaurants, che non ha più una policy SELECT
+// pubblica (per non esporre iban/vat_number/legal_name), quindi si romperebbe
+// anche per un cliente autenticato che vede i propri biglietti. Il locale va
+// letto separatamente dalla vista pubblica restaurants_public.
+const SELECT_WITH_EVENT = "*, events(slug, title, event_date, event_end_date, start_time, location, restaurant_id)";
 
-function mapRow(row: TicketRow, customerId: string): EventTicket {
+async function attachRestaurantNames(
+  rows: TicketRow[]
+): Promise<Map<string, { slug: string; name: string }>> {
+  const supabase = createClient();
+  const restaurantIds = [...new Set(rows.map((r) => r.events?.restaurant_id).filter((id): id is string => !!id))];
+  if (restaurantIds.length === 0) return new Map();
+  const { data, error } = await supabase.from("restaurants_public").select("id, slug, name").in("id", restaurantIds);
+  if (error) throw new Error(error.message);
+  return new Map((data ?? []).map((r) => [r.id as string, { slug: r.slug as string, name: r.name as string }]));
+}
+
+function mapRow(row: TicketRow, customerId: string, restaurant?: { slug: string; name: string }): EventTicket {
   const ev = row.events;
   return {
     id: row.id,
@@ -33,8 +49,8 @@ function mapRow(row: TicketRow, customerId: string): EventTicket {
     eventTitle: ev?.title ?? "",
     eventDate: ev ? formatEventDateLabel(ev.event_date, ev.event_end_date, ev.start_time) : "",
     eventLocation: ev?.location ?? "",
-    restaurantSlug: ev?.restaurants?.slug ?? "",
-    restaurantName: ev?.restaurants?.name ?? "",
+    restaurantSlug: restaurant?.slug ?? "",
+    restaurantName: restaurant?.name ?? "",
     buyerId: customerId,
     buyerName: row.buyer_name,
     buyerEmail: row.buyer_email,
@@ -64,7 +80,9 @@ export async function purchaseTicket(formData: TicketPurchaseFormData, buyerId: 
     .select(SELECT_WITH_EVENT)
     .single();
   if (error) throw new Error(error.message);
-  return mapRow(data as unknown as TicketRow, buyerId);
+  const row = data as unknown as TicketRow;
+  const restaurants = await attachRestaurantNames([row]);
+  return mapRow(row, buyerId, row.events ? restaurants.get(row.events.restaurant_id) : undefined);
 }
 
 export async function getMyTickets(buyerId: string): Promise<EventTicket[]> {
@@ -76,7 +94,9 @@ export async function getMyTickets(buyerId: string): Promise<EventTicket[]> {
     .neq("status", "cancelled")
     .order("requested_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown as TicketRow[]).map((r) => mapRow(r, buyerId));
+  const rows = (data ?? []) as unknown as TicketRow[];
+  const restaurants = await attachRestaurantNames(rows);
+  return rows.map((r) => mapRow(r, buyerId, r.events ? restaurants.get(r.events.restaurant_id) : undefined));
 }
 
 // ── Lato commerciante: richieste per un proprio evento, con i dati cliente ──
