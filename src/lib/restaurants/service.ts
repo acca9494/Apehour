@@ -32,6 +32,10 @@ export interface RestaurantRow {
   max_party_size: number;
   is_active: boolean;
   is_verified: boolean;
+  legal_name: string | null;
+  vat_number: string | null;
+  iban: string | null;
+  opening_hours: { day: string; hours: string }[];
 }
 
 export interface CreateRestaurantInput {
@@ -131,6 +135,10 @@ export interface VenueSettingsPatch {
   depositAmount: number;
   depositPerPerson: boolean;
   depositPolicy: string;
+  legalName?: string;
+  vatNumber?: string;
+  iban?: string;
+  openingHours: { day: string; hours: string }[];
 }
 
 export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPatch): Promise<RestaurantRow> {
@@ -151,6 +159,10 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
       deposit_amount: patch.depositAmount,
       deposit_per_person: patch.depositPerPerson,
       deposit_policy: patch.depositPolicy,
+      legal_name: patch.legalName ?? null,
+      vat_number: patch.vatNumber ?? null,
+      iban: patch.iban ?? null,
+      opening_hours: patch.openingHours,
     })
     .eq("id", id)
     .select()

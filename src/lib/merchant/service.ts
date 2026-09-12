@@ -109,6 +109,10 @@ export async function fetchVenueSettings(userId: string): Promise<VenueSettings>
       perPerson: restaurant.deposit_per_person,
       policy: restaurant.deposit_policy ?? "",
     },
+    legalName: restaurant.legal_name ?? undefined,
+    vatNumber: restaurant.vat_number ?? undefined,
+    iban: restaurant.iban ?? undefined,
+    openingHours: restaurant.opening_hours ?? [],
   };
 }
 
@@ -128,6 +132,10 @@ export async function updateVenueSettings(settings: VenueSettings, userId: strin
     depositAmount: settings.deposit.amount,
     depositPerPerson: settings.deposit.perPerson,
     depositPolicy: settings.deposit.policy,
+    legalName: settings.legalName,
+    vatNumber: settings.vatNumber,
+    iban: settings.iban,
+    openingHours: settings.openingHours,
   });
 }
 

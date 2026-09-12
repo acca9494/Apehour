@@ -35,6 +35,7 @@ CREATE TABLE public.profiles (
   name         TEXT        NOT NULL,
   phone        TEXT,
   avatar_url   TEXT,
+  date_of_birth DATE,       -- facoltativo, es. verifica maggiore età per servizio legato all'alcol
   role         user_role   NOT NULL DEFAULT 'cliente',
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -74,6 +75,14 @@ CREATE TABLE public.restaurants (
   website          TEXT,
   email            TEXT,
   instagram        TEXT,
+
+  -- Dati fiscali/legali (necessari per contratto e fatturazione)
+  legal_name       TEXT,        -- ragione sociale, può differire dal nome pubblico
+  vat_number       TEXT,        -- partita IVA / codice fiscale
+  iban             TEXT,        -- per pagamenti/commissioni future
+
+  -- Orari di apertura generali (distinti dagli slot prenotabili)
+  opening_hours    JSONB       NOT NULL DEFAULT '[]'::jsonb,  -- [{ "day": "Lun - Ven", "hours": "17:30 - 23:30" }, ...]
 
   -- Prenotazione
   price_range      price_range NOT NULL DEFAULT '$$',

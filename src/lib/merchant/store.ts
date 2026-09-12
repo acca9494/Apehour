@@ -53,6 +53,11 @@ export interface MerchantOffer {
   slotIds: string[]; // id degli slot di disponibilità a cui si applica l'offerta
 }
 
+export interface OpeningHoursRow {
+  day: string;    // es. "Lun - Ven", "Sab - Dom"
+  hours: string;  // es. "17:30 - 23:30", "Chiuso"
+}
+
 export interface VenueSettings {
   restaurantId: string;
   name: string;
@@ -65,6 +70,10 @@ export interface VenueSettings {
   instagram?: string;
   heroImage: string;
   deposit: DepositSettings;
+  legalName?: string;   // ragione sociale (può differire dal nome pubblico del locale)
+  vatNumber?: string;   // partita IVA / codice fiscale, per fatturazione
+  iban?: string;        // per pagamenti/commissioni future
+  openingHours: OpeningHoursRow[];
 }
 
 // ── Keys localStorage ────────────────────────────────────────────────────────
@@ -86,6 +95,7 @@ const DEFAULT_SETTINGS: VenueSettings = {
   instagram: "@spritzbrera",
   heroImage:
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80",
+  openingHours: [],
   deposit: {
     required: false,
     amount: 5,

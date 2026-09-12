@@ -6,7 +6,7 @@ import type { VenueSettings } from "@/lib/merchant/store";
 import { useAuth } from "@/lib/auth/context";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 
-type Tab = "locale" | "caparra" | "contatti";
+type Tab = "locale" | "caparra" | "contatti" | "fiscali";
 
 export function VenueSettingsPanel() {
   const { user } = useAuth();
@@ -57,14 +57,14 @@ export function VenueSettingsPanel() {
 
       {/* Tabs */}
       <div className="settings-tabs">
-        {(["locale", "caparra", "contatti"] as Tab[]).map((t) => (
+        {(["locale", "caparra", "contatti", "fiscali"] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
             className={`settings-tab${tab === t ? " is-active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "locale" ? "Locale" : t === "caparra" ? "Caparra" : "Contatti"}
+            {t === "locale" ? "Locale" : t === "caparra" ? "Caparra" : t === "contatti" ? "Contatti" : "Dati fiscali"}
           </button>
         ))}
       </div>
@@ -119,6 +119,55 @@ export function VenueSettingsPanel() {
                 onChange={(e) => patch("city", e.target.value)}
               />
             </label>
+          </div>
+
+          <h3 style={{ marginTop: "2rem" }}>Orari di apertura</h3>
+          <p className="settings-hint">Mostrati sulla pagina pubblica del locale (distinti dagli orari prenotabili).</p>
+          <div className="settings-form">
+            {settings.openingHours.map((row, i) => (
+              <div key={i} className="settings-form__full" style={{ display: "flex", gap: "0.5rem", alignItems: "flex-end" }}>
+                <label style={{ flex: 1 }}>
+                  Giorni
+                  <input
+                    type="text"
+                    value={row.day}
+                    placeholder="Lun - Ven"
+                    onChange={(e) => {
+                      const next = [...settings.openingHours];
+                      next[i] = { ...next[i]!, day: e.target.value };
+                      patch("openingHours", next);
+                    }}
+                  />
+                </label>
+                <label style={{ flex: 1 }}>
+                  Orario
+                  <input
+                    type="text"
+                    value={row.hours}
+                    placeholder="17:30 - 23:30"
+                    onChange={(e) => {
+                      const next = [...settings.openingHours];
+                      next[i] = { ...next[i]!, hours: e.target.value };
+                      patch("openingHours", next);
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="clay-button clay-button--secondary"
+                  onClick={() => patch("openingHours", settings.openingHours.filter((_, idx) => idx !== i))}
+                >
+                  Rimuovi
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="clay-button clay-button--secondary settings-form__full"
+              onClick={() => patch("openingHours", [...settings.openingHours, { day: "", hours: "" }])}
+            >
+              + Aggiungi riga orari
+            </button>
           </div>
         </div>
       )}
@@ -251,6 +300,46 @@ export function VenueSettingsPanel() {
                 value={settings.instagram ?? ""}
                 onChange={(e) => patch("instagram", e.target.value || undefined)}
                 placeholder="@nomepagina"
+              />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* ── Tab: Dati fiscali ── */}
+      {tab === "fiscali" && (
+        <div className="dash-table-card settings-section">
+          <h3>Dati fiscali e legali</h3>
+          <p className="settings-hint">Necessari per il contratto e la fatturazione. Non visibili pubblicamente.</p>
+
+          <div className="settings-form">
+            <label>
+              Ragione sociale
+              <input
+                type="text"
+                value={settings.legalName ?? ""}
+                onChange={(e) => patch("legalName", e.target.value || undefined)}
+                placeholder="Es. Brera Aperitivi S.r.l."
+              />
+            </label>
+
+            <label>
+              Partita IVA / Codice Fiscale
+              <input
+                type="text"
+                value={settings.vatNumber ?? ""}
+                onChange={(e) => patch("vatNumber", e.target.value || undefined)}
+                placeholder="IT01234567890"
+              />
+            </label>
+
+            <label className="settings-form__full">
+              IBAN
+              <input
+                type="text"
+                value={settings.iban ?? ""}
+                onChange={(e) => patch("iban", e.target.value || undefined)}
+                placeholder="IT60X0542811101000000123456"
               />
             </label>
           </div>
