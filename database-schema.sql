@@ -168,6 +168,23 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.is_restaurant_public(UUID) TO anon, authenticated;
 
+-- Verifica se uno slug è già usato da QUALSIASI locale (di qualunque proprietario,
+-- verificato o no) SENZA esporre i dati altrui. Necessaria perché un commerciante
+-- vede via RLS solo i propri locali: senza questa funzione, il controllo di
+-- unicità dello slug in fase di creazione vedrebbe "libero" uno slug in realtà
+-- già usato da un altro commerciante, causando un errore di vincolo UNIQUE.
+CREATE OR REPLACE FUNCTION public.is_slug_taken(s TEXT)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (SELECT 1 FROM public.restaurants r WHERE r.slug = s);
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_slug_taken(TEXT) TO anon, authenticated;
+
 
 -- ═══════════════════════════════════════════════════════════════════════════
 --  3. RESTAURANT_IMAGES

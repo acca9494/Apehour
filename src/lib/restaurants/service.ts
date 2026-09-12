@@ -51,6 +51,9 @@ export interface CreateRestaurantInput {
 }
 
 // Genera uno slug unico aggiungendo -2, -3... in caso di collisione col nome.
+// Usa is_slug_taken() (RPC) invece di una select diretta: la RLS su
+// restaurants nasconde i locali altrui, quindi una select diretta vedrebbe
+// "libero" uno slug già usato da un altro commerciante.
 async function uniqueSlug(base: string): Promise<string> {
   const supabase = createClient();
   const root = slugify(base);
@@ -58,8 +61,9 @@ async function uniqueSlug(base: string): Promise<string> {
   let n = 2;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const { data } = await supabase.from("restaurants").select("id").eq("slug", slug).maybeSingle();
-    if (!data) return slug;
+    const { data: taken, error } = await supabase.rpc("is_slug_taken", { s: slug });
+    if (error) throw new Error(error.message);
+    if (!taken) return slug;
     slug = `${root}-${n++}`;
   }
 }
