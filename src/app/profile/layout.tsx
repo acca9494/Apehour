@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: "/profile/attivita",      icon: "◷",  label: "Attività" },
   { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES" },
   { href: "/profile/apejobs",       icon: "▣",  label: "ApeJobs" },
+  { href: "/profile/impostazioni",  icon: "◌",  label: "Impostazioni" },
 ];
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
