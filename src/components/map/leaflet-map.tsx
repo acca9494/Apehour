@@ -56,26 +56,34 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
       const layer = L.layerGroup().addTo(map);
       layerRef.current = layer;
 
-      // Click-to-expand delegation — close on map click
-      map.on("click", () => {
-        map.getContainer().querySelectorAll(".mcrd-wrap.is-open")
-          .forEach((el) => el.classList.remove("is-open"));
-      });
-
       // Let the browser finish layout before rendering markers
       requestAnimationFrame(() => {
         map.invalidateSize();
         renderMarkers(L, map, layer, markers, fitToMarkers);
 
-        // Event delegation for pin clicks
-        map.getContainer().addEventListener("click", (e) => {
+        // Un solo gestore, in capture phase, per aprire/chiudere le card.
+        // Prima c'era anche un map.on("click", ...) separato di Leaflet per
+        // richiudere tutto: Leaflet però ripropaga i click sui marker anche
+        // internamente al proprio sistema di eventi (non solo via DOM), a
+        // prescindere da stopPropagation — quel secondo gestore poteva quindi
+        // richiudere la card appena aperta subito dopo, in modo incoerente
+        // (a volte prima del repaint, a volte dopo), dando l'impressione che
+        // il click funzionasse "a caso". Unificando tutto qui non c'è più
+        // nessun altro listener che possa richiudere in modo indipendente.
+        const container = map.getContainer();
+        container.addEventListener("click", (e) => {
           const target = e.target as HTMLElement;
           const pin = target.closest(".mcrd-pin");
-          if (!pin) return;
+
+          if (!pin) {
+            container.querySelectorAll(".mcrd-wrap.is-open").forEach((el) => el.classList.remove("is-open"));
+            return;
+          }
+
           e.stopPropagation();
           const wrap = pin.closest(".mcrd-wrap");
           if (!wrap) return;
-          map.getContainer().querySelectorAll(".mcrd-wrap.is-open").forEach((el) => {
+          container.querySelectorAll(".mcrd-wrap.is-open").forEach((el) => {
             if (el !== wrap) el.classList.remove("is-open");
           });
           wrap.classList.toggle("is-open");
