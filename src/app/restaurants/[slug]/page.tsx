@@ -48,7 +48,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             <p className="detail-desc__text">{restaurant.description}</p>
             <div className="detail-pills" style={{ marginTop: "1rem" }}>
               <span>{restaurant.priceRange}</span>
-              <span>{restaurant.rating.toFixed(1)} ★ · {formatReviewCount(restaurant.reviewCount)} rec.</span>
+              <span>{restaurant.rating.toFixed(1)} ★ · {formatReviewCount(restaurant.reviewCount)} {restaurant.reviewCount === 1 ? "recensione" : "recensioni"}</span>
               {restaurant.discount ? <span className="detail-pill--yellow">-{restaurant.discount}% oggi</span> : null}
             </div>
           </div>
