@@ -5,6 +5,7 @@ import { fetchVenueSettings, updateVenueSettings } from "@/lib/merchant/service"
 import type { VenueSettings } from "@/lib/merchant/store";
 import { useAuth } from "@/lib/auth/context";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
+import { DangerZoneDeleteAccount } from "@/components/ui/danger-zone-delete-account";
 
 type Tab = "locale" | "caparra" | "contatti" | "fiscali";
 
@@ -358,6 +359,11 @@ export function VenueSettingsPanel() {
         </button>
         {saved && <span className="settings-saved-msg">Modifiche salvate con successo.</span>}
       </div>
+
+      <p className="settings-hint" style={{ color: "#e04c4c" }}>
+        Attenzione: eliminando l&apos;account elimini anche il tuo locale e tutto ciò che contiene (tavoli, disponibilità, eventi, offerte).
+      </p>
+      <DangerZoneDeleteAccount />
     </div>
   );
 }

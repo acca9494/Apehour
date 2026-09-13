@@ -15,7 +15,7 @@ const ERROR_MESSAGES: Record<Exclude<AuthErrorCode, "email_confirmation_required
   unknown: "Qualcosa è andato storto. Riprova.",
 };
 
-const CITIES = ["Milano", "Roma", "Firenze", "Torino", "Napoli", "Bologna", "Venezia", "Genova", "Palermo", "Bari", "Altra città"];
+const CITIES = ["Roma", "Ostia", "Fregene", "Ladispoli"];
 const PRICE_OPTIONS = ["< €15", "€15 – €25", "€25 – €40", "€40 – €60", "> €60"];
 
 function priceRangeFromAvgSpend(avgSpend: string): PriceRange {
@@ -260,7 +260,7 @@ export function MerchantRegisterForm() {
 
           <label className="mreg__field">
             <span>Password <em>*</em></span>
-            <input type="password" value={s1.password} onChange={e => setF1("password", e.target.value)} placeholder="minimo 6 caratteri" required minLength={6} autoComplete="new-password" />
+            <input type="password" value={s1.password} onChange={e => setF1("password", e.target.value)} placeholder="minimo 8 caratteri" required minLength={8} autoComplete="new-password" />
           </label>
 
           <label className="mreg__checkbox">

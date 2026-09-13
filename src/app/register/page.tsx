@@ -113,7 +113,7 @@ export default function RegisterPage() {
 
               <label>
                 Password
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="minimo 6 caratteri" required autoComplete="new-password" minLength={6} />
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="minimo 8 caratteri" required autoComplete="new-password" minLength={8} />
               </label>
 
               <label className="mreg__checkbox">

@@ -313,7 +313,11 @@ CREATE TABLE public.bookings (
   restaurant_id    UUID           NOT NULL REFERENCES public.restaurants(id),
   slot_id          UUID           REFERENCES public.availability_slots(id) ON DELETE SET NULL,
   table_id         UUID           REFERENCES public.tables(id) ON DELETE SET NULL, -- assegnato dal commerciante
-  customer_id      UUID           NOT NULL REFERENCES public.profiles(id),
+  -- Nullable + SET NULL: se il cliente cancella l'account (diritto all'oblio),
+  -- la prenotazione resta nello storico del locale ma si scollega dal profilo
+  -- eliminato. I campi customer_name/email/phone sotto vengono anonimizzati
+  -- dalla procedura di cancellazione account prima dell'eliminazione.
+  customer_id      UUID           REFERENCES public.profiles(id) ON DELETE SET NULL,
 
   -- Dettagli prenotazione
   date             DATE           NOT NULL,
@@ -358,7 +362,7 @@ CREATE INDEX idx_bookings_slot        ON public.bookings(slot_id);
 CREATE TABLE public.payments (
   id                   UUID           PRIMARY KEY DEFAULT uuid_generate_v4(),
   booking_id           UUID           NOT NULL REFERENCES public.bookings(id) ON DELETE RESTRICT,
-  customer_id          UUID           NOT NULL REFERENCES public.profiles(id),
+  customer_id          UUID           REFERENCES public.profiles(id) ON DELETE SET NULL,
 
   -- Importi
   amount               NUMERIC(10, 2) NOT NULL,
@@ -500,7 +504,7 @@ CREATE TABLE public.ticket_requests (
   id             UUID           PRIMARY KEY DEFAULT uuid_generate_v4(),
   ticket_ref     TEXT           NOT NULL UNIQUE,       -- es. APE-TIX-1234
   event_id       UUID           NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
-  customer_id    UUID           NOT NULL REFERENCES public.profiles(id),
+  customer_id    UUID           REFERENCES public.profiles(id) ON DELETE SET NULL,
 
   quantity       SMALLINT       NOT NULL DEFAULT 1,
   status         ticket_status  NOT NULL DEFAULT 'pending',
