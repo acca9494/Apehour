@@ -36,11 +36,28 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
   // ── Init map once ────────────────────────────────
   useEffect(() => {
     if (mapRef.current || !containerRef.current) return;
+    let cancelled = false;
 
-    Promise.all([import("leaflet"), import("leaflet.markercluster")]).then(([mod]) => {
-      if (mapRef.current || !containerRef.current) return;
+    import("leaflet").then(async (mod) => {
+      if (cancelled || mapRef.current || !containerRef.current) return;
       const L = mod.default ?? mod;
       LRef.current = L;
+
+      // leaflet.markercluster è un plugin UMD scritto per l'uso con <script>:
+      // internamente si aspetta Leaflet su window.L, non lo importa come
+      // modulo. Senza questo, il suo caricamento falliva con "L is not
+      // defined" — un crash silenzioso che a seconda del momento in cui
+      // avveniva lasciava la mappa a metà inizializzata (a volte senza
+      // marker, a volte senza il layer di clustering), dando l'impressione
+      // di un comportamento "casuale" sui click.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).L = L;
+      await import("leaflet.markercluster");
+      // Il componente potrebbe essere stato smontato (es. doppio mount di
+      // React StrictMode in sviluppo) mentre questi import erano in corso:
+      // ricontrolla prima di creare la mappa, altrimenti Leaflet lancia
+      // "Map container is already initialized" al mount successivo.
+      if (cancelled || mapRef.current || !containerRef.current) return;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -64,6 +81,14 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
         maxClusterRadius: 50,
         spiderfyOnMaxZoom: true,
         showCoverageOnHover: false,
+        // Senza animazione, i pin vengono posizionati subito al valore
+        // finale invece di scorrere lì con una transizione CSS: con
+        // l'animazione attiva c'era una finestra di alcune centinaia di ms,
+        // subito dopo uno zoom o l'apertura di un cluster, in cui la
+        // posizione "vera" del pin (dove il click viene davvero registrato)
+        // non corrispondeva ancora a dove il browser lo riportava — un click
+        // fatto in quella finestra cadeva sulla mappa invece che sul pin.
+        animate: false,
       }).addTo(map);
       layerRef.current = layer;
 
@@ -103,6 +128,7 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
     });
 
     return () => {
+      cancelled = true;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
