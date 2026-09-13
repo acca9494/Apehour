@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import type { MarkerClusterGroup } from "leaflet";
 
 export type MapMarker = {
   lat: number;
@@ -28,13 +31,13 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef       = useRef<ReturnType<typeof import("leaflet")["map"]> | null>(null);
   const LRef         = useRef<typeof import("leaflet") | null>(null);
-  const layerRef     = useRef<ReturnType<typeof import("leaflet")["layerGroup"]> | null>(null);
+  const layerRef     = useRef<MarkerClusterGroup | null>(null);
 
   // ── Init map once ────────────────────────────────
   useEffect(() => {
     if (mapRef.current || !containerRef.current) return;
 
-    import("leaflet").then((mod) => {
+    Promise.all([import("leaflet"), import("leaflet.markercluster")]).then(([mod]) => {
       if (mapRef.current || !containerRef.current) return;
       const L = mod.default ?? mod;
       LRef.current = L;
@@ -53,7 +56,15 @@ export default function LeafletMap({ center, zoom = 13, markers = [], className,
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
 
-      const layer = L.layerGroup().addTo(map);
+      // Raggruppa i pallini vicini in un cluster con contatore: a zoom basso
+      // più locali ravvicinati (es. centro di Roma) finiscono altrimenti
+      // sovrapposti sullo schermo, coprendosi a vicenda e rendendo cliccabile
+      // solo quello disegnato sopra — da qui la sensazione di click "a caso".
+      const layer = L.markerClusterGroup({
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+      }).addTo(map);
       layerRef.current = layer;
 
       // Let the browser finish layout before rendering markers
@@ -138,7 +149,7 @@ function escapeHtml(value: string): string {
 function renderMarkers(
   L: typeof import("leaflet"),
   map: ReturnType<typeof import("leaflet")["map"]>,
-  layer: ReturnType<typeof import("leaflet")["layerGroup"]>,
+  layer: MarkerClusterGroup,
   markers: MapMarker[],
   fitToMarkers = true,
 ) {
