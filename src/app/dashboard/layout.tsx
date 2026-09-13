@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/offerte",       icon: "%",  label: "Offerte" },
   { href: "/dashboard/eventi",        icon: "✦",  label: "Eventi" },
   { href: "/dashboard/pagamenti",     icon: "◎",  label: "Pagamenti" },
-  { href: "/dashboard/artisti",       icon: "▣",  label: "ApeJobs" },
+  { href: "/dashboard/artisti",       icon: "▣",  label: "ApeJobs", comingSoon: true },
   { href: "/dashboard/impostazioni",  icon: "◌",  label: "Impostazioni" },
 ];
 
@@ -78,6 +78,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Nav */}
         <nav className="dashboard-nav">
           {NAV_ITEMS.map((item) => {
+            if (item.comingSoon) {
+              return (
+                <span key={item.href} className="dashboard-nav__item dashboard-nav__item--soon" aria-disabled="true">
+                  <span className="dashboard-nav__icon">{item.icon}</span>
+                  {item.label}
+                  <span className="user-dash-nav__soon-badge">Presto</span>
+                </span>
+              );
+            }
             const exact = item.href === "/dashboard";
             const active = exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
@@ -161,6 +170,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             onScroll={handleNavScroll}
           >
             {NAV_ITEMS.map((item) => {
+              if (item.comingSoon) {
+                return (
+                  <span key={item.href} className="dashboard-mobile-nav__item dashboard-mobile-nav__item--soon" aria-disabled="true">
+                    <span className="dashboard-mobile-nav__icon">{item.icon}</span>
+                    <span>{item.label}</span>
+                    <span className="user-dash-nav__soon-badge">Presto</span>
+                  </span>
+                );
+              }
               const exact = item.href === "/dashboard";
               const active = exact ? pathname === item.href : pathname.startsWith(item.href);
               return (

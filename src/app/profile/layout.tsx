@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { href: "/profile/eventi",        icon: "✦",  label: "Eventi" },
   { href: "/profile/attivita",      icon: "◷",  label: "Attività" },
   { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES" },
-  { href: "/profile/apejobs",       icon: "▣",  label: "ApeJobs" },
+  { href: "/profile/apejobs",       icon: "▣",  label: "ApeJobs", comingSoon: true },
   { href: "/profile/impostazioni",  icon: "◌",  label: "Impostazioni" },
 ];
 
@@ -36,6 +36,15 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
         {/* Nav */}
         <nav className="user-dash-nav">
           {NAV_ITEMS.map((item) => {
+            if (item.comingSoon) {
+              return (
+                <span key={item.href} className="user-dash-nav__item user-dash-nav__item--soon" aria-disabled="true">
+                  <span className="user-dash-nav__icon">{item.icon}</span>
+                  {item.label}
+                  <span className="user-dash-nav__soon-badge">Presto</span>
+                </span>
+              );
+            }
             const exact = item.href === "/profile";
             const active = exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
@@ -89,6 +98,15 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
         {/* Mobile-only horizontal tab nav */}
         <nav className="profile-mobile-nav" aria-label="Navigazione profilo">
           {NAV_ITEMS.map((item) => {
+            if (item.comingSoon) {
+              return (
+                <span key={item.href} className="profile-mobile-nav__item profile-mobile-nav__item--soon" aria-disabled="true">
+                  <span className="profile-mobile-nav__icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                  <span className="user-dash-nav__soon-badge">Presto</span>
+                </span>
+              );
+            }
             const exact = item.href === "/profile";
             const active = exact ? pathname === item.href : pathname.startsWith(item.href);
             return (

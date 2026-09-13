@@ -5662,6 +5662,16 @@ body:has(.search-page--map) > main {
   transition: background 140ms, color 140ms;
 }
 .dashboard-nav__item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+.dashboard-nav__item--soon,
+.dashboard-mobile-nav__item--soon {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.dashboard-nav__item--soon:hover { background: none; color: rgba(255,255,255,0.5); }
+.dashboard-mobile-nav__item--soon .user-dash-nav__soon-badge {
+  margin-left: 0;
+  margin-top: 0.1rem;
+}
 .dashboard-nav__item.is-active {
   background: rgba(245,168,0,0.12);
   color: var(--gold);
@@ -7110,6 +7120,27 @@ body:has(.search-page--map) > main {
   text-decoration: none;
 }
 .user-dash-nav__item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+.user-dash-nav__item--soon,
+.profile-mobile-nav__item--soon {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.user-dash-nav__item--soon:hover { background: none; color: rgba(255,255,255,0.55); }
+.user-dash-nav__soon-badge {
+  margin-left: auto;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.75);
+}
+.profile-mobile-nav__item--soon .user-dash-nav__soon-badge {
+  margin-left: 0;
+  margin-top: 0.15rem;
+}
 .user-dash-nav__item.is-active {
   background: rgba(245,168,0,0.12);
   color: #fff;
