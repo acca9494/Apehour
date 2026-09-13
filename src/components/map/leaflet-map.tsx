@@ -221,7 +221,18 @@ function renderMarkers(
       iconAnchor: [85, 185],
     });
 
-    L.marker([lat, lng], { icon }).addTo(layer);
+    // interactive:false è la vera correzione del click "a caso": di default
+    // Leaflet rende cliccabile TUTTO il riquadro da 170x185px del divIcon
+    // (leaflet-marker-icon ha pointer-events:auto), non solo il pin visibile
+    // — il nostro .mcrd-wrap con pointer-events:none è un div ANNIDATO
+    // dentro quello di Leaflet, quindi non lo disattiva. Quando due locali
+    // sono vicini, il riquadro invisibile di quello con z-index più alto
+    // (Leaflet ordina i marker per posizione verticale) vince il click anche
+    // sopra il pin visibile dell'altro locale. Disattivando l'interattività
+    // del riquadro di Leaflet, restano cliccabili solo mcrd-pin/mcrd (che
+    // hanno pointer-events:all esplicito e quindi restano attivi anche con
+    // l'antenato non interattivo).
+    L.marker([lat, lng], { icon, interactive: false }).addTo(layer);
   });
 
   if (fitToMarkers && markers.length > 1) {
