@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const supabaseHostname = supabaseUrl ? new URL(supabaseUrl).hostname : "";
 
 // Niente CSP a base di nonce: l'app è già interamente a rendering dinamico
 // (il layout legge headers() per la maintenance mode), quindi non perdiamo
@@ -15,7 +16,7 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://images.unsplash.com;
+  img-src 'self' data: blob: https://images.unsplash.com ${supabaseUrl};
   font-src 'self' data:;
   connect-src 'self' ${supabaseUrl};
   object-src 'none';
@@ -35,6 +36,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      ...(supabaseHostname ? [{ protocol: "https" as const, hostname: supabaseHostname }] : []),
     ],
   },
   async headers() {
