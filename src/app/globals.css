@@ -8606,6 +8606,9 @@ body:has(.search-page--map) > main {
      alto: spostate nella barra bianca in basso, come su mobile. */
   .desktop-nav { display: none; }
   .bottom-nav { display: flex; }
+  /* Senza il menu (che prima riempiva lo spazio centrale con flex:1),
+     i bottoni restavano appiccicati al logo: li rispingo a destra. */
+  .header-actions { margin-left: auto; }
   /* La chat flottante non deve finire sotto la nuova barra in basso */
   .gchat { bottom: calc(4rem + env(safe-area-inset-bottom) + 1.25rem); right: 0.75rem; }
 
