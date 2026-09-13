@@ -8598,11 +8598,16 @@ body:has(.search-page--map) > main {
   .brand { padding-left: 4.5rem; }
   .brand__mark { width: 5.5rem; height: 5.5rem; }
   .brand__logo-img { width: 5.5rem; height: 5.5rem; }
-  .desktop-nav { gap: 0.1rem; }
-  .desktop-nav a, .login-link { padding: 0.4rem 0.55rem; font-size: 0.8rem; }
   .header-auth-link { padding: 0.45rem 1rem; font-size: 0.82rem; min-width: 0; }
   .header-actions { gap: 0.4rem; }
   .lang-toggle { margin-left: 0.5rem; }
+
+  /* Le voci di navigazione si stringevano troppo per stare nella barra in
+     alto: spostate nella barra bianca in basso, come su mobile. */
+  .desktop-nav { display: none; }
+  .bottom-nav { display: flex; }
+  /* La chat flottante non deve finire sotto la nuova barra in basso */
+  .gchat { bottom: calc(4rem + env(safe-area-inset-bottom) + 1.25rem); right: 0.75rem; }
 
   /* Hero: scaled desktop */
   .home-hero__shell { padding: 4rem 1.5rem 3rem; }
