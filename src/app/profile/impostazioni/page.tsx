@@ -96,7 +96,9 @@ export default function ProfileSettingsPage() {
         {saved && <span className="settings-saved-msg">Modifiche salvate con successo.</span>}
       </div>
 
-      <DangerZoneDeleteAccount />
+      <div style={{ marginTop: "2.5rem" }}>
+        <DangerZoneDeleteAccount />
+      </div>
     </div>
   );
 }

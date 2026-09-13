@@ -360,10 +360,12 @@ export function VenueSettingsPanel() {
         {saved && <span className="settings-saved-msg">Modifiche salvate con successo.</span>}
       </div>
 
-      <p className="settings-hint" style={{ color: "#e04c4c" }}>
-        Attenzione: eliminando l&apos;account elimini anche il tuo locale e tutto ciò che contiene (tavoli, disponibilità, eventi, offerte).
-      </p>
-      <DangerZoneDeleteAccount />
+      <div style={{ marginTop: "2.5rem" }}>
+        <p className="settings-hint" style={{ color: "#e04c4c" }}>
+          Attenzione: eliminando l&apos;account elimini anche il tuo locale e tutto ciò che contiene (tavoli, disponibilità, eventi, offerte).
+        </p>
+        <DangerZoneDeleteAccount />
+      </div>
     </div>
   );
 }

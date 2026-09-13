@@ -8597,7 +8597,8 @@ body:has(.search-page--map) > main {
   .site-header__inner { height: 58px; padding: 0 1.25rem; gap: 1.25rem; }
   .header-auth-link { padding: 0.45rem 1rem; font-size: 0.82rem; min-width: 0; }
   .header-actions { gap: 0.4rem; }
-  .lang-toggle { margin-left: 0.5rem; }
+  /* Il cambio lingua è già nel menu della barra in basso, niente doppione qui */
+  .lang-toggle { display: none; }
 
   /* Le voci di navigazione si stringevano troppo per stare nella barra in
      alto: spostate nella barra bianca in basso, come su mobile. */
