@@ -199,6 +199,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   color: var(--text);
   position: relative;
   padding-left: 5.1rem;
+  margin-left: -0.75rem;
 }
 
 .brand__mark {
@@ -275,6 +276,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   align-items: center;
   gap: 0.6rem;
   flex-shrink: 0;
+  margin-right: 0.75rem;
 }
 
 /* ── LANGUAGE TOGGLE ────────────────────────────── */
@@ -8649,31 +8651,9 @@ body:has(.search-page--map) > main {
   .footer-body  { grid-template-columns: 1fr 1fr; gap: 2rem; padding: 3rem 1.5rem 2.5rem; }
   .footer-brand { grid-column: 1 / -1; }
 
-  /* Search page: tablet sidebar toggle */
-  .search-sidebar-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    width: max-content;
-    background: rgba(255,255,255,0.08);
-    border: 1.5px solid rgba(255,255,255,0.18);
-    border-radius: 99px;
-    color: rgba(255,255,255,0.88);
-    font-size: 0.82rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin: 0.5rem 1.25rem 0;
-    transition: background 130ms;
-  }
-  .search-sidebar-toggle svg {
-    width: 0.9rem;
-    height: 0.9rem;
-    flex-shrink: 0;
-  }
-  .search-sidebar-toggle:hover {
-    background: rgba(255,255,255,0.13);
-  }
+  /* Search page: i filtri restano sempre visibili in linea come su
+     desktop, niente pulsante "Filtri" a tendina — .search-sidebar-toggle
+     resta nascosto (regola base in globals.css). */
 }
 
 @media (max-width: 768px) {
@@ -9215,26 +9195,6 @@ body:has(.search-page--map) > main {
 /* ── SEARCH PAGE: map view fills the viewport, no footer at any width ── */
 body:has(.search-page--map) .site-footer { display: none !important; }
 body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
-
-/* ── TABLET: sidebar open state (overrides the 1024px hide) ── */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .search-sidebar--open {
-    display: flex !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100vh;
-    z-index: 1050;
-    overflow-y: auto;
-    border-radius: 0 1.25rem 1.25rem 0;
-    box-shadow: 4px 0 32px rgba(0,0,0,0.3);
-    padding: 1.5rem 1.25rem;
-  }
-  .search-sidebar--open + .search-results {
-    padding-left: calc(280px + 1.75rem);
-  }
-}
 
 /* ── COOKIE BANNER ──────────────────────────────── */
 .cookie-banner {
