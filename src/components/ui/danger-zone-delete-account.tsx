@@ -29,7 +29,9 @@ export function DangerZoneDeleteAccount() {
 
   return (
     <div className="dash-table-card settings-section" style={{ borderColor: "#e04c4c" }}>
-      <h3 style={{ color: "#e04c4c" }}>Zona pericolosa</h3>
+      <h3 style={{ color: "#e04c4c", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <span aria-hidden="true">⚠️</span> Elimina il tuo account
+      </h3>
       <p className="settings-hint">
         Eliminare l&apos;account cancella definitivamente il tuo profilo, i preferiti e le recensioni. Le prenotazioni/biglietti già fatti restano nello storico del locale ma senza più i tuoi dati personali. Questa azione non è reversibile.
       </p>
