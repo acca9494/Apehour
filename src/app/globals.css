@@ -8593,11 +8593,8 @@ body:has(.search-page--map) > main {
   h1 { font-size: 2.2rem; }
   h2 { font-size: 1.55rem; }
 
-  /* Header: tighter */
+  /* Header: tighter (logo/scritta restano identici al desktop) */
   .site-header__inner { height: 58px; padding: 0 1.25rem; gap: 1.25rem; }
-  .brand { padding-left: 4.5rem; }
-  .brand__mark { width: 5.5rem; height: 5.5rem; }
-  .brand__logo-img { width: 5.5rem; height: 5.5rem; }
   .header-auth-link { padding: 0.45rem 1rem; font-size: 0.82rem; min-width: 0; }
   .header-actions { gap: 0.4rem; }
   .lang-toggle { margin-left: 0.5rem; }
