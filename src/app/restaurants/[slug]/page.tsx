@@ -53,6 +53,22 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             </div>
           </div>
 
+          {/* ── Carta e drink ─────────────────────────────────────────── */}
+          <section className="detail-block">
+            <h2>Carta e drink</h2>
+            <div className="menu-list">
+              {restaurant.menuPreview.map((item) => (
+                <div key={item.name}>
+                  <div>
+                    <h3>{item.name}</h3>
+                    <p>{item.description}</p>
+                  </div>
+                  <strong>€{item.price}</strong>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {/* ── 8. Punti forti ────────────────────────────────────────── */}
           <section className="detail-block">
             <h2>Perché prenotare qui</h2>
@@ -100,22 +116,6 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
               </div>
             </section>
           )}
-
-          {/* ── Carta e drink ─────────────────────────────────────────── */}
-          <section className="detail-block">
-            <h2>Carta e drink</h2>
-            <div className="menu-list">
-              {restaurant.menuPreview.map((item) => (
-                <div key={item.name}>
-                  <div>
-                    <h3>{item.name}</h3>
-                    <p>{item.description}</p>
-                  </div>
-                  <strong>€{item.price}</strong>
-                </div>
-              ))}
-            </div>
-          </section>
 
           {/* ── Orari + Mappa ─────────────────────────────────────────── */}
           <section className="detail-block split-block">
