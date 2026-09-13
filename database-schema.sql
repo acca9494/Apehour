@@ -945,7 +945,7 @@ CREATE POLICY "tables: owner manage"
 -- ═══════════════════════════════════════════════════════════════════════════
 CREATE POLICY "schedules: public read"
   ON public.availability_schedules FOR SELECT
-  USING (is_active = TRUE);
+  USING (is_active = TRUE AND public.is_restaurant_public(restaurant_id));
 
 CREATE POLICY "schedules: owner manage"
   ON public.availability_schedules FOR ALL
@@ -962,7 +962,7 @@ CREATE POLICY "schedules: owner manage"
 -- ═══════════════════════════════════════════════════════════════════════════
 CREATE POLICY "slots: public read active future"
   ON public.availability_slots FOR SELECT
-  USING (is_active = TRUE AND date >= CURRENT_DATE);
+  USING (is_active = TRUE AND date >= CURRENT_DATE AND public.is_restaurant_public(restaurant_id));
 
 -- Il commerciante vede tutti i propri slot (anche passati)
 CREATE POLICY "slots: owner read all"
@@ -1103,19 +1103,20 @@ CREATE POLICY "reviews: customer read own"
   USING (auth.uid() = customer_id);
 
 -- Cliente: lascia recensione solo se ha una prenotazione confermata
+-- booking_id obbligatorio e verificato: senza questo, "booking_id IS NULL"
+-- permetteva a chiunque di inserire una recensione falsa, senza aver mai
+-- prenotato — il commento della tabella ("collegate a una prenotazione per
+-- verificare la visita") era smentito dalla policy stessa.
 CREATE POLICY "reviews: customer insert"
   ON public.reviews FOR INSERT
   WITH CHECK (
     auth.uid() = customer_id
     AND public.get_my_role() = 'cliente'
-    AND (
-      booking_id IS NULL
-      OR EXISTS (
-        SELECT 1 FROM public.bookings b
-        WHERE b.id = booking_id
-          AND b.customer_id = auth.uid()
-          AND b.status = 'confirmed'
-      )
+    AND EXISTS (
+      SELECT 1 FROM public.bookings b
+      WHERE b.id = booking_id
+        AND b.customer_id = auth.uid()
+        AND b.status = 'confirmed'
     )
   );
 
