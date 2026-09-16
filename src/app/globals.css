@@ -4668,6 +4668,20 @@ main:has(.app-preview-page) ~ * { display: none !important; }
 }
 .auth-card--merchant { max-width: 480px; }
 
+.founding-partner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--gold-soft, #fff3d6);
+  color: var(--gold-dk, #8a6200);
+  border: 1.5px solid var(--gold, #f5c518);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-bottom: 1.25rem;
+}
+
 /* ── Register mode toggle ── */
 .reg-mode-toggle {
   display: flex;

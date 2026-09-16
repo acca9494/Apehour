@@ -29,6 +29,7 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
 
   const [mode, setMode] = useState<Mode>(() => initialModeFrom(searchParams.get("mode")));
+  const isFoundingPartner = searchParams.get("ref") === "founding";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -69,6 +70,12 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className={`auth-card ${mode === "commerciante" ? "auth-card--merchant" : ""}`}>
+
+        {isFoundingPartner && mode === "commerciante" && (
+          <div className="founding-partner-badge">
+            🎉 Founding Partner — condizioni speciali riservate ai primi locali
+          </div>
+        )}
 
         {/* Mode toggle */}
         <div className="reg-mode-toggle">
@@ -144,7 +151,7 @@ export default function RegisterPage() {
             <h1>Per i locali</h1>
             <p>Gratis per i primi 30 giorni. Nessun contratto.</p>
             <div style={{ marginTop: "1rem" }}>
-              <MerchantRegisterForm />
+              <MerchantRegisterForm isFoundingPartner={isFoundingPartner} />
             </div>
             <p className="auth-link" style={{ marginTop: "1rem" }}>
               Hai già un account? <Link href="/login">Accedi</Link>
