@@ -163,7 +163,7 @@ function CallCalendar({ venueName }: { venueName: string }) {
   );
 }
 
-export function MerchantRegisterForm({ isFoundingPartner = false }: { isFoundingPartner?: boolean } = {}) {
+export function MerchantRegisterForm() {
   const { register } = useAuth();
 
   const [step, setStep]           = useState(1);
@@ -199,7 +199,6 @@ export function MerchantRegisterForm({ isFoundingPartner = false }: { isFounding
           venue_city: s2.city || "Roma",
           venue_price_range: priceRange,
           privacy_accepted_at: new Date().toISOString(),
-          ...(isFoundingPartner && { founding_partner: "true" }),
         },
       });
       // Se la sessione è già attiva (nessuna conferma email richiesta), crea subito
