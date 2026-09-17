@@ -29,6 +29,7 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
 
   const [mode, setMode] = useState<Mode>(() => initialModeFrom(searchParams.get("mode")));
+  const evento = searchParams.get("evento");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,7 +52,10 @@ export default function RegisterPage() {
     try {
       await register({
         name, email, password, role: "cliente",
-        metadata: { privacy_accepted_at: new Date().toISOString() },
+        metadata: {
+          privacy_accepted_at: new Date().toISOString(),
+          ...(evento ? { event_source: evento } : {}),
+        },
       });
     } catch (err) {
       const code = err instanceof Error ? err.message : "unknown";
@@ -144,7 +148,7 @@ export default function RegisterPage() {
             <h1>Per i locali</h1>
             <p>Gratis per i primi 30 giorni. Nessun contratto.</p>
             <div style={{ marginTop: "1rem" }}>
-              <MerchantRegisterForm />
+              <MerchantRegisterForm eventSource={evento} />
             </div>
             <p className="auth-link" style={{ marginTop: "1rem" }}>
               Hai già un account? <Link href="/login">Accedi</Link>

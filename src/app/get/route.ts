@@ -6,6 +6,11 @@ import { NextResponse } from "next/server";
 // sarà pronta basterà puntare questa route allo store (o a una pagina che
 // rileva iOS/Android).
 export async function GET(request: Request) {
+  const reqUrl = new URL(request.url);
   const url = new URL("/register", request.url);
+  // Se il QR ha un tag evento (es. ?evento=aperitivo-lancio), lo passiamo
+  // alla registrazione così viene salvato su chi si iscrive da lì.
+  const evento = reqUrl.searchParams.get("evento");
+  if (evento) url.searchParams.set("evento", evento);
   return NextResponse.redirect(url);
 }

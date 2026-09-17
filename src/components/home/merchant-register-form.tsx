@@ -163,7 +163,7 @@ function CallCalendar({ venueName }: { venueName: string }) {
   );
 }
 
-export function MerchantRegisterForm() {
+export function MerchantRegisterForm({ eventSource }: { eventSource?: string | null }) {
   const { register } = useAuth();
 
   const [step, setStep]           = useState(1);
@@ -199,6 +199,7 @@ export function MerchantRegisterForm() {
           venue_city: s2.city || "Roma",
           venue_price_range: priceRange,
           privacy_accepted_at: new Date().toISOString(),
+          ...(eventSource ? { event_source: eventSource } : {}),
         },
       });
       // Se la sessione è già attiva (nessuna conferma email richiesta), crea subito
