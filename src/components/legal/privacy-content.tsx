@@ -7,7 +7,7 @@ export function PrivacyContent() {
         <h2>1. Titolare del trattamento</h2>
         <p>
           Il Titolare del trattamento dei dati personali è <strong>Vega Labs S.r.l.s.</strong> (di seguito "ApeHour"),
-          con sede legale in Via Monte Gran Paradiso 28, Italia. Per qualsiasi comunicazione relativa al trattamento
+          con sede legale in Via Monte Gran Paradiso 28, 00012 Guidonia Montecelio (RM), Italia. Per qualsiasi comunicazione relativa al trattamento
           dei dati personali puoi contattarci all'indirizzo e-mail: <a href="mailto:privacy@apehour.it">privacy@apehour.it</a>.
         </p>
       </section>
