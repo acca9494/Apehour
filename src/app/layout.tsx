@@ -8,7 +8,7 @@ import { MobileMenuProvider } from "@/lib/mobile-menu-context";
 import { Footer } from "@/components/layout/footer";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { SiteHeader } from "@/components/navigation/site-header";
-import { GlobalChat } from "@/components/chat/global-chat";
+// import { GlobalChat } from "@/components/chat/global-chat"; // Chat globale disattivata temporaneamente
 import { SearchViewPill } from "@/components/search/search-view-pill";
 import { CookieBanner } from "@/components/ui/cookie-banner";
 import { AppModeBody } from "@/components/layout/app-mode-body";
@@ -47,7 +47,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             </main>
             {!isMaintenance && <Footer />}
             {!isMaintenance && <BottomNav />}
-            {!isMaintenance && <GlobalChat />}
+            {/* Chat globale disattivata temporaneamente — riattivare togliendo il commento */}
+            {/* {!isMaintenance && <GlobalChat />} */}
             {!isMaintenance && <Suspense><SearchViewPill /></Suspense>}
             <CookieBanner />
           </MobileMenuProvider>
