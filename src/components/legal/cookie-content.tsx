@@ -53,33 +53,13 @@ export function CookieContent() {
           </table>
         </div>
 
-        <h3>Cookie di terze parti (mappa)</h3>
+        <h3>Mappa interattiva</h3>
         <p>
-          Quando visualizzi la mappa interattiva, le tiles cartografiche vengono caricate da{" "}
-          <strong>OpenStreetMap Foundation</strong>. OpenStreetMap potrebbe impostare cookie propri
-          e raccogliere il tuo indirizzo IP per fornire il servizio. Ti invitiamo a consultare
-          la <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">
-            Privacy Policy di OpenStreetMap
-          </a>.
+          Le tile cartografiche della mappa (dati di OpenStreetMap, elaborati da MapTiler) vengono
+          caricate attraverso un nostro server proxy: il tuo browser non contatta mai direttamente
+          OpenStreetMap o MapTiler, che quindi non ricevono il tuo indirizzo IP e non impostano
+          alcun cookie sul tuo dispositivo. Non è necessario alcun consenso per questa funzionalità.
         </p>
-        <div className="legal-table-wrap">
-          <table className="legal-table">
-            <thead>
-              <tr>
-                <th>Fornitore</th>
-                <th>Scopo</th>
-                <th>Tipo</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>OpenStreetMap</td>
-                <td>Visualizzazione mappa interattiva e tile cartografiche</td>
-                <td>Terza parte</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
 
         <h3>Cookie analitici (solo con consenso)</h3>
         <p>

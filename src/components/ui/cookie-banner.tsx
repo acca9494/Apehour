@@ -36,7 +36,7 @@ export function CookieBanner() {
         <div className="cookie-banner__copy">
           <p className="cookie-banner__title">Usiamo i cookie 🍪</p>
           <p className="cookie-banner__text">
-            Utilizziamo cookie tecnici essenziali per il funzionamento del sito e cookie di terze parti (mappa OpenStreetMap) per mostrarti i locali. Puoi accettare tutti i cookie o limitarli ai soli essenziali.{" "}
+            Utilizziamo solo cookie tecnici essenziali per il funzionamento del sito (accesso, preferenze). Non usiamo cookie di profilazione o di terze parti.{" "}
             <Link href="/cookie-policy" className="cookie-banner__link">Leggi la cookie policy</Link>.
           </p>
         </div>
