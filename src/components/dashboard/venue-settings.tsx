@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth/context";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { DangerZoneDeleteAccount } from "@/components/ui/danger-zone-delete-account";
 
-type Tab = "locale" | "caparra" | "contatti" | "fiscali";
+type Tab = "locale" | "contatti" | "fiscali";
 
 export function VenueSettingsPanel() {
   const { user } = useAuth();
@@ -36,16 +36,6 @@ export function VenueSettingsPanel() {
     setSaved(false);
   }
 
-  function patchDeposit<K extends keyof VenueSettings["deposit"]>(
-    key: K,
-    value: VenueSettings["deposit"][K]
-  ) {
-    setSettings((prev) =>
-      prev ? { ...prev, deposit: { ...prev.deposit, [key]: value } } : prev
-    );
-    setSaved(false);
-  }
-
   if (loading || !settings) return <div className="dash-loading">Caricamento impostazioni…</div>;
 
   return (
@@ -53,19 +43,19 @@ export function VenueSettingsPanel() {
       <div className="dashboard-page-header">
         <p className="eyebrow">Impostazioni</p>
         <h1>Impostazioni locale</h1>
-        <p>Gestisci le informazioni pubbliche, la caparra e i contatti del tuo locale.</p>
+        <p>Gestisci le informazioni pubbliche e i contatti del tuo locale.</p>
       </div>
 
       {/* Tabs */}
       <div className="settings-tabs">
-        {(["locale", "caparra", "contatti", "fiscali"] as Tab[]).map((t) => (
+        {(["locale", "contatti", "fiscali"] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
             className={`settings-tab${tab === t ? " is-active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "locale" ? "Locale" : t === "caparra" ? "Caparra" : t === "contatti" ? "Contatti" : "Dati fiscali"}
+            {t === "locale" ? "Locale" : t === "contatti" ? "Contatti" : "Dati fiscali"}
           </button>
         ))}
       </div>
@@ -169,91 +159,6 @@ export function VenueSettingsPanel() {
             >
               + Aggiungi riga orari
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Tab: Caparra ── */}
-      {tab === "caparra" && (
-        <div className="dash-table-card settings-section">
-          <h3>Impostazioni caparra</h3>
-          <p className="settings-hint">La caparra viene mostrata chiaramente al cliente prima di confermare.</p>
-
-          <div className="settings-deposit">
-            <div className="settings-deposit__toggle-row">
-              <div>
-                <strong>Caparra obbligatoria</strong>
-                <p>Se attiva, il cliente deve pagare la caparra per completare la prenotazione.</p>
-              </div>
-              <button
-                type="button"
-                className={`avail-toggle avail-toggle--large${settings.deposit.required ? " is-on" : ""}`}
-                onClick={() => patchDeposit("required", !settings.deposit.required)}
-                aria-pressed={settings.deposit.required}
-              >
-                <span />
-              </button>
-            </div>
-
-            {settings.deposit.required && (
-              <>
-                <div className="settings-deposit__options">
-                  <label>
-                    Importo (€)
-                    <input
-                      type="number"
-                      min={1}
-                      max={200}
-                      value={settings.deposit.amount}
-                      onChange={(e) => patchDeposit("amount", Number(e.target.value))}
-                    />
-                  </label>
-                  <div className="settings-deposit__type">
-                    <span>Tipo caparra</span>
-                    <div className="settings-radio-group">
-                      <label>
-                        <input
-                          type="radio"
-                          checked={settings.deposit.perPerson}
-                          onChange={() => patchDeposit("perPerson", true)}
-                        />
-                        Per persona
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          checked={!settings.deposit.perPerson}
-                          onChange={() => patchDeposit("perPerson", false)}
-                        />
-                        Importo fisso
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="settings-deposit__preview">
-                  <span>Preview cliente:</span>
-                  <strong>
-                    Caparra {settings.deposit.perPerson ? `€${settings.deposit.amount} × persona` : `€${settings.deposit.amount} fisso`}
-                  </strong>
-                </div>
-
-                <label className="settings-form__full">
-                  Policy caparra (visibile al cliente)
-                  <textarea
-                    rows={3}
-                    value={settings.deposit.policy}
-                    onChange={(e) => patchDeposit("policy", e.target.value)}
-                  />
-                </label>
-              </>
-            )}
-
-            {!settings.deposit.required && (
-              <div className="settings-deposit__off-notice">
-                ✓ Nessuna caparra richiesta. I clienti prenotano gratuitamente.
-              </div>
-            )}
           </div>
         </div>
       )}
