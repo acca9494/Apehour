@@ -79,7 +79,7 @@ const APE_PRICE_RANGE: Record<string, string> = {
 };
 
 // Riga di card scorrevole su mobile con ombreggiatura arancione che invita a scorrere.
-function ScrollHintGrid({ className, children }: { className: string; children: React.ReactNode }) {
+function ScrollHintGrid({ className, alignToImage, children }: { className: string; alignToImage?: boolean; children: React.ReactNode }) {
   const [scrollPos, setScrollPos] = useState<"start" | "mid" | "end">("start");
 
   function handleScroll(e: React.UIEvent<HTMLElement>) {
@@ -90,7 +90,7 @@ function ScrollHintGrid({ className, children }: { className: string; children: 
   }
 
   return (
-    <div className="scroll-hint-wrap">
+    <div className={`scroll-hint-wrap${alignToImage ? " scroll-hint-wrap--image" : ""}`}>
       <div className={className} onScroll={handleScroll}>{children}</div>
       {scrollPos !== "end" && <div className="scroll-hint-wrap__hint-right" aria-hidden="true" />}
       {scrollPos !== "start" && <div className="scroll-hint-wrap__hint-left" aria-hidden="true" />}
@@ -150,7 +150,7 @@ export function EventsSection() {
       <SectionHeading eyebrow={h.eventsEyebrow} title={h.eventsTitle}>
         <span className="events-copy-desktop">{h.eventsCopyDesktop}</span>
       </SectionHeading>
-      <ScrollHintGrid className="event-grid">
+      <ScrollHintGrid className="event-grid" alignToImage>
         {HOME_EVENTS.map((event, index) => (
           <Reveal key={event.id} delay={index * 70}>
             <Link className="event-card" href={`/events/${event.slug}`}>
@@ -188,7 +188,7 @@ export function CategoriesSection() {
         <span className="activities-copy-desktop">{h.activitiesCopyDesktop}</span>
         <span className="activities-copy-mobile">{h.activitiesCopyMobile}</span>
       </SectionHeading>
-      <ScrollHintGrid className="event-grid">
+      <ScrollHintGrid className="event-grid" alignToImage>
         {categories.map((cat) => (
           <Link className="event-card" href={cat.href} key={cat.label}>
             <div className="event-card__image">
