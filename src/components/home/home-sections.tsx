@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ClayLink } from "@/components/ui/clay-button";
 import { Reveal } from "@/components/ui/reveal";
@@ -80,6 +81,15 @@ const APE_PRICE_RANGE: Record<string, string> = {
 export function OffersSection({ promotions }: { promotions: Promotion[] }) {
   const { t } = useLang();
   const h = t.home;
+  const [scrollPos, setScrollPos] = useState<"start" | "mid" | "end">("start");
+
+  function handleGridScroll(e: React.UIEvent<HTMLElement>) {
+    const el = e.currentTarget;
+    const atStart = el.scrollLeft <= 4;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    setScrollPos(atStart ? "start" : atEnd ? "end" : "mid");
+  }
+
   return (
     <section className="page-section page-section--dark page-section--offers">
       <div className="offers-header">
@@ -88,7 +98,8 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
         <span className="eyebrow offers-header__eyebrow--mobile">{h.bookNowEyebrow}</span>
         <h2 className="offers-header__title--mobile">{h.chooseTitle[0]}<span style={{ color: "var(--gold)" }}>{h.chooseTitle[1]}</span>{h.chooseTitle[2]}</h2>
       </div>
-      <div className="offer-grid">
+      <div className="offer-grid-wrap">
+      <div className="offer-grid" onScroll={handleGridScroll}>
         {promotions.map((promotion) => (
           <div className="offer-card" key={promotion.id}>
             {promotion.apeType && (
@@ -109,6 +120,9 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
             </Link>
           </div>
         ))}
+      </div>
+      {scrollPos !== "end" && <div className="offer-grid-wrap__hint-right" aria-hidden="true" />}
+      {scrollPos !== "start" && <div className="offer-grid-wrap__hint-left" aria-hidden="true" />}
       </div>
       <div className="section-cta section-cta--desktop">
         <ClayLink href="/offers" variant="secondary">Tutte le offerte</ClayLink>

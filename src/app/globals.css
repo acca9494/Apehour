@@ -2342,6 +2342,8 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
 .page-section--dark .section-heading__copy { color: rgba(255,255,255,0.5); }
 
 .page-section--offers { padding: 2rem 0; }
+.offer-grid-wrap__hint-right,
+.offer-grid-wrap__hint-left { display: none; }
 
 .offers-header {
   display: flex;
@@ -8827,6 +8829,26 @@ body:has(.search-page--map) > main {
   .offer-grid > *, .event-grid > * {
     flex: 0 0 min(200px, 62vw);
     scroll-snap-align: start;
+  }
+  /* Ombreggiatura arancione che indica di scorrere le card offerte */
+  .offer-grid-wrap { position: relative; }
+  .offer-grid-wrap__hint-right,
+  .offer-grid-wrap__hint-left {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0.75rem;
+    width: 4rem;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .offer-grid-wrap__hint-right {
+    right: 0;
+    background: linear-gradient(to left, rgba(245,130,0,0.75), rgba(245,130,0,0.25) 55%, transparent);
+  }
+  .offer-grid-wrap__hint-left {
+    left: 0;
+    background: linear-gradient(to right, rgba(245,130,0,0.75), rgba(245,130,0,0.25) 55%, transparent);
   }
   .offer-card { padding: 0.65rem 0.75rem; gap: 0; align-items: center; justify-content: flex-start; }
   .offer-card__desktop { display: none; }
