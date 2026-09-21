@@ -8841,8 +8841,8 @@ body:has(.search-page--map) > main {
     width: 2rem;
     pointer-events: none;
     z-index: 2;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 32%, #000 68%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, #000 32%, #000 68%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 24%, #000 76%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 24%, #000 76%, transparent 100%);
   }
   /* Card con foto in alto (4:3, larghezza card = min(200px,62vw)): centra l'ombra sulla foto */
   .scroll-hint-wrap--image .scroll-hint-wrap__hint-right,
