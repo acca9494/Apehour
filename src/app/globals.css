@@ -6120,7 +6120,7 @@ body:has(.search-page--map) > main {
 /* Quick actions */
 .dash-quick-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 .dash-quick-card {

@@ -16,7 +16,6 @@ const NAV_ITEMS = [
   { href: "/dashboard/disponibilita", icon: "◷",  label: "Disponibilità" },
   { href: "/dashboard/offerte",       icon: "%",  label: "Offerte" },
   { href: "/dashboard/eventi",        icon: "✦",  label: "Eventi" },
-  { href: "/dashboard/pagamenti",     icon: "◎",  label: "Pagamenti" },
   { href: "/dashboard/artisti",       icon: "▣",  label: "ApeJobs", comingSoon: true },
   { href: "/dashboard/impostazioni",  icon: "◌",  label: "Impostazioni" },
 ];

@@ -32,7 +32,6 @@ const QUICK_ACTIONS = [
   { href: "/dashboard/disponibilita", icon: "◷", label: "Disponibilità",  desc: "Aggiorna slot liberi" },
   { href: "/dashboard/tavoli",        icon: "⊞", label: "Tavoli",         desc: "Gestisci i tavoli" },
   { href: "/dashboard/impostazioni",  icon: "◌", label: "Impostazioni",   desc: "Profilo del locale" },
-  { href: "/dashboard/pagamenti",     icon: "◎", label: "Pagamenti",      desc: "Storico incassi" },
 ];
 
 export function DashboardOverview() {

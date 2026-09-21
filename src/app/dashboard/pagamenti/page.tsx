@@ -1,7 +1,6 @@
-import { PaymentsPanel } from "@/components/dashboard/payments-panel";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "Pagamenti — Dashboard" };
-
+// Sezione nascosta finché non c'è un sistema di pagamento reale.
 export default function PaymentsPage() {
-  return <PaymentsPanel />;
+  redirect("/dashboard");
 }
