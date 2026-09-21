@@ -2342,8 +2342,8 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
 .page-section--dark .section-heading__copy { color: rgba(255,255,255,0.5); }
 
 .page-section--offers { padding: 2rem 0; }
-.offer-grid-wrap__hint-right,
-.offer-grid-wrap__hint-left { display: none; }
+.scroll-hint-wrap__hint-right,
+.scroll-hint-wrap__hint-left { display: none; }
 
 .offers-header {
   display: flex;
@@ -8830,10 +8830,10 @@ body:has(.search-page--map) > main {
     flex: 0 0 min(200px, 62vw);
     scroll-snap-align: start;
   }
-  /* Ombreggiatura arancione che indica di scorrere le card offerte */
-  .offer-grid-wrap { position: relative; }
-  .offer-grid-wrap__hint-right,
-  .offer-grid-wrap__hint-left {
+  /* Ombreggiatura arancione che indica di scorrere le card (offerte, eventi, attività) */
+  .scroll-hint-wrap { position: relative; }
+  .scroll-hint-wrap__hint-right,
+  .scroll-hint-wrap__hint-left {
     display: block;
     position: absolute;
     top: 0;
@@ -8842,14 +8842,14 @@ body:has(.search-page--map) > main {
     pointer-events: none;
     z-index: 2;
   }
-  .offer-grid-wrap__hint-right {
+  .scroll-hint-wrap__hint-right {
     right: 0;
     border-radius: 1.25rem 0 0 1.25rem;
     background: linear-gradient(to left,
       rgba(245,130,0,0.6) 0%, rgba(245,130,0,0.38) 30%,
       rgba(245,130,0,0.14) 65%, rgba(245,130,0,0) 100%);
   }
-  .offer-grid-wrap__hint-left {
+  .scroll-hint-wrap__hint-left {
     left: 0;
     border-radius: 0 1.25rem 1.25rem 0;
     background: linear-gradient(to right,

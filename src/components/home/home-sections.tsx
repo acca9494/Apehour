@@ -78,17 +78,29 @@ const APE_PRICE_RANGE: Record<string, string> = {
   "bombo-queen":  "$$$$",
 };
 
-export function OffersSection({ promotions }: { promotions: Promotion[] }) {
-  const { t } = useLang();
-  const h = t.home;
+// Riga di card scorrevole su mobile con ombreggiatura arancione che invita a scorrere.
+function ScrollHintGrid({ className, children }: { className: string; children: React.ReactNode }) {
   const [scrollPos, setScrollPos] = useState<"start" | "mid" | "end">("start");
 
-  function handleGridScroll(e: React.UIEvent<HTMLElement>) {
+  function handleScroll(e: React.UIEvent<HTMLElement>) {
     const el = e.currentTarget;
     const atStart = el.scrollLeft <= 4;
     const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
     setScrollPos(atStart ? "start" : atEnd ? "end" : "mid");
   }
+
+  return (
+    <div className="scroll-hint-wrap">
+      <div className={className} onScroll={handleScroll}>{children}</div>
+      {scrollPos !== "end" && <div className="scroll-hint-wrap__hint-right" aria-hidden="true" />}
+      {scrollPos !== "start" && <div className="scroll-hint-wrap__hint-left" aria-hidden="true" />}
+    </div>
+  );
+}
+
+export function OffersSection({ promotions }: { promotions: Promotion[] }) {
+  const { t } = useLang();
+  const h = t.home;
 
   return (
     <section className="page-section page-section--dark page-section--offers">
@@ -98,8 +110,7 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
         <span className="eyebrow offers-header__eyebrow--mobile">{h.bookNowEyebrow}</span>
         <h2 className="offers-header__title--mobile">{h.chooseTitle[0]}<span style={{ color: "var(--gold)" }}>{h.chooseTitle[1]}</span>{h.chooseTitle[2]}</h2>
       </div>
-      <div className="offer-grid-wrap">
-      <div className="offer-grid" onScroll={handleGridScroll}>
+      <ScrollHintGrid className="offer-grid">
         {promotions.map((promotion) => (
           <div className="offer-card" key={promotion.id}>
             {promotion.apeType && (
@@ -120,10 +131,7 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
             </Link>
           </div>
         ))}
-      </div>
-      {scrollPos !== "end" && <div className="offer-grid-wrap__hint-right" aria-hidden="true" />}
-      {scrollPos !== "start" && <div className="offer-grid-wrap__hint-left" aria-hidden="true" />}
-      </div>
+      </ScrollHintGrid>
       <div className="section-cta section-cta--desktop">
         <ClayLink href="/offers" variant="secondary">Tutte le offerte</ClayLink>
       </div>
@@ -142,7 +150,7 @@ export function EventsSection() {
       <SectionHeading eyebrow={h.eventsEyebrow} title={h.eventsTitle}>
         <span className="events-copy-desktop">{h.eventsCopyDesktop}</span>
       </SectionHeading>
-      <div className="event-grid">
+      <ScrollHintGrid className="event-grid">
         {HOME_EVENTS.map((event, index) => (
           <Reveal key={event.id} delay={index * 70}>
             <Link className="event-card" href={`/events/${event.slug}`}>
@@ -163,7 +171,7 @@ export function EventsSection() {
             </Link>
           </Reveal>
         ))}
-      </div>
+      </ScrollHintGrid>
       <div className="section-cta">
         <ClayLink href="/events" variant="secondary">{h.allEvents}</ClayLink>
       </div>
@@ -180,7 +188,7 @@ export function CategoriesSection() {
         <span className="activities-copy-desktop">{h.activitiesCopyDesktop}</span>
         <span className="activities-copy-mobile">{h.activitiesCopyMobile}</span>
       </SectionHeading>
-      <div className="event-grid">
+      <ScrollHintGrid className="event-grid">
         {categories.map((cat) => (
           <Link className="event-card" href={cat.href} key={cat.label}>
             <div className="event-card__image">
@@ -199,7 +207,7 @@ export function CategoriesSection() {
             </div>
           </Link>
         ))}
-      </div>
+      </ScrollHintGrid>
       <div className="section-cta">
         <ClayLink href="/attivita" variant="secondary">{h.allActivities}</ClayLink>
       </div>
