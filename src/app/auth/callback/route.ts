@@ -12,6 +12,16 @@ export async function GET(request: NextRequest) {
   const role = searchParams.get("role") === "commerciante" ? "commerciante" : "cliente";
   const next = role === "commerciante" ? "/dashboard" : "/profile";
 
+  // Link di recupero password: scambia il code e manda alla pagina "nuova password".
+  // Se il code è scaduto/già usato non c'è sessione e quella pagina lo segnala.
+  if (searchParams.get("type") === "recovery") {
+    if (code) {
+      const supabase = await createClient();
+      await supabase.auth.exchangeCodeForSession(code);
+    }
+    return NextResponse.redirect(`${origin}/reset-password`);
+  }
+
   if (code) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);

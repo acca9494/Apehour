@@ -194,7 +194,7 @@ export function SiteHeader() {
   // navigate away via the browser back/forward buttons. /register is exempt so a
   // merchant who just signed up can finish the call-booking step of the form.
   useEffect(() => {
-    if (!loading && user?.role === "commerciante" && !pathname.startsWith("/dashboard") && !pathname.startsWith("/register")) {
+    if (!loading && user?.role === "commerciante" && !pathname.startsWith("/dashboard") && !pathname.startsWith("/register") && !pathname.startsWith("/reset-password")) {
       router.replace("/dashboard");
     }
   }, [user, loading, pathname, router]);
