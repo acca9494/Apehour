@@ -8830,7 +8830,7 @@ body:has(.search-page--map) > main {
     flex: 0 0 min(200px, 62vw);
     scroll-snap-align: start;
   }
-  /* Ombreggiatura arancione che indica di scorrere le card (offerte, eventi, attività) */
+  /* Ombreggiatura gialla che indica di scorrere le card (offerte, eventi, attività) */
   .scroll-hint-wrap { position: relative; }
   .scroll-hint-wrap__hint-right,
   .scroll-hint-wrap__hint-left {
@@ -8846,15 +8846,15 @@ body:has(.search-page--map) > main {
     right: 0;
     border-radius: 1.25rem 0 0 1.25rem;
     background: linear-gradient(to left,
-      rgba(245,130,0,0.6) 0%, rgba(245,130,0,0.38) 30%,
-      rgba(245,130,0,0.14) 65%, rgba(245,130,0,0) 100%);
+      rgba(245,168,0,0.6) 0%, rgba(245,168,0,0.38) 30%,
+      rgba(245,168,0,0.14) 65%, rgba(245,168,0,0) 100%);
   }
   .scroll-hint-wrap__hint-left {
     left: 0;
     border-radius: 0 1.25rem 1.25rem 0;
     background: linear-gradient(to right,
-      rgba(245,130,0,0.6) 0%, rgba(245,130,0,0.38) 30%,
-      rgba(245,130,0,0.14) 65%, rgba(245,130,0,0) 100%);
+      rgba(245,168,0,0.6) 0%, rgba(245,168,0,0.38) 30%,
+      rgba(245,168,0,0.14) 65%, rgba(245,168,0,0) 100%);
   }
   .offer-card { padding: 0.65rem 0.75rem; gap: 0; align-items: center; justify-content: flex-start; }
   .offer-card__desktop { display: none; }
