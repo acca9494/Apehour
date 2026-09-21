@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/context";
+import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { createRestaurant } from "@/lib/restaurants/service";
-import { Modal } from "@/components/ui/modal";
 import { LegalModal } from "@/components/legal/legal-modal";
 import type { PriceRange } from "@/lib/types";
 import type { AuthErrorCode } from "@/lib/auth/types";
@@ -205,14 +205,13 @@ function CallCalendar({ details }: { details: CallDetails }) {
   );
 }
 
-export function MerchantRegisterForm({ eventSource }: { eventSource?: string | null }) {
-  const { register } = useAuth();
+export function MerchantRegisterForm({ eventSource, onAccountCreating }: { eventSource?: string | null; onAccountCreating?: () => void }) {
+  const { login } = useAuth();
 
   const [step, setStep]           = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]         = useState<Exclude<AuthErrorCode, "email_confirmation_required"> | null>(null);
   const [showLegal, setShowLegal] = useState(false);
-  const [showConfirmEmail, setShowConfirmEmail] = useState(false);
 
   const [s1, setS1] = useState<Step1>({ nome: "", cognome: "", email: "", telefono: "", password: "", privacy: false });
   const [s2, setS2] = useState<Step2>({ venueName: "", address: "", city: "", avgSpend: "" });
@@ -228,27 +227,37 @@ export function MerchantRegisterForm({ eventSource }: { eventSource?: string | n
     setSubmitting(true);
     const priceRange = priceRangeFromAvgSpend(s2.avgSpend);
     try {
-      const session = await register({
-        name: `${s1.nome} ${s1.cognome}`.trim(),
-        email: s1.email,
-        password: s1.password,
-        role: "commerciante",
-        // Salvati in user_metadata: servono a creare il locale al primo accesso
-        // confermato, dato che la conferma email può avvenire dopo la registrazione.
-        metadata: {
-          venue_name: s2.venueName,
-          venue_address: s2.address,
-          venue_city: s2.city || "Roma",
-          venue_price_range: priceRange,
-          privacy_accepted_at: new Date().toISOString(),
-          ...(eventSource ? { event_source: eventSource } : {}),
-        },
+      // I locali non richiedono conferma email: l'account nasce già confermato
+      // (route server) e si entra subito, così si prosegue con la call.
+      const res = await fetch("/api/merchant-signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${s1.nome} ${s1.cognome}`.trim(),
+          email: s1.email,
+          password: s1.password,
+          venueName: s2.venueName,
+          venueAddress: s2.address,
+          venueCity: s2.city || "Roma",
+          venuePriceRange: priceRange,
+          eventSource,
+          privacyAccepted: s1.privacy,
+        }),
       });
-      // Se la sessione è già attiva (nessuna conferma email richiesta), crea subito
-      // il locale. Altrimenti ci pensa ensureRestaurantForOwner al primo accesso.
-      if (session.user) {
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error === "email_taken" ? "email_taken" : "unknown");
+      }
+
+      // Evita che la pagina di registrazione rimandi subito alla dashboard,
+      // saltando lo step della call.
+      onAccountCreating?.();
+      await login({ email: s1.email, password: s1.password });
+
+      const { data: { user } } = await createSupabaseBrowserClient().auth.getUser();
+      if (user) {
         await createRestaurant({
-          ownerId: session.user.id,
+          ownerId: user.id,
           name: s2.venueName,
           address: s2.address,
           city: s2.city || "Roma",
@@ -260,13 +269,7 @@ export function MerchantRegisterForm({ eventSource }: { eventSource?: string | n
       setStep(3);
     } catch (err) {
       const code = err instanceof Error ? err.message : "unknown";
-      if (code === "email_confirmation_required") {
-        // L'account è stato creato comunque: manca solo la conferma email.
-        setShowConfirmEmail(true);
-        setStep(3);
-      } else {
-        setError(code as Exclude<AuthErrorCode, "email_confirmation_required">);
-      }
+      setError((code === "email_taken" ? "email_taken" : "unknown") as Exclude<AuthErrorCode, "email_confirmation_required">);
     } finally {
       setSubmitting(false);
     }
@@ -376,19 +379,6 @@ export function MerchantRegisterForm({ eventSource }: { eventSource?: string | n
           }}
         />
       )}
-
-      <Modal open={showConfirmEmail} onClose={() => setShowConfirmEmail(false)} title="Account creato">
-        <div className="confirm-email-modal">
-          <div className="confirm-email-modal__icon" aria-hidden="true">✓</div>
-          <p>
-            Il tuo account è stato creato. Controlla la tua email e clicca sul link di conferma
-            prima di accedere.
-          </p>
-          <button type="button" className="mreg__btn mreg__btn--primary" onClick={() => setShowConfirmEmail(false)}>
-            Ho capito
-          </button>
-        </div>
-      </Modal>
 
       <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
     </div>

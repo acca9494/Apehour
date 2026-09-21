@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
@@ -30,6 +30,7 @@ export default function RegisterPage() {
 
   const [mode, setMode] = useState<Mode>(() => initialModeFrom(searchParams.get("mode")));
   const evento = searchParams.get("evento");
+  const holdRedirect = useRef(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +41,7 @@ export default function RegisterPage() {
   const [showConfirmEmail, setShowConfirmEmail] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !holdRedirect.current) {
       router.replace(user.role === "commerciante" ? "/dashboard" : "/profile");
     }
   }, [user, loading, router]);
@@ -148,7 +149,7 @@ export default function RegisterPage() {
             <h1>Per i locali</h1>
             <p>Gratis per i primi 30 giorni. Nessun contratto.</p>
             <div style={{ marginTop: "1rem" }}>
-              <MerchantRegisterForm eventSource={evento} />
+              <MerchantRegisterForm eventSource={evento} onAccountCreating={() => { holdRedirect.current = true; }} />
             </div>
             <p className="auth-link" style={{ marginTop: "1rem" }}>
               Hai già un account? <Link href="/login">Accedi</Link>

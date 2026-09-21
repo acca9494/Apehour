@@ -191,9 +191,10 @@ export function SiteHeader() {
   useEffect(() => { close(); }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Merchants are confined to the dashboard: bounce back even if they
-  // navigate away via the browser back/forward buttons.
+  // navigate away via the browser back/forward buttons. /register is exempt so a
+  // merchant who just signed up can finish the call-booking step of the form.
   useEffect(() => {
-    if (!loading && user?.role === "commerciante" && !pathname.startsWith("/dashboard")) {
+    if (!loading && user?.role === "commerciante" && !pathname.startsWith("/dashboard") && !pathname.startsWith("/register")) {
       router.replace("/dashboard");
     }
   }, [user, loading, pathname, router]);
