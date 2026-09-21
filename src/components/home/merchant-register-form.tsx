@@ -60,13 +60,47 @@ function Stepper({ step }: { step: number }) {
   );
 }
 
-function CallCalendar({ venueName }: { venueName: string }) {
+type CallDetails = {
+  contactName: string;
+  email: string;
+  phone: string;
+  venueName: string;
+  address: string;
+  city: string;
+  avgSpend: string;
+  eventSource?: string | null;
+};
+
+function CallCalendar({ details }: { details: CallDetails }) {
+  const venueName = details.venueName;
   const now = new Date();
   const [year, setYear]       = useState(now.getFullYear());
   const [month, setMonth]     = useState(now.getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [booked, setBooked]   = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState(false);
+
+  async function confirmCall() {
+    if (!selectedDay || !selectedTime) return;
+    setSending(true);
+    setSendError(false);
+    try {
+      const slotDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`;
+      const res = await fetch("/api/call-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...details, slotDate, slotTime: selectedTime }),
+      });
+      if (!res.ok) throw new Error("request failed");
+      setBooked(true);
+    } catch {
+      setSendError(true);
+    } finally {
+      setSending(false);
+    }
+  }
 
   const available = getAvailableDays(year, month);
   const firstDow  = (new Date(year, month, 1).getDay() + 6) % 7; // Mon=0
@@ -90,7 +124,7 @@ function CallCalendar({ venueName }: { venueName: string }) {
         <h3>Call confermata!</h3>
         <p>
           Ti aspettiamo il <strong>{selectedDay} {MONTHS[month]} {year}</strong> alle <strong>{selectedTime}</strong>.
-          <br />Riceverai una email di conferma per <strong>{venueName}</strong>.
+          <br />Ti contatteremo per <strong>{venueName}</strong> al numero che ci hai lasciato.
         </p>
         <Link href="/dashboard" className="mreg__btn mreg__btn--primary" style={{ marginTop: "1rem", flex: "unset", width: "auto", padding: "0.65rem 1.75rem" }}>
           Vai alla dashboard →
@@ -151,13 +185,21 @@ function CallCalendar({ venueName }: { venueName: string }) {
       )}
 
       {selectedDay && selectedTime && (
-        <button
-          type="button"
-          className="mreg__btn mreg__btn--primary"
-          onClick={() => setBooked(true)}
-        >
-          Conferma call — {selectedDay} {MONTHS[month]} · {selectedTime}
-        </button>
+        <>
+          {sendError && (
+            <div className="auth-error" role="alert">
+              Non siamo riusciti a registrare la richiesta. Riprova tra un attimo.
+            </div>
+          )}
+          <button
+            type="button"
+            className="mreg__btn mreg__btn--primary"
+            onClick={confirmCall}
+            disabled={sending}
+          >
+            {sending ? "Invio…" : `Conferma call — ${selectedDay} ${MONTHS[month]} · ${selectedTime}`}
+          </button>
+        </>
       )}
     </div>
   );
@@ -320,7 +362,20 @@ export function MerchantRegisterForm({ eventSource }: { eventSource?: string | n
         </form>
       )}
 
-      {step === 3 && <CallCalendar venueName={s2.venueName} />}
+      {step === 3 && (
+        <CallCalendar
+          details={{
+            contactName: `${s1.nome} ${s1.cognome}`.trim(),
+            email: s1.email,
+            phone: s1.telefono,
+            venueName: s2.venueName,
+            address: s2.address,
+            city: s2.city || "Roma",
+            avgSpend: s2.avgSpend,
+            eventSource,
+          }}
+        />
+      )}
 
       <Modal open={showConfirmEmail} onClose={() => setShowConfirmEmail(false)} title="Account creato">
         <div className="confirm-email-modal">

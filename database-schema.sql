@@ -1390,6 +1390,31 @@ WHERE s.is_active = TRUE
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
+--  RICHIESTE DI CALL (form "Ho un locale", step 3)
+--  Accesso solo lato server (service role): nessuna policy = nessun accesso
+--  da anon/authenticated, quindi i contatti dei locali non sono leggibili
+--  dal client. La route /api/call-request scrive qui e manda la mail.
+-- ═══════════════════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS public.call_requests (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  contact_name TEXT NOT NULL,
+  email        TEXT NOT NULL,
+  phone        TEXT NOT NULL,
+  venue_name   TEXT NOT NULL,
+  address      TEXT,
+  city         TEXT,
+  avg_spend    TEXT,
+  slot_date    DATE NOT NULL,
+  slot_time    TEXT NOT NULL,
+  event_source TEXT,
+  status       TEXT NOT NULL DEFAULT 'new'
+);
+ALTER TABLE public.call_requests ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.call_requests TO service_role;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
 --  RIEPILOGO PERMESSI
 -- ═══════════════════════════════════════════════════════════════════════════
 /*
