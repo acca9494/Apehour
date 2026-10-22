@@ -32,7 +32,7 @@ function mapRow(row: RestaurantRow, slots: BookingSlot[] = []): Restaurant {
     description: row.description ?? "",
     tags: row.tags ?? [],
     menuPreview: [],
-    openingHours: [],
+    openingHours: row.opening_hours ?? [],
     coordinates: { lat: row.lat ?? 0, lng: row.lng ?? 0 },
     slots,
   };
