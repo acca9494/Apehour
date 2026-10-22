@@ -6980,6 +6980,29 @@ body:has(.search-page--map) > main {
   display: block;
   margin-bottom: 0.5rem;
 }
+.settings-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.settings-tags__item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.settings-tags__item:has(input:checked) {
+  border-color: var(--gold);
+  background: rgba(245,168,0,0.1);
+  color: var(--text);
+}
+
 .settings-radio-group {
   display: flex;
   flex-direction: column;

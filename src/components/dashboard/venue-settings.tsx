@@ -9,6 +9,20 @@ import { DangerZoneDeleteAccount } from "@/components/ui/danger-zone-delete-acco
 
 type Tab = "locale" | "contatti" | "fiscali";
 
+// Stesso vocabolario del filtro "Caratteristiche" in ricerca
+// (src/components/search/search-results-client.tsx CHARACTERISTIC_OPTIONS):
+// il valore salvato qui deve combaciare con la keyword cercata là, altrimenti
+// il locale non comparirà mai per quel filtro anche se la caratteristica c'è.
+const TAG_OPTIONS = [
+  { value: "pet",                  label: "Pet Friendly",         emoji: "🐾" },
+  { value: "outdoor",              label: "Spazio all'aperto",    emoji: "🌿" },
+  { value: "vista",                label: "Vista panoramica",     emoji: "🌇" },
+  { value: "romantico",            label: "Romantico",            emoji: "💕" },
+  { value: "gruppi",               label: "Ideale per gruppi",    emoji: "👥" },
+  { value: "vini naturali",        label: "Vini naturali",        emoji: "🍇" },
+  { value: "cocktail artigianali", label: "Cocktail artigianali", emoji: "🍸" },
+];
+
 export function VenueSettingsPanel() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<VenueSettings | null>(null);
@@ -159,6 +173,26 @@ export function VenueSettingsPanel() {
             >
               + Aggiungi riga orari
             </button>
+          </div>
+
+          <h3 style={{ marginTop: "2rem" }}>Caratteristiche</h3>
+          <p className="settings-hint">Usate dai clienti per filtrare la ricerca — senza queste, il tuo locale non comparirà mai se qualcuno le seleziona.</p>
+          <div className="settings-tags">
+            {TAG_OPTIONS.map((opt) => (
+              <label key={opt.value} className="settings-tags__item">
+                <input
+                  type="checkbox"
+                  checked={settings.tags.includes(opt.value)}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...settings.tags, opt.value]
+                      : settings.tags.filter((t) => t !== opt.value);
+                    patch("tags", next);
+                  }}
+                />
+                {opt.emoji} {opt.label}
+              </label>
+            ))}
           </div>
         </div>
       )}

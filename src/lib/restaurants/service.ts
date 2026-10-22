@@ -143,6 +143,7 @@ export interface VenueSettingsPatch {
   vatNumber?: string;
   iban?: string;
   openingHours: { day: string; hours: string }[];
+  tags: string[];
 }
 
 export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPatch): Promise<RestaurantRow> {
@@ -167,6 +168,7 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
       vat_number: patch.vatNumber ?? null,
       iban: patch.iban ?? null,
       opening_hours: patch.openingHours,
+      tags: patch.tags,
     })
     .eq("id", id)
     .select()

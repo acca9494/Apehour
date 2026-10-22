@@ -113,6 +113,7 @@ export async function fetchVenueSettings(userId: string): Promise<VenueSettings>
     vatNumber: restaurant.vat_number ?? undefined,
     iban: restaurant.iban ?? undefined,
     openingHours: restaurant.opening_hours ?? [],
+    tags: restaurant.tags ?? [],
   };
 }
 
@@ -136,6 +137,7 @@ export async function updateVenueSettings(settings: VenueSettings, userId: strin
     vatNumber: settings.vatNumber,
     iban: settings.iban,
     openingHours: settings.openingHours,
+    tags: settings.tags,
   });
 }
 

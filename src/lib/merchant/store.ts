@@ -74,6 +74,7 @@ export interface VenueSettings {
   vatNumber?: string;   // partita IVA / codice fiscale, per fatturazione
   iban?: string;        // per pagamenti/commissioni future
   openingHours: OpeningHoursRow[];
+  tags: string[];
 }
 
 // ── Keys localStorage ────────────────────────────────────────────────────────
@@ -96,6 +97,7 @@ const DEFAULT_SETTINGS: VenueSettings = {
   heroImage:
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80",
   openingHours: [],
+  tags: [],
   deposit: {
     required: false,
     amount: 5,
