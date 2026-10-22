@@ -9808,3 +9808,41 @@ body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
   }
   .offer-detail-card__img-wrap { height: 160px; }
 }
+
+/* ── ADMIN: verifica locali ─────────────────────── */
+.admin-page { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+.admin-section-title { margin: 2rem 0 0.75rem; font-size: 1.1rem; font-weight: 800; }
+.admin-empty { color: var(--text-3); font-size: 0.9rem; }
+.admin-table th, .admin-table td { vertical-align: middle; }
+.admin-row-sub { font-size: 0.78rem; color: var(--text-3); margin-top: 0.15rem; }
+.admin-badge {
+  display: inline-block; padding: 0.25rem 0.6rem; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+}
+.admin-badge--ok { background: rgba(34,197,94,0.12); color: #15803d; }
+.admin-badge--warn { background: rgba(245,168,0,0.14); color: var(--gold-dk); }
+.admin-verify-btn {
+  padding: 0.45rem 0.9rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700;
+  border: 1px solid var(--border); cursor: pointer; white-space: nowrap;
+  background: var(--bg-2); color: var(--text);
+}
+.admin-verify-btn--off { background: var(--gold); border-color: var(--gold); color: var(--bg-dark); }
+.admin-verify-btn--on { background: var(--bg-2); color: var(--text-3); }
+.admin-verify-btn:disabled { opacity: 0.6; cursor: wait; }
+.admin-table__row { cursor: pointer; transition: background 120ms; }
+.admin-table__row:hover { background: var(--bg-3); }
+
+.admin-preview__cover { width: 100%; max-height: 260px; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: 1rem; }
+.admin-preview__gallery { display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1.25rem; }
+.admin-preview__thumb { width: 90px; height: 70px; object-fit: cover; border-radius: 0.5rem; flex: 0 0 auto; }
+.admin-preview__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+.admin-preview__grid h3 { margin: 0 0 0.35rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-3); }
+.admin-preview__grid p { margin: 0; font-size: 0.9rem; line-height: 1.5; }
+.admin-preview__footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border);
+}
+@media (max-width: 640px) {
+  .admin-preview__grid { grid-template-columns: 1fr; }
+  .admin-preview__footer { flex-direction: column; align-items: stretch; }
+}
