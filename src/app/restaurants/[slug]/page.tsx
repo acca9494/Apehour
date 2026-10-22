@@ -9,6 +9,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { getReviews } from "@/lib/services/reviews";
 import { getRestaurantBySlug, getSimilarRestaurants } from "@/lib/services/restaurants";
 import { formatReviewCount } from "@/lib/utils";
+import { getServerT } from "@/lib/i18n/server";
 
 type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
 
@@ -29,15 +30,17 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) notFound();
 
-  const [similar, reviews] = await Promise.all([
+  const [similar, reviews, t] = await Promise.all([
     getSimilarRestaurants(restaurant.slug),
     getReviews(restaurant.id),
+    getServerT(),
   ]);
+  const d = t.restaurantDetail;
 
   return (
     <div className="detail-page">
       {/* ── 1–6. Hero cinematografico con info overlay ────────────────── */}
-      <DetailHero restaurant={restaurant} />
+      <DetailHero restaurant={restaurant} t={d} />
 
       {/* ── Layout contenuto + pannello prenotazione sticky ──────────── */}
       <section className="detail-layout">
@@ -48,14 +51,14 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             <p className="detail-desc__text">{restaurant.description}</p>
             <div className="detail-pills" style={{ marginTop: "1rem" }}>
               <span>{restaurant.priceRange}</span>
-              <span>{restaurant.rating.toFixed(1)} ★ · {formatReviewCount(restaurant.reviewCount)} {restaurant.reviewCount === 1 ? "recensione" : "recensioni"}</span>
-              {restaurant.discount ? <span className="detail-pill--yellow">-{restaurant.discount}% oggi</span> : null}
+              <span>{restaurant.rating.toFixed(1)} ★ · {formatReviewCount(restaurant.reviewCount)} {restaurant.reviewCount === 1 ? d.review : d.reviewsPlural}</span>
+              {restaurant.discount ? <span className="detail-pill--yellow">{d.discountToday(restaurant.discount)}</span> : null}
             </div>
           </div>
 
           {/* ── Carta e drink ─────────────────────────────────────────── */}
           <section className="detail-block">
-            <h2>Carta e drink</h2>
+            <h2>{d.menu}</h2>
             <div className="menu-list">
               {restaurant.menuPreview.map((item) => (
                 <div key={item.name}>
@@ -71,23 +74,23 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
 
           {/* ── 8. Punti forti ────────────────────────────────────────── */}
           <section className="detail-block">
-            <h2>Perché prenotare qui</h2>
+            <h2>{d.whyBookHere}</h2>
             <div className="highlight-grid">
               <div>
-                <strong>L&apos;atmosfera</strong>
+                <strong>{d.atmosphere}</strong>
                 <p>{restaurant.urgencyLabel} — {restaurant.socialProof}</p>
               </div>
               <div>
-                <strong>Drink &amp; cibo</strong>
+                <strong>{d.drinksAndFood}</strong>
                 <p>
                   {restaurant.menuPreview
                     .slice(0, 2)
                     .map((i) => i.name)
-                    .join(", ")} e altri {restaurant.menuPreview.length} classici.
+                    .join(", ")} {d.andOtherClassics(restaurant.menuPreview.length)}
                 </p>
               </div>
               <div>
-                <strong>Ideale per</strong>
+                <strong>{d.idealFor}</strong>
                 <p>{restaurant.tags.join(", ")}</p>
               </div>
             </div>
@@ -100,8 +103,8 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
 
           {/* ── 9. Gallery strip ───────────────────────────────────────── */}
           {restaurant.gallery.length > 0 && (
-            <section className="detail-block detail-gallery-strip" aria-label="Galleria foto">
-              <h2>Guarda il locale</h2>
+            <section className="detail-block detail-gallery-strip" aria-label={d.gallery}>
+              <h2>{d.gallery}</h2>
               <div className="gallery-strip">
                 {restaurant.gallery.map((img, i) => (
                   <div key={img} className="gallery-strip__tile">
@@ -120,7 +123,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
           {/* ── Orari + Mappa ─────────────────────────────────────────── */}
           <section className="detail-block split-block">
             <div>
-              <h2>Orari aperitivo</h2>
+              <h2>{d.hours}</h2>
               <dl className="hours-list">
                 {restaurant.openingHours.map((item) => (
                   <div key={item.day}>
@@ -153,7 +156,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
           {/* ── Recensioni ────────────────────────────────────────────── */}
           {reviews.length > 0 && (
             <section className="detail-block">
-              <h2>Cosa dicono i clienti</h2>
+              <h2>{d.whatCustomersSay}</h2>
               <div className="testimonial-grid">
                 {reviews.map((rev) => (
                   <blockquote className="testimonial-card" key={rev.id}>
@@ -170,23 +173,23 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
 
           {/* ── 15. FAQ ───────────────────────────────────────────────── */}
           <section className="detail-block detail-faq-section">
-            <h2>Domande frequenti</h2>
+            <h2>{d.faq}</h2>
             <div className="detail-faq-grid">
               <div className="detail-faq-item">
-                <strong>Posso cancellare la prenotazione?</strong>
-                <p>Sì, cancellazione gratuita fino a 2 ore prima. Basta accedere alle tue prenotazioni e premere Annulla.</p>
+                <strong>{d.faqCancel}</strong>
+                <p>{d.faqCancelA}</p>
               </div>
               <div className="detail-faq-item">
-                <strong>Serve una carta di credito?</strong>
-                <p>No. La prenotazione è gratuita. La caparra è indicata chiaramente solo se il locale la richiede.</p>
+                <strong>{d.faqCard}</strong>
+                <p>{d.faqCardA}</p>
               </div>
               <div className="detail-faq-item">
-                <strong>Come ricevo la conferma?</strong>
-                <p>Via email subito dopo aver premuto &quot;Prenota il tavolo&quot;. Controlla anche lo spam se non arriva.</p>
+                <strong>{d.faqConfirm}</strong>
+                <p>{d.faqConfirmA}</p>
               </div>
               <div className="detail-faq-item">
-                <strong>Posso modificare dopo aver prenotato?</strong>
-                <p>Puoi cancellare e riprenotare gratuitamente. Per modifiche urgenti, contatta direttamente il locale.</p>
+                <strong>{d.faqChange}</strong>
+                <p>{d.faqChangeA}</p>
               </div>
             </div>
           </section>
@@ -201,8 +204,8 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
 
       {/* ── Locali simili ─────────────────────────────────────────────── */}
       <section className="page-section">
-        <SectionHeading eyebrow="Scopri anche" title="Altri locali che potrebbero piacerti">
-          Stessa qualità, orari ancora disponibili.
+        <SectionHeading eyebrow={d.discoverAlso} title={d.similarVenues}>
+          {d.similarVenuesSub}
         </SectionHeading>
         <div className="restaurant-grid">
           {similar.map((item) => (

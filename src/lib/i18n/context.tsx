@@ -29,7 +29,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   function setLang(l: Lang) {
     setLangState(l);
-    try { localStorage.setItem("apehour_lang", l); } catch {}
+    try {
+      localStorage.setItem("apehour_lang", l);
+      // Anche come cookie: le pagine renderizzate dal server (es. scheda
+      // locale) non hanno accesso a localStorage, solo ai cookie.
+      document.cookie = `apehour_lang=${l}; path=/; max-age=31536000; samesite=lax`;
+    } catch {}
   }
 
   return (

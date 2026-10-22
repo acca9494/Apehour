@@ -3,12 +3,13 @@ import Link from "next/link";
 import type { Restaurant } from "@/lib/types";
 import { formatReviewCount } from "@/lib/utils";
 import { FavoriteHeartButton } from "@/components/favorites/favorite-heart-button";
+import type { getServerT } from "@/lib/i18n/server";
 
-function Stars({ rating }: { rating: number }) {
+function Stars({ rating, label }: { rating: number; label: string }) {
   const full = Math.floor(rating);
   const half = rating - full >= 0.4;
   return (
-    <span className="star-row" aria-label={`${rating} su 5`}>
+    <span className="star-row" aria-label={label}>
       {Array.from({ length: 5 }, (_, i) => {
         const filled = i < full ? "full" : i === full && half ? "half" : "empty";
         return (
@@ -21,10 +22,10 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-export function DetailHero({ restaurant }: { restaurant: Restaurant }) {
+export function DetailHero({ restaurant, t }: { restaurant: Restaurant; t: Awaited<ReturnType<typeof getServerT>>["restaurantDetail"] }) {
   return (
     <div className="detail-hero">
-      <Link href="/search" className="detail-back-btn" aria-label="Torna alla ricerca">
+      <Link href="/search" className="detail-back-btn" aria-label={t.backToSearch}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="m15 18-6-6 6-6" />
         </svg>
@@ -65,10 +66,10 @@ export function DetailHero({ restaurant }: { restaurant: Restaurant }) {
         {/* Meta row */}
         <div className="detail-hero__meta">
           <span className="detail-hero__rating">
-            <Stars rating={restaurant.rating} />
+            <Stars rating={restaurant.rating} label={t.outOf5(restaurant.rating)} />
             <strong>{restaurant.rating.toFixed(1)}</strong>
             <span className="detail-hero__review-count">
-              ({formatReviewCount(restaurant.reviewCount)} recensioni)
+              ({formatReviewCount(restaurant.reviewCount)} {t.reviewsPlural})
             </span>
           </span>
 
@@ -95,7 +96,7 @@ export function DetailHero({ restaurant }: { restaurant: Restaurant }) {
           ))}
           {restaurant.discount && (
             <span className="detail-hero__tag detail-hero__tag--discount">
-              -{restaurant.discount}% oggi
+              {t.discountToday(restaurant.discount)}
             </span>
           )}
         </div>

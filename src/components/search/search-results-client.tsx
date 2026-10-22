@@ -10,47 +10,48 @@ import { SkeletonGrid } from "@/components/ui/skeleton";
 import { getRestaurantsClient } from "@/lib/services/restaurants.client";
 import type { Cuisine, FoodType, PriceRange, Restaurant, SearchFilters } from "@/lib/types";
 import { CalendarDropdown } from "@/components/ui/calendar-dropdown";
+import { useLang } from "@/lib/i18n/context";
 
 const LeafletMap = dynamic(() => import("@/components/map/leaflet-map"), { ssr: false });
 
-const CATEGORY_ICONS: Array<{ label: string; emoji: string; value: Cuisine | "All" }> = [
-  { label: "Tutti",     emoji: "🎉", value: "All" },
-  { label: "Spritz",    emoji: "🍹", value: "Spritz Bar" },
-  { label: "Cocktail",  emoji: "🍸", value: "Cocktail Bar" },
-  { label: "Wine Bar",  emoji: "🍷", value: "Wine Bar" },
-  { label: "Brunch",    emoji: "☕", value: "Brunch" },
-  { label: "Rooftop",   emoji: "🌅", value: "Rooftop Bar" },
-  { label: "Beer Bar",  emoji: "🍺", value: "Beer Bar" },
-  { label: "Champagne", emoji: "🥂", value: "Champagne Bar" },
-  { label: "Whisky Bar", emoji: "🥃", value: "Whisky Bar" },
+const CATEGORY_VALUES: Array<{ key: string; emoji: string; value: Cuisine | "All" }> = [
+  { key: "all",       emoji: "🎉", value: "All" },
+  { key: "spritz",    emoji: "🍹", value: "Spritz Bar" },
+  { key: "cocktail",  emoji: "🍸", value: "Cocktail Bar" },
+  { key: "wine",      emoji: "🍷", value: "Wine Bar" },
+  { key: "brunch",    emoji: "☕", value: "Brunch" },
+  { key: "rooftop",   emoji: "🌅", value: "Rooftop Bar" },
+  { key: "beer",      emoji: "🍺", value: "Beer Bar" },
+  { key: "champagne", emoji: "🥂", value: "Champagne Bar" },
+  { key: "whisky",    emoji: "🥃", value: "Whisky Bar" },
 ];
 
-const BUDGET_OPTIONS: Array<{ value: PriceRange | "All"; label: string; budget: string; imgSrc?: string }> = [
-  { value: "All",  label: "Tutti",       budget: ""    },
-  { value: "$$",   label: "Vespa Sprint", budget: "€",   imgSrc: "/vespa-v2.png" },
-  { value: "$$$",  label: "Ape Plus",    budget: "€€",  imgSrc: "/plus-v2.png"  },
-  { value: "$$$$", label: "Bombo Queen", budget: "€€€", imgSrc: "/bombo-v2.png" },
+const BUDGET_VALUES: Array<{ value: PriceRange | "All"; apeLabel: string; budget: string; imgSrc?: string }> = [
+  { value: "All",  apeLabel: "",             budget: ""    },
+  { value: "$$",   apeLabel: "Vespa Sprint", budget: "€",   imgSrc: "/vespa-v2.png" },
+  { value: "$$$",  apeLabel: "Ape Plus",     budget: "€€",  imgSrc: "/plus-v2.png"  },
+  { value: "$$$$", apeLabel: "Bombo Queen",  budget: "€€€", imgSrc: "/bombo-v2.png" },
 ];
 
 const GUESTS_OPTIONS = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15];
 
-const FOOD_TYPE_OPTIONS: Array<{ value: FoodType | "All"; label: string; emoji: string }> = [
-  { value: "All",           label: "Tutti",          emoji: "🍽️" },
-  { value: "Vegano",        label: "Vegano",          emoji: "🌱" },
-  { value: "Vegetariano",   label: "Vegetariano",     emoji: "🥗" },
-  { value: "Senza Glutine", label: "Senza Glutine",   emoji: "🌾" },
-  { value: "Halal",         label: "Halal",           emoji: "☪️" },
-  { value: "Bio",           label: "Bio",             emoji: "🍃" },
+const FOOD_TYPE_VALUES: Array<{ key: string; value: FoodType | "All"; emoji: string }> = [
+  { key: "all",        value: "All",           emoji: "🍽️" },
+  { key: "vegan",       value: "Vegano",        emoji: "🌱" },
+  { key: "vegetarian",  value: "Vegetariano",   emoji: "🥗" },
+  { key: "glutenFree",  value: "Senza Glutine", emoji: "🌾" },
+  { key: "halal",       value: "Halal",         emoji: "☪️" },
+  { key: "bio",         value: "Bio",           emoji: "🍃" },
 ];
 
-const CHARACTERISTIC_OPTIONS: Array<{ key: string; label: string; emoji: string; keywords: string[] }> = [
-  { key: "petFriendly",    label: "Pet Friendly",         emoji: "🐾", keywords: ["pet", "cani"] },
-  { key: "outdoor",        label: "Spazio all'aperto",    emoji: "🌿", keywords: ["outdoor", "aperto", "terrazza", "giardino"] },
-  { key: "view",           label: "Vista panoramica",     emoji: "🌇", keywords: ["vista", "panoramica", "tramonto"] },
-  { key: "romantic",       label: "Romantico",            emoji: "💕", keywords: ["romantico"] },
-  { key: "groups",         label: "Ideale per gruppi",    emoji: "👥", keywords: ["gruppi", "studenti"] },
-  { key: "naturalWine",    label: "Vini naturali",        emoji: "🍇", keywords: ["vini naturali"] },
-  { key: "craftCocktails", label: "Cocktail artigianali", emoji: "🍸", keywords: ["cocktail artigianali", "cocktail classici"] },
+const CHARACTERISTIC_VALUES: Array<{ key: string; emoji: string; keywords: string[] }> = [
+  { key: "petFriendly",    emoji: "🐾", keywords: ["pet", "cani"] },
+  { key: "outdoor",        emoji: "🌿", keywords: ["outdoor", "aperto", "terrazza", "giardino"] },
+  { key: "view",           emoji: "🌇", keywords: ["vista", "panoramica", "tramonto"] },
+  { key: "romantic",       emoji: "💕", keywords: ["romantico"] },
+  { key: "groups",         emoji: "👥", keywords: ["gruppi", "studenti"] },
+  { key: "naturalWine",    emoji: "🍇", keywords: ["vini naturali"] },
+  { key: "craftCocktails", emoji: "🍸", keywords: ["cocktail artigianali", "cocktail classici"] },
 ];
 
 const TIME_SLOTS = ["17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"];
@@ -84,6 +85,7 @@ const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
 const LAZIO_CENTER = { lat: 41.894, lng: 12.482 };
 
 export function SearchResultsClient({ initialFilters }: { initialFilters: SearchFilters }) {
+  const { t } = useLang();
   const todayISO = new Date().toISOString().split("T")[0]!;
 
   const [filters, setFilters] = useState<ExtendedFilters>({
@@ -177,7 +179,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
           filtered = filtered.filter((r) => {
             const tags = r.tags.map((t) => t.toLowerCase());
             return filters.characteristics.every((key) => {
-              const opt = CHARACTERISTIC_OPTIONS.find((o) => o.key === key);
+              const opt = CHARACTERISTIC_VALUES.find((o) => o.key === key);
               return opt ? tags.some((t) => opt.keywords.some((kw) => t.includes(kw))) : true;
             });
           });
@@ -212,14 +214,14 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
     <>
       {/* Città */}
       <div className="search-sidebar__field">
-        <span>Città</span>
+        <span>{t.search.city}</span>
         <div className="search-filter-toggles">
           <button
             type="button"
             className={`search-filter-toggle${!filters.city ? " is-active" : ""}`}
             onClick={() => setFilter("city", undefined)}
           >
-            Tutto il Lazio
+            {t.search.allLazio}
           </button>
           {Object.keys(CITY_COORDS).map((c) => (
             <button
@@ -236,20 +238,20 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
       {/* Data */}
       <div className="search-sidebar__field">
-        <span>Data</span>
+        <span>{t.search.date}</span>
         <CalendarDropdown compact value={filters.date ?? ""} onChange={(v) => setFilter("date", v)} />
       </div>
 
       {/* Orario — multi-select pills */}
       <div className="search-sidebar__field">
-        <span>Orario</span>
+        <span>{t.search.time}</span>
         <div className="search-filter-toggles">
           <button
             type="button"
             className={`search-filter-toggle${filters.times.includes(BRUNCH_SLOT) ? " is-active" : ""}`}
             onClick={() => setFilter("times", togglePill(filters.times, BRUNCH_SLOT))}
           >
-            🥐 Brunch
+            {t.search.brunch}
           </button>
           {TIME_SLOTS.map((t) => (
             <button
@@ -266,16 +268,16 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
             className={`search-filter-toggle${filters.times.includes(AFTER_SLOT) ? " is-active" : ""}`}
             onClick={() => setFilter("times", togglePill(filters.times, AFTER_SLOT))}
           >
-            🌙 After
+            {t.search.after}
           </button>
         </div>
       </div>
 
       {/* Budget — multi-select pills (mirrors strip above map) */}
       <div className="search-sidebar__field">
-        <span>Budget</span>
+        <span>{t.search.budget}</span>
         <div className="search-filter-toggles">
-          {BUDGET_OPTIONS.filter((o) => o.value !== "All").map((opt) => (
+          {BUDGET_VALUES.filter((o) => o.value !== "All").map((opt) => (
             <button
               key={opt.value}
               type="button"
@@ -284,7 +286,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {opt.imgSrc && <img src={opt.imgSrc} alt="" className="search-filter-toggle__ape-img" />}
-              <span>{opt.label}</span>
+              <span>{opt.apeLabel}</span>
               <span className="search-filter-toggle__budget">{opt.budget}</span>
             </button>
           ))}
@@ -293,19 +295,19 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
       {/* Persone */}
       <label className="search-sidebar__field">
-        <span>Persone</span>
+        <span>{t.search.people}</span>
         <select value={filters.guests ?? 2} onChange={(e) => setFilter("guests", Number(e.target.value))}>
           {GUESTS_OPTIONS.map((n) => (
-            <option key={n} value={n}>{n} {n === 1 ? "persona" : "persone"}</option>
+            <option key={n} value={n}>{n} {n === 1 ? t.search.person : t.search.peoplePlural}</option>
           ))}
         </select>
       </label>
 
       {/* Tipo di aperitivo — multi-select cuisine pills */}
       <div className="search-sidebar__field">
-        <span>Tipo di aperitivo</span>
+        <span>{t.search.cuisineType}</span>
         <div className="search-filter-toggles">
-          {CATEGORY_ICONS.filter((c) => c.value !== "All").map((cat) => (
+          {CATEGORY_VALUES.filter((c) => c.value !== "All").map((cat) => (
             <button
               key={cat.value}
               type="button"
@@ -313,7 +315,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
               onClick={() => setFilter("cuisines", togglePill(filters.cuisines, cat.value as Cuisine))}
             >
               <span>{cat.emoji}</span>
-              <span>{cat.label}</span>
+              <span>{t.search.cuisine[cat.key as keyof typeof t.search.cuisine]}</span>
             </button>
           ))}
         </div>
@@ -321,9 +323,9 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
       {/* Tipo di cibo — multi-select pills */}
       <div className="search-sidebar__field">
-        <span>Tipo di cibo</span>
+        <span>{t.search.foodType}</span>
         <div className="search-filter-toggles">
-          {FOOD_TYPE_OPTIONS.filter((o) => o.value !== "All").map((opt) => (
+          {FOOD_TYPE_VALUES.filter((o) => o.value !== "All").map((opt) => (
             <button
               key={opt.value}
               type="button"
@@ -331,7 +333,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
               onClick={() => setFilter("foodTypes", togglePill(filters.foodTypes, opt.value as FoodType))}
             >
               <span>{opt.emoji}</span>
-              <span>{opt.label}</span>
+              <span>{t.search.food[opt.key as keyof typeof t.search.food]}</span>
             </button>
           ))}
         </div>
@@ -339,16 +341,16 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
       {/* Caratteristiche */}
       <div className="search-sidebar__field">
-        <span>Caratteristiche</span>
+        <span>{t.search.characteristics}</span>
         <div className="search-filter-toggles">
-          {CHARACTERISTIC_OPTIONS.map((opt) => (
+          {CHARACTERISTIC_VALUES.map((opt) => (
             <button
               key={opt.key}
               type="button"
               className={`search-filter-toggle${filters.characteristics.includes(opt.key) ? " is-active" : ""}`}
               onClick={() => setFilter("characteristics", togglePill(filters.characteristics, opt.key))}
             >
-              {opt.emoji} {opt.label}
+              {opt.emoji} {t.search.traits[opt.key as keyof typeof t.search.traits]}
             </button>
           ))}
         </div>
@@ -373,7 +375,7 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
             <polygon points="5.5,7.07 9.5,7.07 11.5,10.54 9.5,14 5.5,14 3.5,10.54"/>
             <polygon points="12.5,7.07 16.5,7.07 18.5,10.54 16.5,14 12.5,14 10.5,10.54"/>
           </svg>
-          Filtri{!loading && restaurants.length > 0 ? ` (${restaurants.length})` : ""}
+          {t.search.filters}{!loading && restaurants.length > 0 ? ` (${restaurants.length})` : ""}
         </button>
 
         <aside className={`search-sidebar${sidebarOpen ? " search-sidebar--open" : ""}`}>
@@ -383,19 +385,19 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
               className={`search-view-pill__btn${viewMode === "list" ? " is-active" : ""}`}
               onClick={() => switchView("list")}
             >
-              Lista
+              {t.search.list}
             </button>
             <button
               type="button"
               className={`search-view-pill__btn${viewMode === "map" ? " is-active" : ""}`}
               onClick={() => switchView("map")}
             >
-              Mappa
+              {t.search.map}
             </button>
           </div>
 
           <div className="search-sidebar__scroll">
-            <p className="search-sidebar__label">Filtri</p>
+            <p className="search-sidebar__label">{t.search.filters}</p>
             <div className="search-sidebar__group">{filterControls}</div>
             <div className="search-sidebar__locali">
               <button
@@ -403,14 +405,14 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
                 className="search-sidebar__locali-trigger"
                 onClick={() => setLocaliOpen((v) => !v)}
               >
-                <span className="search-sidebar__locali-label">Locali trovati</span>
+                <span className="search-sidebar__locali-label">{t.search.venuesFound}</span>
                 <span className="search-sidebar__locali-count">{loading ? "…" : restaurants.length}</span>
                 <svg className={`search-sidebar__locali-chevron${localiOpen ? " is-open" : ""}`} viewBox="0 0 20 20" fill="currentColor"><path d="M5 8l5 5 5-5"/></svg>
               </button>
               {localiOpen && !loading && (
                 <ul className="search-sidebar__locali-list">
                   {restaurants.length === 0 && (
-                    <li className="search-sidebar__locali-empty">Nessun locale trovato</li>
+                    <li className="search-sidebar__locali-empty">{t.search.noVenuesFound}</li>
                   )}
                   {restaurants.map((r) => (
                     <li key={r.id}>
@@ -430,10 +432,10 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
               )}
             </div>
             <button type="button" className="search-sidebar__reset" onClick={resetFilters}>
-              Azzera filtri
+              {t.search.resetFilters}
             </button>
             <button type="button" className="search-sidebar__apply" onClick={() => setSidebarOpen(false)}>
-              Applica filtri
+              {t.search.applyFilters}
             </button>
           </div>
         </aside>
@@ -458,8 +460,8 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
             {!loading && restaurants.length === 0 && (
               <div className="search-empty">
                 <p className="search-empty__icon">🍋</p>
-                <h2>Nessun locale trovato</h2>
-                <p>Prova a rimuovere qualche filtro o cerca in un&apos;altra città.</p>
+                <h2>{t.search.noVenuesFound}</h2>
+                <p>{t.search.noVenuesHint}</p>
               </div>
             )}
             {!loading && restaurants.length > 0 && (
@@ -480,8 +482,8 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
           <div className="results-sheet">
             <div className="results-sheet__handle" />
             <div className="results-sheet__header">
-              <h3>{loading ? "…" : `${restaurants.length} locali`}</h3>
-              <button type="button" className="results-sheet__close" onClick={() => setResultsOpen(false)} aria-label="Chiudi">✕</button>
+              <h3>{loading ? "…" : t.search.venuesCount(restaurants.length)}</h3>
+              <button type="button" className="results-sheet__close" onClick={() => setResultsOpen(false)} aria-label={t.search.close}>✕</button>
             </div>
 
             {/* Filters */}
@@ -491,9 +493,9 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
             {/* Footer: reset + apply */}
             <div className="results-sheet__footer">
-              <button type="button" className="mobile-filter-sheet__reset" onClick={resetFilters}>Azzera</button>
+              <button type="button" className="mobile-filter-sheet__reset" onClick={resetFilters}>{t.search.reset}</button>
               <button type="button" className="mobile-filter-sheet__apply" onClick={() => setResultsOpen(false)}>
-                Mostra {loading ? "…" : restaurants.length} locali
+                {loading ? "…" : t.search.showResults(restaurants.length)}
               </button>
             </div>
           </div>
@@ -506,16 +508,16 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
           <div className="mobile-filter-backdrop" onClick={() => setFiltersOpen(false)} />
           <div className="mobile-filter-sheet">
             <div className="mobile-filter-sheet__header">
-              <h3>Filtri avanzati</h3>
-              <button type="button" className="mobile-filter-sheet__close" onClick={() => setFiltersOpen(false)} aria-label="Chiudi filtri">✕</button>
+              <h3>{t.search.filtersAdvanced}</h3>
+              <button type="button" className="mobile-filter-sheet__close" onClick={() => setFiltersOpen(false)} aria-label={t.search.filtersAdvanced}>✕</button>
             </div>
             <div className="mobile-filter-sheet__body">
               <div className="search-sidebar__group">{filterControls}</div>
             </div>
             <div className="mobile-filter-sheet__footer">
-              <button type="button" className="mobile-filter-sheet__reset" onClick={resetFilters}>Azzera</button>
+              <button type="button" className="mobile-filter-sheet__reset" onClick={resetFilters}>{t.search.reset}</button>
               <button type="button" className="mobile-filter-sheet__apply" onClick={() => setFiltersOpen(false)}>
-                Mostra {loading ? "…" : restaurants.length} locali
+                {loading ? "…" : t.search.showResults(restaurants.length)}
               </button>
             </div>
           </div>

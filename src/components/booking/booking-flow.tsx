@@ -14,9 +14,8 @@ import {
   getSlotsForDate,
 } from "@/lib/bookings/service";
 import type { AvailabilityResult, ClientBooking } from "@/lib/bookings/types";
+import { useLang } from "@/lib/i18n/context";
 
-// ── Step labels ───────────────────────────────────────────────────────────────
-const STEPS = ["Quando", "Chi sei", "Conferma"] as const;
 type Step = 0 | 1 | 2;
 
 // ── Slot pill ─────────────────────────────────────────────────────────────────
@@ -25,11 +24,13 @@ function SlotPill({
   selected,
   guests,
   onSelect,
+  c,
 }: {
   slot: { time: string; availableSeats: number; discount?: number; label?: string };
   selected: boolean;
   guests: number;
   onSelect: () => void;
+  c: ReturnType<typeof useLang>["t"]["checkout"];
 }) {
   const tooFew = slot.availableSeats < guests;
   return (
@@ -38,7 +39,7 @@ function SlotPill({
       className={`booking-slot-pill${selected ? " is-selected" : ""}${tooFew ? " is-disabled" : ""}`}
       onClick={onSelect}
       disabled={tooFew}
-      title={tooFew ? `Solo ${slot.availableSeats} posti` : undefined}
+      title={tooFew ? c.onlySeats(slot.availableSeats) : undefined}
     >
       <strong>{slot.time}</strong>
       {slot.discount ? (
@@ -46,25 +47,25 @@ function SlotPill({
       ) : null}
       <small>
         {slot.availableSeats === 0
-          ? "Esaurito"
-          : `${slot.availableSeats} posti`}
+          ? c.soldOut
+          : c.seatsLeft(slot.availableSeats)}
       </small>
     </button>
   );
 }
 
 // ── Stepper header ────────────────────────────────────────────────────────────
-function Stepper({ step }: { step: Step }) {
+function Stepper({ step, c }: { step: Step; c: ReturnType<typeof useLang>["t"]["checkout"] }) {
   return (
-    <div className="booking3-stepper" aria-label="Passaggi prenotazione">
-      {STEPS.map((label, i) => (
+    <div className="booking3-stepper" aria-label={c.stepsAria}>
+      {c.steps.map((label, i) => (
         <div
           key={label}
           className={`booking3-step${i === step ? " is-active" : i < step ? " is-done" : ""}`}
         >
           <span className="booking3-step__num">{i < step ? "✓" : i + 1}</span>
           <span className="booking3-step__label">{label}</span>
-          {i < STEPS.length - 1 && <span className="booking3-step__line" />}
+          {i < c.steps.length - 1 && <span className="booking3-step__line" />}
         </div>
       ))}
     </div>
@@ -75,6 +76,8 @@ function Stepper({ step }: { step: Step }) {
 export function BookingFlow() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
+  const { t } = useLang();
+  const c = t.checkout;
 
   const restaurantSlug = searchParams.get("restaurant");
   const modifyId = searchParams.get("modifyId") ?? null;
@@ -151,11 +154,11 @@ export function BookingFlow() {
   if (!restaurant) {
     return (
       <div className="booking-confirmed">
-        <p className="eyebrow">Locale non trovato</p>
-        <h1>Non troviamo questo locale</h1>
-        <p className="booking-confirmed__note">Il link potrebbe non essere più valido.</p>
+        <p className="eyebrow">{c.venueNotFound}</p>
+        <h1>{c.notFoundTitle}</h1>
+        <p className="booking-confirmed__note">{c.notFoundNote}</p>
         <div className="booking-confirmed__actions">
-          <ClayLink href="/search">Cerca locali</ClayLink>
+          <ClayLink href="/search">{c.findVenues}</ClayLink>
         </div>
       </div>
     );
@@ -174,7 +177,7 @@ export function BookingFlow() {
   }
 
   async function handleConfirm() {
-    if (!user) { setBookingError("Devi essere loggato per prenotare."); return; }
+    if (!user) { setBookingError(c.loginRequired); return; }
     if (!restaurant) return;
     setSubmitting(true);
     setBookingError(null);
@@ -205,7 +208,7 @@ export function BookingFlow() {
         body: JSON.stringify({ bookingId: result.id, kind: "confirmed" }),
       }).catch(() => {});
     } catch (err) {
-      setBookingError(err instanceof Error ? err.message : "Errore durante la prenotazione");
+      setBookingError(err instanceof Error ? err.message : c.genericError);
     } finally {
       setSubmitting(false);
     }
@@ -216,7 +219,7 @@ export function BookingFlow() {
     return (
       <div className="booking-confirmed">
         <div className="booking-confirmed__icon" aria-hidden="true">✓</div>
-        <p className="eyebrow">Prenotazione confermata</p>
+        <p className="eyebrow">{c.confirmedTitle}</p>
         <h1>{confirmed.restaurantName}</h1>
         <p className="booking-confirmed__ref">{confirmed.bookingRef}</p>
         <div className="booking-confirmed__details">
@@ -224,14 +227,14 @@ export function BookingFlow() {
           <span>·</span>
           <span>{confirmed.time}</span>
           <span>·</span>
-          <span>{confirmed.guests} {confirmed.guests === 1 ? "persona" : "persone"}</span>
+          <span>{confirmed.guests} {confirmed.guests === 1 ? c.person : c.peoplePlural}</span>
         </div>
         <p className="booking-confirmed__note">
-          Conferma inviata a <strong>{confirmed.customerEmail}</strong>. Cancellazione gratuita fino a 2 ore prima.
+          {c.confirmedSentTo} <strong>{confirmed.customerEmail}</strong>. {c.confirmedCancelNote}
         </p>
         <div className="booking-confirmed__actions">
-          <ClayLink href="/profile">Le mie prenotazioni</ClayLink>
-          <ClayLink href="/search" variant="secondary">Cerca altri locali</ClayLink>
+          <ClayLink href="/profile">{c.myBookings}</ClayLink>
+          <ClayLink href="/search" variant="secondary">{c.findOtherVenues}</ClayLink>
         </div>
       </div>
     );
@@ -241,26 +244,26 @@ export function BookingFlow() {
   return (
     <section className="booking-flow">
       <div className="booking-flow__intro">
-        <p className="eyebrow">{modifyId ? "Modifica prenotazione" : "Prenota in 3 passi"}</p>
+        <p className="eyebrow">{modifyId ? c.modifyBooking : c.bookIn3Steps}</p>
         <h1>{restaurant.name}</h1>
         <p>{restaurant.neighborhood} · {restaurant.city} · {restaurant.priceRange}</p>
         {modifyId && (
           <p className="booking-flow__modify-note">
-            ℹ️ La prenotazione precedente verrà annullata automaticamente alla conferma.
+            {c.modifyNote}
           </p>
         )}
       </div>
 
-      <Stepper step={step} />
+      <Stepper step={step} c={c} />
 
       <div className="booking3-layout">
         {/* ── Step 1: Quando e quanti ─────────────────────────────────────── */}
         {step === 0 && (
           <div className="booking-card booking-step">
-            <h2>Quando e in quanti?</h2>
+            <h2>{c.step1Title}</h2>
 
             <label>
-              Data
+              {c.date}
               <input
                 type="date"
                 value={date}
@@ -270,7 +273,7 @@ export function BookingFlow() {
             </label>
 
             <div>
-              <p className="booking-sublabel">Orario</p>
+              <p className="booking-sublabel">{c.time}</p>
               <div className="booking3-slots">
                 {slots.map((slot) => (
                   <SlotPill
@@ -279,10 +282,11 @@ export function BookingFlow() {
                     selected={time === slot.time}
                     guests={guests}
                     onSelect={() => setTime(slot.time)}
+                    c={c}
                   />
                 ))}
               </div>
-              {checkingAvail && <p className="booking-avail-msg">Verifico disponibilità…</p>}
+              {checkingAvail && <p className="booking-avail-msg">{c.checkingAvail}</p>}
               {!checkingAvail && availCheck && !availCheck.available && (
                 <p className="booking-avail-msg booking-avail-msg--error">
                   {availCheck.reason}
@@ -291,10 +295,10 @@ export function BookingFlow() {
             </div>
 
             <label>
-              Persone
+              {c.people}
               <select value={guests} onChange={(e) => setGuests(Number(e.target.value))}>
                 {[1, 2, 3, 4, 5, 6, 8, 10, 12, 15].map((n) => (
-                  <option key={n} value={n}>{n} {n === 1 ? "persona" : "persone"}</option>
+                  <option key={n} value={n}>{n} {n === 1 ? c.person : c.peoplePlural}</option>
                 ))}
               </select>
             </label>
@@ -305,7 +309,7 @@ export function BookingFlow() {
                 disabled={!availCheck?.available || checkingAvail}
                 className="booking3-cta"
               >
-                Continua →
+                {c.continue}
               </ClayButton>
             </div>
           </div>
@@ -314,10 +318,10 @@ export function BookingFlow() {
         {/* ── Step 2: Chi sei ─────────────────────────────────────────────── */}
         {step === 1 && (
           <div className="booking-card booking-step">
-            <h2>I tuoi dati</h2>
+            <h2>{c.step2Title}</h2>
 
             <label>
-              Nome completo
+              {c.fullName}
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -328,7 +332,7 @@ export function BookingFlow() {
             </label>
 
             <label>
-              Email
+              {c.email}
               <input
                 type="email"
                 value={email}
@@ -340,7 +344,7 @@ export function BookingFlow() {
             </label>
 
             <label>
-              Telefono <span style={{ color: "var(--white-25)", fontWeight: 400 }}>(facoltativo)</span>
+              {c.phone} <span style={{ color: "var(--white-25)", fontWeight: 400 }}>{c.optional}</span>
               <input
                 type="tel"
                 value={phone}
@@ -351,24 +355,24 @@ export function BookingFlow() {
             </label>
 
             <label>
-              Richieste speciali <span style={{ color: "var(--white-25)", fontWeight: 400 }}>(facoltativo)</span>
+              {c.specialRequests} <span style={{ color: "var(--white-25)", fontWeight: 400 }}>{c.optional}</span>
               <input
                 value={specialRequests}
                 onChange={(e) => setSpecialRequests(e.target.value)}
-                placeholder="Allergie, tavolo esterno, occasione speciale…"
+                placeholder={c.specialRequestsPlaceholder}
               />
             </label>
 
             <div className="booking3-nav">
               <button type="button" className="booking3-back" onClick={() => setStep(0)}>
-                ← Indietro
+                {c.back}
               </button>
               <ClayButton
                 onClick={goToStep3}
                 disabled={!name || !email}
                 className="booking3-cta"
               >
-                Vai al riepilogo →
+                {c.goToSummary}
               </ClayButton>
             </div>
           </div>
@@ -377,49 +381,49 @@ export function BookingFlow() {
         {/* ── Step 3: Riepilogo + conferma ────────────────────────────────── */}
         {step === 2 && (
           <div className="booking-card booking-step">
-            <h2>Riepilogo</h2>
+            <h2>{c.step3Title}</h2>
 
             <div className="booking3-summary">
               <div className="booking3-summary__row">
-                <span>Locale</span>
+                <span>{c.venue}</span>
                 <strong>{restaurant.name}</strong>
               </div>
               <div className="booking3-summary__row">
-                <span>Data</span>
+                <span>{c.date}</span>
                 <strong>{date.split("-").reverse().join("/")}</strong>
               </div>
               <div className="booking3-summary__row">
-                <span>Orario</span>
+                <span>{c.time}</span>
                 <strong>{time}</strong>
               </div>
               <div className="booking3-summary__row">
-                <span>Persone</span>
+                <span>{c.people}</span>
                 <strong>{guests}</strong>
               </div>
               {selectedSlot?.discount ? (
                 <div className="booking3-summary__row booking3-summary__row--highlight">
-                  <span>Sconto applicato</span>
+                  <span>{c.discountApplied}</span>
                   <strong>-{selectedSlot.discount}%</strong>
                 </div>
               ) : null}
               <div className="booking3-summary__row">
-                <span>Nome</span>
+                <span>{c.name}</span>
                 <strong>{name}</strong>
               </div>
               <div className="booking3-summary__row">
-                <span>Email</span>
+                <span>{c.email}</span>
                 <strong>{email}</strong>
               </div>
               {phone && (
                 <div className="booking3-summary__row">
-                  <span>Telefono</span>
+                  <span>{c.phone}</span>
                   <strong>{phone}</strong>
                 </div>
               )}
             </div>
 
             <p className="booking3-terms">
-              Cancellazione gratuita fino a 2 ore prima. Nessuna carta richiesta.
+              {c.termsNote}
             </p>
 
             {bookingError && (
@@ -429,21 +433,21 @@ export function BookingFlow() {
             {!user && (
               <div className="auth-error" role="alert">
                 <ClayLink href={`/login?from=/booking?restaurant=${restaurantSlug}`} variant="ghost">
-                  Accedi per confermare →
+                  {c.loginToConfirm}
                 </ClayLink>
               </div>
             )}
 
             <div className="booking3-nav">
               <button type="button" className="booking3-back" onClick={() => setStep(1)}>
-                ← Indietro
+                {c.back}
               </button>
               <ClayButton
                 onClick={handleConfirm}
                 disabled={submitting || !user}
                 className="booking3-cta"
               >
-                {submitting ? "Confermando…" : "Conferma prenotazione"}
+                {submitting ? c.confirming : c.confirmBooking}
               </ClayButton>
             </div>
           </div>
@@ -457,11 +461,11 @@ export function BookingFlow() {
             {restaurant.neighborhood} · {restaurant.city}
           </p>
           <dl>
-            <div><dt>Data</dt><dd>{date.split("-").reverse().join("/")}</dd></div>
-            <div><dt>Orario</dt><dd>{time || "—"}</dd></div>
-            <div><dt>Persone</dt><dd>{guests}</dd></div>
+            <div><dt>{c.date}</dt><dd>{date.split("-").reverse().join("/")}</dd></div>
+            <div><dt>{c.time}</dt><dd>{time || "—"}</dd></div>
+            <div><dt>{c.people}</dt><dd>{guests}</dd></div>
             {selectedSlot?.discount && (
-              <div><dt>Offerta</dt><dd>-{selectedSlot.discount}% early bird</dd></div>
+              <div><dt>{c.offer}</dt><dd>{c.earlyBird(selectedSlot.discount)}</dd></div>
             )}
           </dl>
           {restaurant.urgencyLabel && (
@@ -470,7 +474,7 @@ export function BookingFlow() {
             </p>
           )}
           <p className="booking-panel__note" style={{ marginTop: "0.5rem" }}>
-            Conferma immediata · Cancellazione gratuita
+            {c.instantAndFree}
           </p>
         </aside>
       </div>

@@ -6,16 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { ClayButton } from "@/components/ui/clay-button";
 import type { AuthErrorCode } from "@/lib/auth/types";
-
-const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
-  invalid_credentials: "Email o password non corretti. Riprova.",
-  email_taken: "Email già registrata.",
-  email_confirmation_required: "Conferma prima la tua email dal link che ti abbiamo inviato.",
-  unknown: "Qualcosa è andato storto. Riprova.",
-};
+import { useLang } from "@/lib/i18n/context";
 
 export default function LoginPage() {
   const { login, loading, user } = useAuth();
+  const { t } = useLang();
+  const a = t.auth;
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") ?? "/profile";
@@ -50,19 +46,19 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <p className="eyebrow">Bentornato</p>
-        <h1>Accedi</h1>
-        <p>Scopri i migliori bar e prenota il tuo aperitivo.</p>
+        <p className="eyebrow">{a.welcomeBack}</p>
+        <h1>{a.login}</h1>
+        <p>{a.loginSub}</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {error && (
             <div className="auth-error" role="alert">
-              {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.unknown}
+              {a.errors[error] ?? a.errors.unknown}
             </div>
           )}
 
           <label>
-            Email
+            {a.email}
             <input
               type="email"
               value={email}
@@ -74,7 +70,7 @@ export default function LoginPage() {
           </label>
 
           <label>
-            Password
+            {a.password}
             <input
               type="password"
               value={password}
@@ -91,17 +87,17 @@ export default function LoginPage() {
             className="auth-form__submit"
             disabled={submitting}
           >
-            {submitting ? "Accesso in corso…" : "Accedi"}
+            {submitting ? a.loggingIn : a.login}
           </ClayButton>
         </form>
 
         <p className="auth-link">
-          <Link href="/forgot-password">Password dimenticata?</Link>
+          <Link href="/forgot-password">{a.forgotPassword}</Link>
         </p>
 
         <p className="auth-link">
-          Non hai un account?{" "}
-          <Link href="/register">Registrati gratis</Link>
+          {a.noAccount}{" "}
+          <Link href="/register">{a.registerFree}</Link>
         </p>
       </div>
     </div>

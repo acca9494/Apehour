@@ -7,27 +7,9 @@ import { ClayLink } from "@/components/ui/clay-button";
 import { checkAvailability, getSlotsForDate } from "@/lib/bookings/service";
 import type { Restaurant } from "@/lib/types";
 import { todayInputValue } from "@/lib/utils";
+import { useLang } from "@/lib/i18n/context";
 
 type DaySlot = { time: string; availableSeats: number; totalSeats: number; discount?: number; label?: string };
-
-const FAQ = [
-  {
-    q: "Posso cancellare?",
-    a: "Sì, cancellazione gratuita fino a 2 ore prima dell'orario prenotato.",
-  },
-  {
-    q: "Serve la carta di credito?",
-    a: "No, la prenotazione è gratuita. Se il locale richiede caparra ti verrà indicato prima di confermare.",
-  },
-  {
-    q: "Ricevo conferma?",
-    a: "Sì, conferma immediata via email non appena premi il bottone.",
-  },
-  {
-    q: "Quanto tempo ho a tavolo?",
-    a: "Lo slot dura circa 1,5–2 ore. Puoi chiedere al locale estensioni.",
-  },
-];
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -57,6 +39,8 @@ export function BookingPanel({
   initialSlot?: string;
 }) {
   const { user } = useAuth();
+  const { t } = useLang();
+  const b = t.booking;
 
   // Scroll to this panel when a slot was pre-selected from a card
   useEffect(() => {
@@ -101,16 +85,16 @@ export function BookingPanel({
   const href = `/booking?restaurant=${restaurant.slug}&date=${date}&time=${selectedSlot}&guests=${guests}`;
 
   return (
-    <aside className="booking-panel" id="prenota" aria-label="Prenota un tavolo">
+    <aside className="booking-panel" id="prenota" aria-label={b.bookTable}>
       {/* Header */}
       <div className="bp-header">
-        <p className="eyebrow">Prenota il tavolo</p>
+        <p className="eyebrow">{b.bookTable}</p>
         <p className="bp-social-proof">{restaurant.socialProof}</p>
       </div>
 
       {/* Date */}
       <label className="bp-label">
-        Data
+        {b.date}
         <input
           type="date"
           value={date}
@@ -121,7 +105,7 @@ export function BookingPanel({
 
       {/* Time slots */}
       <div>
-        <p className="bp-label-text">Orario</p>
+        <p className="bp-label-text">{b.time}</p>
         <div className="bp-slots">
           {slots.map((slot) => {
             const urgent = slot.availableSeats <= 3;
@@ -136,12 +120,12 @@ export function BookingPanel({
                 {slot.discount ? (
                   <span className="bp-slot__badge">-{slot.discount}%</span>
                 ) : null}
-                <small>{slot.availableSeats} post{slot.availableSeats === 1 ? "o" : "i"}</small>
+                <small>{slot.availableSeats} {slot.availableSeats === 1 ? b.seat : b.seatsPlural}</small>
               </button>
             );
           })}
         </div>
-        {checking && <p className="bp-avail-msg">Verifico…</p>}
+        {checking && <p className="bp-avail-msg">{b.checking}</p>}
         {!checking && availMsg && (
           <p className="bp-avail-msg bp-avail-msg--error">⚠ {availMsg}</p>
         )}
@@ -149,25 +133,25 @@ export function BookingPanel({
 
       {/* Guests stepper */}
       <div>
-        <p className="bp-label-text">Persone</p>
+        <p className="bp-label-text">{b.people}</p>
         <div className="bp-guests">
           <button
             type="button"
             className="bp-guests__btn"
             onClick={() => setGuests((g) => Math.max(1, g - 1))}
-            aria-label="Riduci"
+            aria-label={b.decrease}
             disabled={guests <= 1}
           >
             −
           </button>
           <span className="bp-guests__count">
-            {guests} {guests === 1 ? "persona" : "persone"}
+            {guests} {guests === 1 ? b.person : b.peoplePlural}
           </span>
           <button
             type="button"
             className="bp-guests__btn"
             onClick={() => setGuests((g) => Math.min(10, g + 1))}
-            aria-label="Aumenta"
+            aria-label={b.increase}
             disabled={guests >= 10}
           >
             +
@@ -178,14 +162,14 @@ export function BookingPanel({
       {/* Caparra (static mock — always "no deposit" for current data) */}
       <div className="bp-deposit">
         <span className="bp-deposit__icon">✓</span>
-        <span>Nessuna caparra richiesta</span>
+        <span>{b.noDeposit}</span>
       </div>
 
       {/* Discount highlight */}
       {currentSlot?.discount ? (
         <div className="bp-offer">
-          <strong>-{currentSlot.discount}% early bird</strong>
-          <span>sconto applicato automaticamente</span>
+          <strong>{b.earlyBird(currentSlot.discount)}</strong>
+          <span>{b.autoApplied}</span>
         </div>
       ) : null}
 
@@ -196,31 +180,31 @@ export function BookingPanel({
           className={`bp-cta${availMsg ? " is-disabled" : ""}`}
           onClick={availMsg ? (e) => e.preventDefault() : undefined}
         >
-          Prenota il tavolo
+          {b.bookButton}
         </ClayLink>
       ) : (
         <Link
           href={`/login?from=${encodeURIComponent(href)}`}
           className="clay-button clay-button--primary bp-cta"
         >
-          Accedi per prenotare
+          {b.loginToBook}
         </Link>
       )}
 
       {/* Trust row */}
       <div className="bp-trust">
-        <span>✓ Conferma immediata</span>
-        <span>✓ Cancellazione gratuita</span>
+        <span>{b.instantConfirm}</span>
+        <span>{b.freeCancel}</span>
       </div>
 
       {/* Policy */}
       <p className="bp-policy">
-        Cancellazione gratuita fino a <strong>2 ore prima</strong> dell&apos;orario prenotato. Nessuna carta richiesta.
+        {b.policyParts[0]}<strong>{b.policyParts[1]}</strong>{b.policyParts[2]}
       </p>
 
       {/* FAQ */}
       <div className="bp-faq">
-        {FAQ.map((item) => (
+        {b.faq.map((item) => (
           <FaqItem key={item.q} q={item.q} a={item.a} />
         ))}
       </div>

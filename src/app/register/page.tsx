@@ -9,12 +9,7 @@ import { MerchantRegisterForm } from "@/components/home/merchant-register-form";
 import { Modal } from "@/components/ui/modal";
 import { LegalModal } from "@/components/legal/legal-modal";
 import type { AuthErrorCode } from "@/lib/auth/types";
-
-const ERROR_MESSAGES: Record<Exclude<AuthErrorCode, "email_confirmation_required">, string> = {
-  invalid_credentials: "Credenziali non valide.",
-  email_taken: "Email già registrata. Prova ad accedere.",
-  unknown: "Qualcosa è andato storto. Riprova.",
-};
+import { useLang } from "@/lib/i18n/context";
 
 type Mode = "cliente" | "commerciante";
 
@@ -25,6 +20,8 @@ function initialModeFrom(param: string | null): Mode {
 
 export default function RegisterPage() {
   const { register, loading, user } = useAuth();
+  const { t } = useLang();
+  const a = t.auth;
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -82,63 +79,63 @@ export default function RegisterPage() {
             className={`reg-mode-toggle__btn ${mode === "cliente" ? "is-active" : ""}`}
             onClick={() => { setMode("cliente"); setError(null); }}
           >
-            Account personale
+            {a.personalAccount}
           </button>
           <button
             type="button"
             className={`reg-mode-toggle__btn ${mode === "commerciante" ? "is-active" : ""}`}
             onClick={() => { setMode("commerciante"); setError(null); }}
           >
-            Ho un locale
+            {a.haveVenue}
           </button>
         </div>
 
         {mode === "cliente" && (
           <>
-            <p className="eyebrow" style={{ marginTop: "1rem" }}>Crea account</p>
-            <h1>Registrati</h1>
-            <p>Gratis. Nessuna carta di credito richiesta.</p>
+            <p className="eyebrow" style={{ marginTop: "1rem" }}>{a.createAccount}</p>
+            <h1>{a.register}</h1>
+            <p>{a.registerSub}</p>
 
             <form className="auth-form" onSubmit={handleSubmit}>
               {error && (
                 <div className="auth-error" role="alert">
-                  {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.unknown}
+                  {a.errors[error] ?? a.errors.unknown}
                 </div>
               )}
 
               <label>
-                Nome completo
+                {a.fullName}
                 <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Mario Rossi" required autoComplete="name" />
               </label>
 
               <label>
-                Email
+                {a.email}
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="la@tua-email.com" required autoComplete="email" />
               </label>
 
               <label>
-                Password
+                {a.password}
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="minimo 8 caratteri" required autoComplete="new-password" minLength={8} />
               </label>
 
               <label className="mreg__checkbox">
                 <input type="checkbox" checked={privacy} onChange={e => setPrivacy(e.target.checked)} required />
                 <span>
-                  Accetto l&apos;{" "}
+                  {a.privacyAccept}
                   <button type="button" className="mreg__privacy-link" onClick={() => setShowLegal(true)}>
-                    informativa sulla privacy
+                    {a.privacyPolicy}
                   </button>
-                  {" "}di ApeHour
+                  {" "}{a.privacyOf}
                 </span>
               </label>
 
               <ClayButton type="submit" className="auth-form__submit" disabled={submitting}>
-                {submitting ? "Creazione account…" : "Crea account"}
+                {submitting ? a.creatingAccount : a.createAccount}
               </ClayButton>
             </form>
 
             <p className="auth-link">
-              Hai già un account? <Link href="/login">Accedi</Link>
+              {a.alreadyAccount} <Link href="/login">{a.login}</Link>
             </p>
           </>
         )}
@@ -159,15 +156,14 @@ export default function RegisterPage() {
 
       </div>
 
-      <Modal open={showConfirmEmail} onClose={() => setShowConfirmEmail(false)} title="Account creato">
+      <Modal open={showConfirmEmail} onClose={() => setShowConfirmEmail(false)} title={a.accountCreated}>
         <div className="confirm-email-modal">
           <div className="confirm-email-modal__icon" aria-hidden="true">✓</div>
           <p>
-            Il tuo account è stato creato. Controlla la tua email e clicca sul link di conferma
-            prima di accedere.
+            {a.accountCreatedNote}
           </p>
           <button type="button" className="mreg__btn mreg__btn--primary" onClick={() => setShowConfirmEmail(false)}>
-            Ho capito
+            {a.gotIt}
           </button>
         </div>
       </Modal>

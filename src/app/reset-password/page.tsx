@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { createClient } from "@/lib/supabase/client";
 import { ClayButton } from "@/components/ui/clay-button";
+import { useLang } from "@/lib/i18n/context";
 
 export default function ResetPasswordPage() {
   const { user, loading } = useAuth();
+  const { t } = useLang();
+  const a = t.auth;
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -20,7 +23,7 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError(null);
     if (password !== confirm) {
-      setError("Le due password non coincidono.");
+      setError(a.passwordsNoMatch);
       return;
     }
     setSubmitting(true);
@@ -30,8 +33,8 @@ export default function ResetPasswordPage() {
     if (err) {
       setError(
         /different from the old|same as the old/i.test(err.message)
-          ? "Scegli una password diversa da quella attuale."
-          : "Non siamo riusciti ad aggiornare la password. Riprova."
+          ? a.samePassword
+          : a.updateFailed
       );
       return;
     }
@@ -46,11 +49,11 @@ export default function ResetPasswordPage() {
     return (
       <div className="auth-page">
         <div className="auth-card">
-          <p className="eyebrow">Recupero accesso</p>
-          <h1>Link non valido</h1>
-          <p>Il link è scaduto o è già stato usato. Richiedine uno nuovo.</p>
+          <p className="eyebrow">{a.recoverAccess}</p>
+          <h1>{a.invalidLinkTitle}</h1>
+          <p>{a.invalidLinkNote}</p>
           <p className="auth-link">
-            <Link href="/forgot-password">Richiedi un nuovo link</Link>
+            <Link href="/forgot-password">{a.requestNewLink}</Link>
           </p>
         </div>
       </div>
@@ -60,11 +63,11 @@ export default function ResetPasswordPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <p className="eyebrow">Recupero accesso</p>
-        <h1>Nuova password</h1>
+        <p className="eyebrow">{a.recoverAccess}</p>
+        <h1>{a.newPasswordTitle}</h1>
 
         {done ? (
-          <p>Password aggiornata! Ti stiamo portando nel tuo account…</p>
+          <p>{a.passwordUpdated}</p>
         ) : (
           <form className="auth-form" onSubmit={handleSubmit}>
             {error && (
@@ -73,7 +76,7 @@ export default function ResetPasswordPage() {
               </div>
             )}
             <label>
-              Nuova password
+              {a.newPassword}
               <input
                 type="password"
                 value={password}
@@ -85,7 +88,7 @@ export default function ResetPasswordPage() {
               />
             </label>
             <label>
-              Ripeti la password
+              {a.repeatPassword}
               <input
                 type="password"
                 value={confirm}
@@ -97,7 +100,7 @@ export default function ResetPasswordPage() {
               />
             </label>
             <ClayButton type="submit" className="auth-form__submit" disabled={submitting}>
-              {submitting ? "Salvataggio…" : "Salva la nuova password"}
+              {submitting ? a.saving : a.savePassword}
             </ClayButton>
           </form>
         )}
