@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { href: "/profile/prenotazioni",  icon: "≡",  label: "Prenotazioni" },
   { href: "/profile/eventi",        icon: "✦",  label: "Eventi" },
   { href: "/profile/attivita",      icon: "◷",  label: "Attività" },
-  { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES" },
+  { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES", comingSoon: true },
   { href: "/profile/apejobs",       icon: "▣",  label: "ApeJobs", comingSoon: true },
   { href: "/profile/impostazioni",  icon: "◌",  label: "Impostazioni" },
 ];
