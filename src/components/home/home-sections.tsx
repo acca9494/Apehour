@@ -7,14 +7,15 @@ import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
 import Image from "next/image";
 import type { Promotion, Review } from "@/lib/types";
+import type { EventItem } from "@/lib/data/events";
 import { MerchantRegisterForm } from "@/components/home/merchant-register-form";
 import { ApeCardLink } from "@/components/home/ape-card-link";
 import { useLang } from "@/lib/i18n/context";
-import { EVENTS } from "@/lib/data/events";
 
 type HomeSectionsProps = {
   promotions: Promotion[];
   reviews: Review[];
+  events: EventItem[];
 };
 
 const categories = [
@@ -52,10 +53,6 @@ const categories = [
   },
 ];
 
-
-const HOME_EVENTS = EVENTS.filter((e) =>
-  ["jazz-navigli", "dj-rooftop-roma", "vini-naturali-firenze", "mezcal-torino"].includes(e.slug)
-);
 
 const APE_IMG: Record<string, string> = {
   "vespa-sprint": "/vespa-v2.png",
@@ -102,6 +99,8 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
   const { t } = useLang();
   const h = t.home;
 
+  if (promotions.length === 0) return null;
+
   return (
     <section className="page-section page-section--dark page-section--offers">
       <div className="offers-header">
@@ -140,9 +139,12 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
   );
 }
 
-export function EventsSection() {
+export function EventsSection({ events }: { events: EventItem[] }) {
   const { t } = useLang();
   const h = t.home;
+
+  if (events.length === 0) return null;
+
   return (
     <section className="page-section page-section--with-deco">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -151,12 +153,12 @@ export function EventsSection() {
         <span className="events-copy-desktop">{h.eventsCopyDesktop}</span>
       </SectionHeading>
       <ScrollHintGrid className="event-grid" alignToImage>
-        {HOME_EVENTS.map((event, index) => (
+        {events.map((event, index) => (
           <Reveal key={event.id} delay={index * 70}>
             <Link className="event-card" href={`/events/${event.slug}`}>
               <div className="event-card__image">
                 <Image
-                  src={event.image}
+                  src={event.image || "/apeapplogo1.png"}
                   alt={event.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
@@ -217,6 +219,9 @@ export function CategoriesSection() {
 
 export function SocialProofSection({ reviews }: { reviews: Review[] }) {
   const { t } = useLang();
+
+  if (reviews.length === 0) return null;
+
   const doubled = [...reviews, ...reviews];
   return (
     <section className="page-section social-proof">
@@ -269,11 +274,11 @@ export function MerchantSection() {
   );
 }
 
-export function HomeSections({ promotions, reviews }: HomeSectionsProps) {
+export function HomeSections({ promotions, reviews, events }: HomeSectionsProps) {
   return (
     <>
       <OffersSection promotions={promotions} />
-      <EventsSection />
+      <EventsSection events={events} />
       <CategoriesSection />
       <MerchantSection />
       <SocialProofSection reviews={reviews} />

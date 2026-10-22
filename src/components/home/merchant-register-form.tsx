@@ -256,6 +256,11 @@ export function MerchantRegisterForm({ eventSource, onAccountCreating }: { event
 
       const { data: { user } } = await createSupabaseBrowserClient().auth.getUser();
       if (user) {
+        // Se fallisce qui (slug duplicato, rete, ecc.) non blocchiamo il flusso:
+        // l'account è comunque valido e ensureRestaurantForOwner() ritenta la
+        // creazione in automatico al primo accesso alla dashboard, leggendo
+        // gli stessi dati salvati in user_metadata da /api/merchant-signup.
+        // Logghiamo comunque l'errore, prima veniva silenziato del tutto.
         await createRestaurant({
           ownerId: user.id,
           name: s2.venueName,
@@ -264,7 +269,9 @@ export function MerchantRegisterForm({ eventSource, onAccountCreating }: { event
           priceRange,
           email: s1.email,
           phone: s1.telefono,
-        }).catch(() => {});
+        }).catch((e) => {
+          console.error("[merchant-register] creazione locale fallita, verrà ritentata in dashboard:", e);
+        });
       }
       setStep(3);
     } catch (err) {

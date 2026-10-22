@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 // Riceve il redirect di Supabase dopo un login OAuth (es. Google), scambia il
 // code per una sessione e — al primo accesso — imposta il ruolo scelto
@@ -28,9 +29,19 @@ export async function GET(request: NextRequest) {
 
     if (!error && data.user) {
       // Solo al primo accesso (nessun ruolo ancora salvato): fissa il ruolo scelto.
+      // L'update su profiles.role richiede la service role key: un trigger sul
+      // database blocca il cambio di ruolo quando arriva dalla sessione normale
+      // dell'utente (altrimenti un cliente potrebbe auto-promuoversi a
+      // commerciante chiamando direttamente la tabella).
       if (!data.user.user_metadata?.role) {
         await supabase.auth.updateUser({ data: { role } });
-        await supabase.from("profiles").update({ role }).eq("id", data.user.id);
+        const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (serviceRoleKey) {
+          const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey, {
+            auth: { autoRefreshToken: false, persistSession: false },
+          });
+          await admin.from("profiles").update({ role }).eq("id", data.user.id);
+        }
       }
       return NextResponse.redirect(`${origin}${next}`);
     }

@@ -794,6 +794,130 @@ CREATE TRIGGER trg_bookings_availability
   AFTER INSERT OR UPDATE OF status ON public.bookings
   FOR EACH ROW EXECUTE FUNCTION public.update_slot_availability();
 
+-- ─────────────────────────────────────────────────────────────────────────
+-- Protezione ruolo profilo: un utente autenticato non può cambiarsi da solo
+-- il ruolo chiamando direttamente la tabella (bypasserebbe sia la
+-- registrazione commerciante con verifica, sia /api/merchant-signup).
+-- Il cambio resta possibile solo con la service role key (admin API, route
+-- server) o dal trigger handle_new_user alla creazione dell'account.
+-- ─────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.protect_profile_role()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF NEW.role IS DISTINCT FROM OLD.role AND auth.role() = 'authenticated' THEN
+    RAISE EXCEPTION 'Non puoi cambiare il tuo ruolo direttamente.';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_protect_profile_role
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.protect_profile_role();
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- Il cliente che cancella una prenotazione può solo impostare
+-- status='cancelled' (+cancelled_at/cancel_reason): la policy RLS "bookings:
+-- customer cancel" lo richiede ma non impedisce, nella stessa UPDATE, di
+-- riscrivere anche guests/date/customer_name/ecc. Questo trigger lo blocca.
+-- Non si applica al commerciante (che aggiorna le proprie prenotazioni per
+-- altri motivi, es. assegnare un tavolo).
+-- ─────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.restrict_customer_booking_update()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF auth.uid() = OLD.customer_id THEN
+    IF NEW.restaurant_id     IS DISTINCT FROM OLD.restaurant_id
+      OR NEW.customer_id     IS DISTINCT FROM OLD.customer_id
+      OR NEW.date            IS DISTINCT FROM OLD.date
+      OR NEW.start_time      IS DISTINCT FROM OLD.start_time
+      OR NEW.guests          IS DISTINCT FROM OLD.guests
+      OR NEW.customer_name   IS DISTINCT FROM OLD.customer_name
+      OR NEW.customer_email  IS DISTINCT FROM OLD.customer_email
+      OR NEW.customer_phone  IS DISTINCT FROM OLD.customer_phone
+      OR NEW.deposit_required IS DISTINCT FROM OLD.deposit_required
+      OR NEW.deposit_amount  IS DISTINCT FROM OLD.deposit_amount
+      OR NEW.booking_ref     IS DISTINCT FROM OLD.booking_ref
+      OR NEW.table_id        IS DISTINCT FROM OLD.table_id
+      OR NEW.slot_id         IS DISTINCT FROM OLD.slot_id
+    THEN
+      RAISE EXCEPTION 'Puoi solo cancellare la tua prenotazione, non modificarne i dati.';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_restrict_customer_booking_update
+  BEFORE UPDATE ON public.bookings
+  FOR EACH ROW EXECUTE FUNCTION public.restrict_customer_booking_update();
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- Capienza reale a livello di database: oggi il controllo "ci sono posti?"
+-- (checkAvailability) e l'inserimento della prenotazione sono due chiamate
+-- separate dal client, senza alcun blocco nel mezzo — due richieste quasi
+-- simultanee per l'ultimo posto potrebbero passare entrambe il controllo e
+-- creare un overbooking. pg_advisory_xact_lock serializza le prenotazioni
+-- sullo stesso locale/data/orario (rilasciato automaticamente a fine
+-- transazione), così la seconda richiesta aspetta che la prima abbia
+-- davvero inserito la sua riga prima di contare i posti occupati.
+-- ─────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.check_booking_capacity()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_day_key     day_of_week;
+  v_total_seats INTEGER;
+  v_booked      INTEGER;
+BEGIN
+  IF NEW.status = 'cancelled' THEN
+    RETURN NEW;
+  END IF;
+
+  PERFORM pg_advisory_xact_lock(
+    hashtextextended(NEW.restaurant_id::text || NEW.date::text || NEW.start_time::text, 0)
+  );
+
+  v_day_key := (ARRAY['dom','lun','mar','mer','gio','ven','sab']::day_of_week[])[extract(dow FROM NEW.date)::int + 1];
+
+  SELECT COALESCE(SUM(total_seats), 0) INTO v_total_seats
+  FROM public.availability_schedules
+  WHERE restaurant_id = NEW.restaurant_id
+    AND is_active = TRUE
+    AND v_day_key = ANY(days_of_week)
+    AND start_time = NEW.start_time;
+
+  SELECT COALESCE(SUM(guests), 0) INTO v_booked
+  FROM public.bookings
+  WHERE restaurant_id = NEW.restaurant_id
+    AND date = NEW.date
+    AND start_time = NEW.start_time
+    AND status <> 'cancelled'
+    AND id <> NEW.id;
+
+  IF v_total_seats = 0 THEN
+    RAISE EXCEPTION 'Orario non disponibile per questo locale.';
+  END IF;
+
+  IF v_booked + NEW.guests > v_total_seats THEN
+    RAISE EXCEPTION 'Posti esauriti per questo orario.';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_check_booking_capacity
+  BEFORE INSERT ON public.bookings
+  FOR EACH ROW EXECUTE FUNCTION public.check_booking_capacity();
+
 -- Profilo automatico alla registrazione
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
@@ -896,14 +1020,17 @@ CREATE POLICY "restaurants: owner delete"
 -- non finiscono mai in una risposta anonima, indipendentemente da come viene
 -- interrogata (app o chiamata REST diretta con la anon key).
 CREATE OR REPLACE VIEW public.restaurants_public AS
-  SELECT id, name, slug, description, cuisine, tags, address, neighborhood, city, country,
-         lat, lng, phone, website, email, instagram, opening_hours,
-         price_range, deposit_required, deposit_amount, deposit_per_person, deposit_policy,
-         max_party_size, booking_window_days, rating, review_count,
-         zone_names, closed_days, cover_image_url, urgency_label, social_proof,
-         is_active, is_verified, created_at, updated_at
-  FROM public.restaurants
-  WHERE is_active = TRUE AND is_verified = TRUE;
+  SELECT r.id, r.name, r.slug, r.description, r.cuisine, r.tags, r.address, r.neighborhood, r.city, r.country,
+         r.lat, r.lng, r.phone, r.website, r.email, r.instagram, r.opening_hours,
+         r.price_range, r.deposit_required, r.deposit_amount, r.deposit_per_person, r.deposit_policy,
+         r.max_party_size, r.booking_window_days, r.rating, r.review_count,
+         r.zone_names, r.closed_days, COALESCE(r.cover_image_url, img.url) AS cover_image_url,
+         r.urgency_label, r.social_proof,
+         r.is_active, r.is_verified, r.created_at, r.updated_at
+  FROM public.restaurants r
+  LEFT JOIN public.restaurant_images img
+    ON img.restaurant_id = r.id AND img.is_cover = TRUE
+  WHERE r.is_active = TRUE AND r.is_verified = TRUE;
 
 GRANT SELECT ON public.restaurants_public TO anon, authenticated;
 
@@ -1258,33 +1385,8 @@ CREATE POLICY "tickets: owner update status"
 --  VIEWS UTILI (read-only, sicure)
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- Vista pubblica dei locali con immagine di copertina
-CREATE OR REPLACE VIEW public.restaurants_public AS
-SELECT
-  r.id,
-  r.name,
-  r.slug,
-  r.description,
-  r.cuisine,
-  r.tags,
-  r.neighborhood,
-  r.city,
-  r.country,
-  r.lat,
-  r.lng,
-  r.price_range,
-  r.rating,
-  r.review_count,
-  r.urgency_label,
-  r.social_proof,
-  r.deposit_required,
-  r.deposit_amount,
-  r.max_party_size,
-  COALESCE(r.cover_image_url, img.url) AS cover_image_url
-FROM public.restaurants r
-LEFT JOIN public.restaurant_images img
-  ON img.restaurant_id = r.id AND img.is_cover = TRUE
-WHERE r.is_active = TRUE;
+-- (vista restaurants_public unica, definita sopra subito dopo la tabella restaurants:
+--  is_active + is_verified, con fallback copertina dalla galleria se non impostata)
 
 -- Slot disponibili (solo futuri e attivi)
 CREATE OR REPLACE VIEW public.available_slots AS

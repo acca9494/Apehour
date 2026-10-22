@@ -39,7 +39,7 @@ export function leaveActivity(userId: string, activityId: string): string[] {
   return map[userId];
 }
 
-// ── Storico attività completate (mock) ──────────────────────────────────────
+// ── Storico attività completate ──────────────────────────────────────────────
 
 export interface CompletedActivity {
   id: string;
@@ -53,19 +53,13 @@ export interface CompletedActivity {
 
 const COMPLETED_KEY = "appape_activity_completed";
 
-const DEFAULT_COMPLETED: CompletedActivity[] = [
-  { id: "c-positano", title: "Pulizia Spiaggia Positano", location: "Napoli · Positano", date: "10 Apr 2026", category: "Spiagge", bees: 30, icon: "🏖️" },
-  { id: "c-borghese", title: "Pulizia Villa Borghese", location: "Roma · Borghese", date: "3 Apr 2026", category: "Parchi", bees: 25, icon: "🌳" },
-  { id: "c-po", title: "Pulizia Riva Po", location: "Torino · Murazzi", date: "22 Mar 2026", category: "Fiumi", bees: 25, icon: "🌊" },
-];
-
 function completedKey(userId: string) { return `${COMPLETED_KEY}_${userId}`; }
 
 export function getCompletedActivities(userId: string): CompletedActivity[] {
   try {
     const raw = localStorage.getItem(completedKey(userId));
-    return raw ? (JSON.parse(raw) as CompletedActivity[]) : DEFAULT_COMPLETED;
+    return raw ? (JSON.parse(raw) as CompletedActivity[]) : [];
   } catch {
-    return DEFAULT_COMPLETED;
+    return [];
   }
 }
