@@ -105,6 +105,13 @@ export function DashboardOverview() {
   async function handleAction(bookingId: string, action: "confirmed" | "cancelled") {
     setActionId(bookingId);
     await updateStatus(bookingId, action);
+    if (action === "cancelled") {
+      fetch("/api/booking-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, kind: "cancelled" }),
+      }).catch(() => {});
+    }
     await loadStatsAndBookings(restaurantIds);
     setActionId(null);
   }

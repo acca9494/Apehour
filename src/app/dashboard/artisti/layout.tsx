@@ -1,32 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
 
-const SUB_NAV = [
-  { href: "/dashboard/artisti",         label: "ApeJobs" },
-  { href: "/dashboard/artisti/offerte", label: "Le mie offerte di lavoro" },
-  { href: "/dashboard/artisti/pagamenti", label: "Pagamenti" },
-];
+// ApeJobs è "coming soon" (voce nascosta dal menu dashboard) e queste pagine
+// mostrano ancora dati finti da localStorage: bloccate anche per chi apre
+// l'URL direttamente, stesso trattamento già dato a /dashboard/pagamenti.
+export default function ApeJobsMerchantLayout({ children: _children }: { children: ReactNode }) {
+  const router = useRouter();
 
-export default function ApeJobsMerchantLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
+  useEffect(() => {
+    router.replace("/dashboard");
+  }, [router]);
 
-  return (
-    <div>
-      <div className="apejobs-subnav">
-        {SUB_NAV.map((item) => {
-          const active = item.href === "/dashboard/artisti" ? pathname === item.href : pathname.startsWith(item.href);
-          return (
-            <Link key={item.href} href={item.href} className={cn("apejobs-subnav__item", active && "is-active")}>
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
-      {children}
-    </div>
-  );
+  return null;
 }

@@ -32,7 +32,9 @@ export function OffersManager() {
     let cancelled = false;
     Promise.all([fetchOffers(user.id), fetchAvailability(user.id)])
       .then(([o, s]) => { if (!cancelled) { setOffers(o); setSchedule(s); } })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) alert("Non è stato possibile caricare le offerte. Ricarica la pagina.");
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [user]);
@@ -44,6 +46,8 @@ export function OffersManager() {
       await saveOffer(editing, user.id);
       setOffers(await fetchOffers(user.id));
       setEditing(null);
+    } catch {
+      alert("Non è stato possibile salvare l'offerta. Riprova.");
     } finally {
       setSaving(false);
     }

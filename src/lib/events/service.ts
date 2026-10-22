@@ -54,6 +54,9 @@ function mapRow(row: EventRow, restaurant?: { slug: string; name: string }): Eve
     description: row.description ?? "",
     restaurantSlug: rest?.slug ?? "",
     restaurantName: rest?.name ?? "",
+    eventDateRaw: row.event_date,
+    eventEndDateRaw: row.event_end_date,
+    startTimeRaw: row.start_time,
   };
 }
 

@@ -105,21 +105,24 @@ export function EventsManager() {
     const { city, zone } = splitLocation(e.location);
     setEventCity(city);
     setEventZone(zone);
+    const date = e.eventDateRaw ?? "";
+    const endDate = e.eventEndDateRaw ?? "";
+    const time = (e.startTimeRaw ?? "18:00").slice(0, 5);
     setEditing({
       id: e.id,
       title: e.title,
-      eventDate: "",
-      eventEndDate: "",
-      startTime: "18:00",
+      eventDate: date,
+      eventEndDate: endDate,
+      startTime: time,
       location: e.location,
       image: e.image,
       category: e.category,
       description: e.description,
       slug: e.slug,
     });
-    setEventDate(todayInputValue());
-    setEventEndDate("");
-    setEventTime("18:00");
+    setEventDate(date || todayInputValue());
+    setEventEndDate(endDate);
+    setEventTime(time);
   }
 
   async function handleSave(e: React.FormEvent) {

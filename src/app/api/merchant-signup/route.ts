@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendTransactionalEmail, emailShell } from "@/lib/email/send";
 
 // Registrazione dei locali senza conferma email: l'account viene creato già
 // confermato, così il locale prosegue il form (call) e accede subito. Solo i
@@ -81,6 +82,21 @@ export async function POST(request: Request) {
     if (!taken) console.error("merchant-signup failed:", error.message);
     return NextResponse.json({ error: taken ? "email_taken" : "unknown" }, { status: taken ? 409 : 500 });
   }
+
+  // L'account nasce già confermato (email_confirm: true sopra), quindi Supabase
+  // non manda la sua email di conferma standard: senza questa, il locale non
+  // riceverebbe alcuna traccia scritta della registrazione.
+  await sendTransactionalEmail({
+    to: email,
+    subject: "Il tuo account ApeHour è stato creato",
+    html: emailShell({
+      heading: "Benvenuto su ApeHour!",
+      bodyHtml: `<p style="margin:0; font-size:15px; line-height:1.6; color:#49473D;">
+        Il tuo account per <strong>${venueName}</strong> è stato creato. Puoi accedere subito dalla pagina di login con l'email e la password che hai scelto.
+        Prima che il locale sia visibile ai clienti dovremo verificarlo — ti contatteremo per la call che hai prenotato.
+      </p>`,
+    }),
+  });
 
   return NextResponse.json({ ok: true });
 }

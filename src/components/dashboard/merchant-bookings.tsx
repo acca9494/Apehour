@@ -54,6 +54,13 @@ export function MerchantBookings() {
     setUpdatingId(bookingId);
     try {
       await updateStatus(bookingId, newStatus);
+      if (newStatus === "cancelled") {
+        fetch("/api/booking-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId, kind: "cancelled" }),
+        }).catch(() => {});
+      }
       await load();
     } finally {
       setUpdatingId(null);

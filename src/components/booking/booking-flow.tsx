@@ -199,6 +199,11 @@ export function BookingFlow() {
         user.id
       );
       setConfirmed(result);
+      fetch("/api/booking-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: result.id, kind: "confirmed" }),
+      }).catch(() => {});
     } catch (err) {
       setBookingError(err instanceof Error ? err.message : "Errore durante la prenotazione");
     } finally {

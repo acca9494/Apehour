@@ -163,10 +163,14 @@ export function TableManager() {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    fetchZones(user.id).then(setZones).catch(() => {});
+    fetchZones(user.id).then(setZones).catch(() => {
+      if (!cancelled) alert("Non è stato possibile caricare le zone del locale. Ricarica la pagina.");
+    });
     fetchTables(user.id)
       .then((t) => { if (!cancelled) setTables(t); })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) alert("Non è stato possibile caricare i tavoli. Ricarica la pagina.");
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [user]);
@@ -214,16 +218,24 @@ export function TableManager() {
     };
     setTables((prev) => [...prev, newTable]);
     setEditingId(newTable.id);
-    void persist(newTable);
+    persist(newTable).catch(() => {
+      setTables((prev) => prev.filter((t) => t.id !== newTable.id));
+      setEditingId(null);
+      alert("Non è stato possibile salvare il tavolo. Riprova.");
+    });
   }
 
   async function handleAddZone(e: React.FormEvent) {
     e.preventDefault();
     if (!user || !newZoneName.trim()) return;
-    const updated = await addZoneForUser(newZoneName.trim(), user.id);
-    setZones(updated);
-    setNewZoneName("");
-    setAddingZone(false);
+    try {
+      const updated = await addZoneForUser(newZoneName.trim(), user.id);
+      setZones(updated);
+      setNewZoneName("");
+      setAddingZone(false);
+    } catch {
+      alert("Non è stato possibile aggiungere la zona. Riprova.");
+    }
   }
 
   // ── Free drag within the floor canvas ──────────────────────────

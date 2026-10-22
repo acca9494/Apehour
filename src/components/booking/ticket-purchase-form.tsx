@@ -52,6 +52,11 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
         user.id
       );
       setConfirmed(ticket);
+      fetch("/api/ticket-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticketId: ticket.id }),
+      }).catch(() => {});
     } catch (err) {
       setError(err instanceof Error ? err.message : "Errore durante l'acquisto");
     } finally {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { sendTransactionalEmail, emailShell } from "@/lib/email/send";
 
 // Cancellazione account (diritto all'oblio, GDPR). Richiede la service role
 // key: solo il server può eliminare un utente da auth.users, mai il client.
@@ -49,6 +50,25 @@ export async function POST() {
   const { error: deleteErr } = await admin.auth.admin.deleteUser(user.id);
   if (deleteErr) {
     return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+  }
+
+  // Mandata DOPO che la cancellazione è andata davvero a buon fine (l'indirizzo
+  // era già stato letto sopra, prima di cancellare l'utente — Resend non ha
+  // bisogno che l'account esista ancora). Un fallimento dell'invio non deve
+  // far fallire la risposta: l'account è comunque stato eliminato.
+  if (user.email) {
+    await sendTransactionalEmail({
+      to: user.email,
+      subject: "Il tuo account ApeHour è stato eliminato",
+      html: emailShell({
+        heading: "Account eliminato",
+        bodyHtml: `<p style="margin:0; font-size:15px; line-height:1.6; color:#49473D;">
+          Confermiamo che il tuo account ApeHour e i tuoi dati personali sono stati eliminati, come richiesto.
+          Lo storico delle prenotazioni resta presso i locali in forma anonima, senza più nessun dato che ti identifichi.
+          Se non sei stato tu a richiederlo, scrivici subito a <a href="mailto:privacy@apehour.it">privacy@apehour.it</a>.
+        </p>`,
+      }),
+    });
   }
 
   return NextResponse.json({ ok: true });

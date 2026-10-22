@@ -55,6 +55,11 @@ export function ClientBookings() {
     setCancelling(bookingId);
     try {
       await cancelBooking(bookingId, user.id, "Annullata dal cliente");
+      fetch("/api/booking-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, kind: "cancelled" }),
+      }).catch(() => {});
       await load();
     } finally {
       setCancelling(null);
