@@ -3886,6 +3886,10 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   padding: 1.5rem;
 }
 .detail-video-link { margin-top: -0.5rem; }
+.detail-verified-badge {
+  font-size: 0.82rem; font-weight: 700; color: #15803d;
+  margin: -0.5rem 0 1rem;
+}
 .detail-block h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 1rem; }
 .detail-desc__text { color: var(--text-2); line-height: 1.7; margin: 0; }
 .detail-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }

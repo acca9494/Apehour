@@ -165,6 +165,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
           {reviews.length > 0 && (
             <section className="detail-block">
               <h2>{d.whatCustomersSay}</h2>
+              <p className="detail-verified-badge">{d.verifiedReviews}</p>
               <div className="testimonial-grid">
                 {reviews.map((rev) => (
                   <blockquote className="testimonial-card" key={rev.id}>
