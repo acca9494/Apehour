@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const MAINTENANCE = false;
+const MAINTENANCE = true;
+// Esclusi dalla manutenzione: /admin (devi poterci lavorare anche a sito
+// fermo) e /api (le email automatiche e le route server devono continuare
+// a funzionare).
+const MAINTENANCE_EXEMPT = ["/admin", "/api"];
 
 const PROTECTED_ANY = ["/profile", "/favorites"];
 const PROTECTED_MERCHANT = ["/dashboard"];
@@ -17,7 +21,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Maintenance mode ──────────────────────────────
-  if (MAINTENANCE && pathname !== "/maintenance") {
+  if (MAINTENANCE && pathname !== "/maintenance" && !MAINTENANCE_EXEMPT.some((r) => pathname.startsWith(r))) {
     const url = request.nextUrl.clone();
     url.pathname = "/maintenance";
     const res = NextResponse.rewrite(url);
