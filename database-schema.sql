@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
---  ApeTable — Supabase PostgreSQL Schema
+--  ApeHour — Supabase PostgreSQL Schema
 --  Versione: 1.0
 --
 --  ISTRUZIONI:
@@ -112,7 +112,7 @@ CREATE TABLE public.restaurants (
 
   -- Stato
   is_active        BOOLEAN     NOT NULL DEFAULT TRUE,
-  is_verified      BOOLEAN     NOT NULL DEFAULT FALSE,    -- verificato dal team ApeTable
+  is_verified      BOOLEAN     NOT NULL DEFAULT FALSE,    -- verificato dal team ApeHour
   org_type         TEXT        NOT NULL DEFAULT 'locale'
                      CHECK (org_type IN ('locale', 'associazione')), -- associazione: niente prenotazioni/tavoli, solo eventi/attività
 
