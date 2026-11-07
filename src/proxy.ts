@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const MAINTENANCE = true;
+// Attiva/disattiva qui per la produzione (Vercel). In locale (`npm run dev`)
+// resta sempre disattivata in automatico, così non serve ricordarsi di
+// girare il flag avanti e indietro ogni volta che testiamo qualcosa.
+const MAINTENANCE_WHEN_LIVE = true;
+const MAINTENANCE = MAINTENANCE_WHEN_LIVE && process.env.NODE_ENV === "production";
 // Esclusi dalla manutenzione: /admin (devi poterci lavorare anche a sito
 // fermo) e /api (le email automatiche e le route server devono continuare
 // a funzionare).
