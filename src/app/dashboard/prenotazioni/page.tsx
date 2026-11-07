@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MerchantBookings } from "@/components/dashboard/merchant-bookings";
 
 export const metadata: Metadata = {
-  title: "Prenotazioni | Dashboard ApeTable",
+  title: "Prenotazioni | Dashboard ApeHour",
 };
 
 export default function MerchantBookingsPage() {

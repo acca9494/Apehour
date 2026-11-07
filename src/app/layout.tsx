@@ -23,11 +23,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "ApeTable | Prenota il tuo aperitivo",
-    template: "%s | ApeTable",
+    default: "ApeHour | Prima lo trovi, poi lo vivi",
+    template: "%s | ApeHour",
   },
   description:
-    "Scopri e prenota i migliori bar per l'aperitivo a Milano, Venezia, Roma e in tutta Europa. Disponibilità live, offerte esclusive, conferma immediata.",
+    "Scopri e prenota i migliori aperitivi nel Lazio — Roma, Ostia, Fregene, Ladispoli. Disponibilità live, offerte esclusive, conferma immediata.",
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

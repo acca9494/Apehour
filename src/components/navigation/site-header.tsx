@@ -260,7 +260,7 @@ export function SiteHeader() {
     <>
       <header className={cn("site-header", scrolled && "site-header--solid")}>
         <div className={cn("site-header__inner", isHome && "site-header__inner--home")}>
-          <Link className="brand" href="/" aria-label="ApeTable home">
+          <Link className="brand" href="/" aria-label="ApeHour home">
             <span className="brand__mark" aria-hidden="true">
               <Image src="/apeapplogo1.png" alt="" width={200} height={200} className="brand__logo-img" priority />
             </span>

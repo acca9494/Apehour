@@ -120,7 +120,7 @@ export function HeroSection() {
 
           <div className="home-hero__badge">
             <BrandIcon className="home-hero__badge-icon" aria-hidden="true" />
-            <span>Prenota, gusta, vivi</span>
+            <span>Prima lo trovi, poi lo vivi</span>
           </div>
 
           <div className="home-hero__title-wrap">
