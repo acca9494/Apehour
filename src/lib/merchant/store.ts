@@ -68,6 +68,7 @@ export interface VenueSettings {
   email: string;
   website?: string;
   instagram?: string;
+  videoUrl?: string;
   heroImage: string;
   deposit: DepositSettings;
   legalName?: string;   // ragione sociale (può differire dal nome pubblico del locale)
@@ -94,6 +95,7 @@ const DEFAULT_SETTINGS: VenueSettings = {
   email: "info@spritzbrera.it",
   website: "https://spritzbrera.it",
   instagram: "@spritzbrera",
+  videoUrl: "",
   heroImage:
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80",
   openingHours: [],

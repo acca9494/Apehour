@@ -21,6 +21,7 @@ export interface RestaurantRow {
   website: string | null;
   email: string | null;
   instagram: string | null;
+  video_url: string | null;
   rating: number;
   review_count: number;
   urgency_label: string | null;
@@ -134,6 +135,7 @@ export interface VenueSettingsPatch {
   email: string;
   website?: string;
   instagram?: string;
+  videoUrl?: string;
   heroImage: string;
   depositRequired: boolean;
   depositAmount: number;
@@ -159,6 +161,7 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
       email: patch.email,
       website: patch.website ?? null,
       instagram: patch.instagram ?? null,
+      video_url: patch.videoUrl ?? null,
       cover_image_url: patch.heroImage,
       deposit_required: patch.depositRequired,
       deposit_amount: patch.depositAmount,

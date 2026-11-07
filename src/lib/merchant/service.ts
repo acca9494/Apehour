@@ -102,6 +102,7 @@ export async function fetchVenueSettings(userId: string): Promise<VenueSettings>
     email: restaurant.email ?? "",
     website: restaurant.website ?? undefined,
     instagram: restaurant.instagram ?? undefined,
+    videoUrl: restaurant.video_url ?? undefined,
     heroImage: restaurant.cover_image_url ?? "",
     deposit: {
       required: restaurant.deposit_required,
@@ -128,6 +129,7 @@ export async function updateVenueSettings(settings: VenueSettings, userId: strin
     email: settings.email,
     website: settings.website,
     instagram: settings.instagram,
+    videoUrl: settings.videoUrl,
     heroImage: settings.heroImage,
     depositRequired: settings.deposit.required,
     depositAmount: settings.deposit.amount,

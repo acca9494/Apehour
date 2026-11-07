@@ -75,6 +75,7 @@ CREATE TABLE public.restaurants (
   website          TEXT,
   email            TEXT,
   instagram        TEXT,
+  video_url        TEXT,        -- link a un video del locale (YouTube, Instagram Reel, ecc.) — niente upload/hosting
 
   -- Dati fiscali/legali (necessari per contratto e fatturazione)
   legal_name       TEXT,        -- ragione sociale, può differire dal nome pubblico
@@ -1021,7 +1022,7 @@ CREATE POLICY "restaurants: owner delete"
 -- interrogata (app o chiamata REST diretta con la anon key).
 CREATE OR REPLACE VIEW public.restaurants_public AS
   SELECT r.id, r.name, r.slug, r.description, r.cuisine, r.tags, r.address, r.neighborhood, r.city, r.country,
-         r.lat, r.lng, r.phone, r.website, r.email, r.instagram, r.opening_hours,
+         r.lat, r.lng, r.phone, r.website, r.email, r.instagram, r.video_url, r.opening_hours,
          r.price_range, r.deposit_required, r.deposit_amount, r.deposit_per_person, r.deposit_policy,
          r.max_party_size, r.booking_window_days, r.rating, r.review_count,
          r.zone_names, r.closed_days, COALESCE(r.cover_image_url, img.url) AS cover_image_url,

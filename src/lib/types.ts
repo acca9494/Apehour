@@ -41,6 +41,7 @@ export type Restaurant = {
   description: string;
   tags: string[];
   menuPreview: MenuItem[];
+  videoUrl?: string;
   openingHours: OpeningHour[];
   coordinates: {
     lat: number;

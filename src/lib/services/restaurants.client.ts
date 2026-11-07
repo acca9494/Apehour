@@ -11,7 +11,7 @@ interface ScheduleRow {
   discount_percent: number | null;
 }
 
-function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = []): Restaurant {
+function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = [], gallery?: string[]): Restaurant {
   return {
     id: row.id,
     slug: row.slug,
@@ -25,13 +25,14 @@ function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = []): Restaurant
     neighborhood: row.neighborhood ?? row.city,
     address: row.address ?? "",
     heroImage: row.cover_image_url ?? "/apeapplogo1.png",
-    gallery: row.cover_image_url ? [row.cover_image_url] : [],
+    gallery: gallery && gallery.length > 0 ? gallery : (row.cover_image_url ? [row.cover_image_url] : []),
     discount: undefined,
     urgencyLabel: row.urgency_label ?? "",
     socialProof: row.social_proof ?? "",
     description: row.description ?? "",
     tags: row.tags ?? [],
     menuPreview: [],
+    videoUrl: row.video_url ?? undefined,
     openingHours: row.opening_hours ?? [],
     coordinates: { lat: row.lat ?? 0, lng: row.lng ?? 0 },
     slots,
@@ -146,5 +147,16 @@ export async function getRestaurantBySlugClient(slug: string): Promise<Restauran
     .eq("is_active", true);
   if (schedErr) throw new Error(schedErr.message);
 
-  return mapRow(row, groupSlotsByRestaurant((scheduleRows ?? []) as ScheduleRow[]).get(row.id) ?? []);
+  const { data: imageRows, error: imgErr } = await supabase
+    .from("restaurant_images")
+    .select("url")
+    .eq("restaurant_id", row.id)
+    .order("position", { ascending: true });
+  if (imgErr) throw new Error(imgErr.message);
+
+  return mapRow(
+    row,
+    groupSlotsByRestaurant((scheduleRows ?? []) as ScheduleRow[]).get(row.id) ?? [],
+    (imageRows ?? []).map((r) => r.url as string)
+  );
 }

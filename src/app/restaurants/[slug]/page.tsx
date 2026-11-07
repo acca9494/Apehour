@@ -120,6 +120,14 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             </section>
           )}
 
+          {restaurant.videoUrl && (
+            <div className="detail-video-link">
+              <a href={restaurant.videoUrl} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
+                ▶ {d.watchVideo}
+              </a>
+            </div>
+          )}
+
           {/* ── Orari + Mappa ─────────────────────────────────────────── */}
           <section className="detail-block split-block">
             <div>

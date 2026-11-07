@@ -6,6 +6,7 @@ import type { VenueSettings } from "@/lib/merchant/store";
 import { useAuth } from "@/lib/auth/context";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { DangerZoneDeleteAccount } from "@/components/ui/danger-zone-delete-account";
+import { listGalleryImages, addGalleryImage, removeGalleryImage, type GalleryImage } from "@/lib/restaurants/gallery";
 
 type Tab = "locale" | "contatti" | "fiscali";
 
@@ -30,11 +31,41 @@ export function VenueSettingsPanel() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [gallery, setGallery] = useState<GalleryImage[]>([]);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    fetchVenueSettings(user.id).then((s) => { setSettings(s); setLoading(false); });
+    fetchVenueSettings(user.id).then((s) => {
+      setSettings(s);
+      setLoading(false);
+      listGalleryImages(s.restaurantId).then(setGallery).catch(() => {});
+    });
   }, [user]);
+
+  async function handleAddGalleryImage(url: string) {
+    if (!settings) return;
+    setUploadingGallery(true);
+    try {
+      const img = await addGalleryImage(settings.restaurantId, url);
+      setGallery((prev) => [...prev, img]);
+    } catch {
+      alert("Non è stato possibile aggiungere la foto. Riprova.");
+    } finally {
+      setUploadingGallery(false);
+    }
+  }
+
+  async function handleRemoveGalleryImage(id: string) {
+    const prev = gallery;
+    setGallery((g) => g.filter((img) => img.id !== id));
+    try {
+      await removeGalleryImage(id);
+    } catch {
+      setGallery(prev);
+      alert("Non è stato possibile rimuovere la foto. Riprova.");
+    }
+  }
 
   async function handleSave() {
     if (!settings || !user) return;
@@ -105,6 +136,39 @@ export function VenueSettingsPanel() {
                 value={settings.heroImage}
                 onChange={(dataUrl) => patch("heroImage", dataUrl)}
               />
+            </div>
+
+            <div className="settings-form__full">
+              <span className="auth-form__label" style={{ display: "block", marginBottom: "0.5rem" }}>
+                Galleria foto
+              </span>
+              <p className="settings-hint" style={{ marginTop: 0 }}>
+                Altre foto mostrate nella pagina pubblica del locale (oltre all&apos;immagine hero). Carica quelle che ti manda il locale.
+              </p>
+              <div className="settings-gallery">
+                {gallery.map((img) => (
+                  <div key={img.id} className="settings-gallery__item">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.url} alt="" />
+                    <button
+                      type="button"
+                      className="settings-gallery__remove"
+                      onClick={() => handleRemoveGalleryImage(img.id)}
+                      aria-label="Rimuovi foto"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <div className="settings-gallery__add">
+                  <ImageUploadField
+                    label=""
+                    value=""
+                    onChange={handleAddGalleryImage}
+                  />
+                </div>
+              </div>
+              {uploadingGallery && <p className="settings-hint">Aggiunta foto…</p>}
             </div>
 
             <label>
@@ -240,6 +304,16 @@ export function VenueSettingsPanel() {
                 value={settings.instagram ?? ""}
                 onChange={(e) => patch("instagram", e.target.value || undefined)}
                 placeholder="@nomepagina"
+              />
+            </label>
+
+            <label className="settings-form__full">
+              Video del locale
+              <input
+                type="url"
+                value={settings.videoUrl ?? ""}
+                onChange={(e) => patch("videoUrl", e.target.value || undefined)}
+                placeholder="Link YouTube, Instagram Reel, TikTok…"
               />
             </label>
           </div>
