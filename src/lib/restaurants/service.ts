@@ -33,6 +33,7 @@ export interface RestaurantRow {
   max_party_size: number;
   is_active: boolean;
   is_verified: boolean;
+  org_type: "locale" | "associazione";
   legal_name: string | null;
   vat_number: string | null;
   iban: string | null;

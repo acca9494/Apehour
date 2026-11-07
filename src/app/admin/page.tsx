@@ -14,6 +14,7 @@ interface RestaurantAdminRow {
   phone: string | null;
   is_active: boolean;
   is_verified: boolean;
+  org_type: "locale" | "associazione";
   created_at: string;
 }
 
@@ -31,7 +32,7 @@ export default async function AdminPage() {
 
   const { data: restaurants } = await service
     .from("restaurants")
-    .select("id, name, city, address, email, phone, is_active, is_verified, created_at")
+    .select("id, name, city, address, email, phone, is_active, is_verified, org_type, created_at")
     .order("created_at", { ascending: false });
 
   const { data: schedules } = await service.from("availability_schedules").select("restaurant_id").eq("is_active", true);
@@ -57,7 +58,7 @@ export default async function AdminPage() {
       ) : (
         <div className="dash-card" style={{ overflowX: "auto" }}>
           <table className="dash-table admin-table">
-            <thead><tr><th>Locale</th><th>Contatti</th><th>Disponibilità</th><th>Stato</th><th></th></tr></thead>
+            <thead><tr><th>Locale</th><th>Contatti</th><th>Tipo</th><th>Disponibilità</th><th>Stato</th><th></th></tr></thead>
             <tbody>{pending.map(renderRow)}</tbody>
           </table>
         </div>
@@ -69,7 +70,7 @@ export default async function AdminPage() {
       ) : (
         <div className="dash-card" style={{ overflowX: "auto" }}>
           <table className="dash-table admin-table">
-            <thead><tr><th>Locale</th><th>Contatti</th><th>Disponibilità</th><th>Stato</th><th></th></tr></thead>
+            <thead><tr><th>Locale</th><th>Contatti</th><th>Tipo</th><th>Disponibilità</th><th>Stato</th><th></th></tr></thead>
             <tbody>{verified.map(renderRow)}</tbody>
           </table>
         </div>

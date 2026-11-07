@@ -113,6 +113,8 @@ CREATE TABLE public.restaurants (
   -- Stato
   is_active        BOOLEAN     NOT NULL DEFAULT TRUE,
   is_verified      BOOLEAN     NOT NULL DEFAULT FALSE,    -- verificato dal team ApeTable
+  org_type         TEXT        NOT NULL DEFAULT 'locale'
+                     CHECK (org_type IN ('locale', 'associazione')), -- associazione: niente prenotazioni/tavoli, solo eventi/attività
 
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()

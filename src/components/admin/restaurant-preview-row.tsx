@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/modal";
 import { VerifyButton } from "@/components/admin/verify-button";
 
@@ -13,7 +14,44 @@ interface RestaurantAdminRow {
   phone: string | null;
   is_active: boolean;
   is_verified: boolean;
+  org_type: "locale" | "associazione";
   created_at: string;
+}
+
+function OrgTypeSelect({ restaurantId, orgType }: { restaurantId: string; orgType: "locale" | "associazione" }) {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function change(value: string) {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/set-org-type", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restaurantId, orgType: value }),
+      });
+      if (!res.ok) {
+        alert("Operazione fallita. Riprova.");
+        return;
+      }
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <select
+      value={orgType}
+      disabled={loading}
+      onClick={(e) => e.stopPropagation()}
+      onChange={(e) => change(e.target.value)}
+      className="admin-org-select"
+    >
+      <option value="locale">Locale</option>
+      <option value="associazione">Associazione</option>
+    </select>
+  );
 }
 
 interface RestaurantDetail {
@@ -81,8 +119,13 @@ export function RestaurantPreviewRow({ row, hasSchedule }: { row: RestaurantAdmi
           {row.phone && <div className="admin-row-sub">{row.phone}</div>}
           {!row.email && !row.phone && <span className="admin-row-sub">—</span>}
         </td>
+        <td onClick={(e) => e.stopPropagation()}>
+          <OrgTypeSelect restaurantId={row.id} orgType={row.org_type} />
+        </td>
         <td>
-          {hasSchedule ? (
+          {row.org_type === "associazione" ? (
+            <span className="admin-row-sub">—</span>
+          ) : hasSchedule ? (
             <span className="admin-badge admin-badge--ok">✓ Orari impostati</span>
           ) : (
             <span className="admin-badge admin-badge--warn">⚠️ Nessun orario</span>
@@ -147,7 +190,9 @@ export function RestaurantPreviewRow({ row, hasSchedule }: { row: RestaurantAdmi
             </div>
 
             <div className="admin-preview__footer">
-              {hasSchedule ? (
+              {row.org_type === "associazione" ? (
+                <span className="admin-row-sub">Associazione — niente prenotazioni/orari</span>
+              ) : hasSchedule ? (
                 <span className="admin-badge admin-badge--ok">✓ Ha impostato gli orari prenotabili</span>
               ) : (
                 <span className="admin-badge admin-badge--warn">⚠️ Non ha ancora impostato orari prenotabili</span>
