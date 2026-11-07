@@ -23,7 +23,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "ApeHour | Prima lo trovi, poi lo vivi",
+    default: "ApeHour | Aperitivo? Trovato. Prenota nel Lazio",
     template: "%s | ApeHour",
   },
   description:
