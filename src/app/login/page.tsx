@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth/context";
 import { ClayButton } from "@/components/ui/clay-button";
 import type { AuthErrorCode } from "@/lib/auth/types";
 import { useLang } from "@/lib/i18n/context";
+import { ADMIN_EMAILS } from "@/lib/admin/constants";
 
 export default function LoginPage() {
   const { login, loading, user } = useAuth();
@@ -23,7 +24,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      const dest = user.role === "commerciante" ? "/dashboard" : from;
+      const dest = ADMIN_EMAILS.includes(user.email)
+        ? "/admin"
+        : user.role === "commerciante" ? "/dashboard" : from;
       router.replace(dest);
     }
   }, [user, loading, router, from]);

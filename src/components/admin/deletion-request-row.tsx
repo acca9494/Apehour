@@ -32,26 +32,6 @@ export function DeletionRequestRow({ row }: { row: DeletionRequest }) {
     }
   }
 
-  async function deleteAccount() {
-    if (!confirm(`Eliminare definitivamente l'account di "${row.name}"? Non è reversibile.`)) return;
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/delete-merchant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ownerId: row.owner_id }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        alert("Operazione fallita: " + (body.error ?? "errore sconosciuto"));
-        return;
-      }
-      router.refresh();
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <tr className="admin-table__row">
       <td>
@@ -64,13 +44,13 @@ export function DeletionRequestRow({ row }: { row: DeletionRequest }) {
         {row.email && <a href={`mailto:${row.email}`} className="clay-button clay-button--secondary" style={{ marginTop: "0.4rem", display: "inline-block" }}>Contatta</a>}
       </td>
       <td>{row.deletion_reason || "— nessun motivo indicato —"}</td>
-      <td style={{ display: "flex", gap: "0.5rem" }}>
+      <td>
         <button type="button" className="clay-button clay-button--secondary" disabled={loading} onClick={dismiss}>
           Annulla richiesta
         </button>
-        <button type="button" className="clay-button clay-button--primary" style={{ background: "#e04c4c" }} disabled={loading} onClick={deleteAccount}>
-          Elimina account
-        </button>
+        <div className="admin-row-sub" style={{ marginTop: "0.4rem" }}>
+          Per eliminare davvero l&apos;account, fallo da Supabase → Authentication (mai dal sito).
+        </div>
       </td>
     </tr>
   );

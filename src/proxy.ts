@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { ADMIN_EMAILS } from "@/lib/admin/constants";
 
 // Attiva/disattiva qui per la produzione (Vercel). In locale (`npm run dev`)
 // resta sempre disattivata in automatico, così non serve ricordarsi di
@@ -20,7 +21,8 @@ const PROTECTED_ANY = ["/profile", "/favorites"];
 const PROTECTED_MERCHANT = ["/dashboard"];
 const AUTH_ROUTES = ["/login", "/register"];
 
-function homeFor(role: string | undefined): string {
+function homeFor(role: string | undefined, email: string | undefined): string {
+  if (email && ADMIN_EMAILS.includes(email)) return "/admin";
   if (role === "commerciante") return "/dashboard";
   return "/profile";
 }
@@ -49,7 +51,7 @@ export async function proxy(request: NextRequest) {
   const isAuthenticated = !!user;
 
   if (AUTH_ROUTES.some((r) => pathname.startsWith(r)) && isAuthenticated) {
-    return NextResponse.redirect(new URL(homeFor(role), request.url));
+    return NextResponse.redirect(new URL(homeFor(role, user.email), request.url));
   }
 
   if (PROTECTED_MERCHANT.some((r) => pathname.startsWith(r))) {
@@ -59,7 +61,7 @@ export async function proxy(request: NextRequest) {
       );
     }
     if (role !== "commerciante") {
-      return NextResponse.redirect(new URL(homeFor(role), request.url));
+      return NextResponse.redirect(new URL(homeFor(role, user.email), request.url));
     }
   }
 

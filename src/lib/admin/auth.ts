@@ -1,10 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-
-// Unico amministratore per ora (fase pilota, 25 locali test): un solo
-// indirizzo hardcoded invece di un ruolo "admin" nel database — niente nuova
-// colonna/RLS da proteggere, e la Scelta di chi sia admin dipende da te, non
-// da un dato modificabile a runtime.
-const ADMIN_EMAILS = ["aleacca94@gmail.com"];
+import { ADMIN_EMAILS } from "@/lib/admin/constants";
 
 export async function requireAdmin(): Promise<{ email: string } | null> {
   const supabase = await createClient();
