@@ -16,7 +16,6 @@ const ERROR_MESSAGES: Record<Exclude<AuthErrorCode, "email_confirmation_required
   unknown: "Qualcosa è andato storto. Riprova.",
 };
 
-const CITIES = ["Roma", "Ostia", "Fregene", "Ladispoli", "Fiumicino", "Frascati"];
 const PRICE_OPTIONS = ["< €15", "€15 – €25", "€25 – €40", "€40 – €60", "> €60"];
 
 function priceRangeFromAvgSpend(avgSpend: string): PriceRange {
@@ -236,7 +235,7 @@ export function MerchantRegisterForm({ eventSource, onAccountCreating }: { event
         setLocating(false);
       },
       () => {
-        setLocationError("Non siamo riusciti a rilevare la posizione — seleziona la città manualmente.");
+        setLocationError("Non siamo riusciti a rilevare la posizione — scrivi la città manualmente.");
         setLocating(false);
       },
       { timeout: 10000 }
@@ -248,7 +247,7 @@ export function MerchantRegisterForm({ eventSource, onAccountCreating }: { event
   async function handleStep2(e: React.FormEvent) {
     e.preventDefault();
     if (!s2.city) {
-      setLocationError("Rileva la posizione (o seleziona la città manualmente) prima di continuare.");
+      setLocationError("Scrivi la città o rileva la posizione prima di continuare.");
       return;
     }
     setError(null);
@@ -377,34 +376,26 @@ export function MerchantRegisterForm({ eventSource, onAccountCreating }: { event
 
           <div className="mreg__field">
             <span>Città <em>*</em></span>
-            {s2.city && !locationError ? (
-              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                <strong>📍 {s2.city}</strong>
-                <button type="button" className="mreg__privacy-link" onClick={handleUseLocation} disabled={locating}>
-                  {locating ? "Rilevo…" : "Rileva di nuovo"}
-                </button>
-              </div>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  className="mreg__btn mreg__btn--ghost"
-                  onClick={handleUseLocation}
-                  disabled={locating}
-                >
-                  {locating ? "Rilevo la posizione…" : "📍 Rileva la mia posizione"}
-                </button>
-                {locationError && (
-                  <>
-                    <small style={{ color: "#e04c4c", display: "block", marginTop: "0.4rem" }}>{locationError}</small>
-                    <select value={s2.city} onChange={e => setF2("city", e.target.value)} required style={{ marginTop: "0.4rem" }}>
-                      <option value="" disabled>Seleziona manualmente…</option>
-                      {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </>
-                )}
-              </>
-            )}
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <input
+                type="text"
+                value={s2.city}
+                onChange={e => setF2("city", e.target.value)}
+                placeholder="Roma, Ostia, Fregene…"
+                required
+                style={{ flex: 1 }}
+              />
+              <button
+                type="button"
+                className="mreg__btn mreg__btn--ghost"
+                style={{ flex: "unset", whiteSpace: "nowrap" }}
+                onClick={handleUseLocation}
+                disabled={locating}
+              >
+                {locating ? "Rilevo…" : "📍 Rileva posizione"}
+              </button>
+            </div>
+            {locationError && <small style={{ color: "#e04c4c" }}>{locationError}</small>}
           </div>
 
           <label className="mreg__field">
