@@ -873,6 +873,35 @@ CREATE TRIGGER trg_restrict_customer_booking_update
   BEFORE UPDATE ON public.bookings
   FOR EACH ROW EXECUTE FUNCTION public.restrict_customer_booking_update();
 
+-- Stesso buco, stessa soluzione, ma su ticket_requests: la policy "tickets:
+-- customer cancel" controlla solo customer_id/status nel WITH CHECK, quindi
+-- un cliente potrebbe approfittare della UPDATE di "cancellazione" per
+-- riscrivere quantity/event_id/buyer_* restando dentro la RLS.
+CREATE OR REPLACE FUNCTION public.restrict_customer_ticket_update()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF auth.uid() = OLD.customer_id THEN
+    IF NEW.event_id       IS DISTINCT FROM OLD.event_id
+      OR NEW.customer_id  IS DISTINCT FROM OLD.customer_id
+      OR NEW.quantity     IS DISTINCT FROM OLD.quantity
+      OR NEW.buyer_name   IS DISTINCT FROM OLD.buyer_name
+      OR NEW.buyer_email  IS DISTINCT FROM OLD.buyer_email
+      OR NEW.buyer_phone  IS DISTINCT FROM OLD.buyer_phone
+      OR NEW.ticket_ref   IS DISTINCT FROM OLD.ticket_ref
+    THEN
+      RAISE EXCEPTION 'Puoi solo annullare la tua richiesta, non modificarne i dati.';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_restrict_customer_ticket_update
+  BEFORE UPDATE ON public.ticket_requests
+  FOR EACH ROW EXECUTE FUNCTION public.restrict_customer_ticket_update();
+
 -- ─────────────────────────────────────────────────────────────────────────
 -- Capienza reale a livello di database: oggi il controllo "ci sono posti?"
 -- (checkAvailability) e l'inserimento della prenotazione sono due chiamate

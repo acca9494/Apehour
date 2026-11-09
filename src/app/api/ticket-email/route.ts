@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 import { sendTransactionalEmail, emailShell, escapeHtml } from "@/lib/email/send";
 
 // Email di conferma richiesta biglietto (fase pilota: solo waitlist, nessun
@@ -8,6 +9,10 @@ import { sendTransactionalEmail, emailShell, escapeHtml } from "@/lib/email/send
 export async function POST(request: Request) {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) return NextResponse.json({ ok: false }, { status: 503 });
+
+  const server = await createServerClient();
+  const { data: { user } } = await server.auth.getUser();
+  if (!user) return NextResponse.json({ ok: false }, { status: 401 });
 
   let body: Record<string, unknown>;
   try {
@@ -25,11 +30,16 @@ export async function POST(request: Request) {
 
   const { data: ticket, error } = await admin
     .from("ticket_requests")
-    .select("ticket_ref, quantity, buyer_name, buyer_email, event_id")
+    .select("ticket_ref, quantity, buyer_name, buyer_email, event_id, customer_id")
     .eq("id", ticketId)
     .maybeSingle();
   if (error || !ticket || !ticket.buyer_email) {
     return NextResponse.json({ ok: false });
+  }
+  // Solo il richiedente del biglietto può far (ri)partire questa email —
+  // altrimenti basterebbe conoscere un ticketId per spammarlo.
+  if (ticket.customer_id !== user.id) {
+    return NextResponse.json({ ok: false }, { status: 403 });
   }
 
   const { data: event } = await admin
