@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth/context";
 import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { createRestaurant } from "@/lib/restaurants/service";
 import { LegalModal } from "@/components/legal/legal-modal";
+import { nearestLazioCity } from "@/lib/lazio-cities";
 import type { PriceRange } from "@/lib/types";
 import type { AuthErrorCode } from "@/lib/auth/types";
 
@@ -15,7 +16,7 @@ const ERROR_MESSAGES: Record<Exclude<AuthErrorCode, "email_confirmation_required
   unknown: "Qualcosa è andato storto. Riprova.",
 };
 
-const CITIES = ["Roma", "Ostia", "Fregene", "Ladispoli"];
+const CITIES = ["Roma", "Ostia", "Fregene", "Ladispoli", "Fiumicino", "Frascati"];
 const PRICE_OPTIONS = ["< €15", "€15 – €25", "€25 – €40", "€40 – €60", "> €60"];
 
 function priceRangeFromAvgSpend(avgSpend: string): PriceRange {
@@ -215,14 +216,41 @@ export function MerchantRegisterForm({ eventSource, onAccountCreating }: { event
 
   const [s1, setS1] = useState<Step1>({ nome: "", cognome: "", email: "", telefono: "", password: "", privacy: false });
   const [s2, setS2] = useState<Step2>({ venueName: "", address: "", city: "", avgSpend: "" });
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   function setF1<K extends keyof Step1>(k: K, v: Step1[K]) { setS1(p => ({ ...p, [k]: v })); }
   function setF2<K extends keyof Step2>(k: K, v: Step2[K]) { setS2(p => ({ ...p, [k]: v })); }
+
+  function handleUseLocation() {
+    if (!navigator.geolocation) {
+      setLocationError("Il tuo browser non supporta la geolocalizzazione.");
+      return;
+    }
+    setLocating(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const city = nearestLazioCity({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setF2("city", city);
+        setLocating(false);
+      },
+      () => {
+        setLocationError("Non siamo riusciti a rilevare la posizione — seleziona la città manualmente.");
+        setLocating(false);
+      },
+      { timeout: 10000 }
+    );
+  }
 
   function handleStep1(e: React.FormEvent) { e.preventDefault(); setStep(2); }
 
   async function handleStep2(e: React.FormEvent) {
     e.preventDefault();
+    if (!s2.city) {
+      setLocationError("Rileva la posizione (o seleziona la città manualmente) prima di continuare.");
+      return;
+    }
     setError(null);
     setSubmitting(true);
     const priceRange = priceRangeFromAvgSpend(s2.avgSpend);
@@ -347,13 +375,37 @@ export function MerchantRegisterForm({ eventSource, onAccountCreating }: { event
             <input type="text" value={s2.address} onChange={e => setF2("address", e.target.value)} placeholder="Via Roma 10, Milano" required autoComplete="street-address" />
           </label>
 
-          <label className="mreg__field">
+          <div className="mreg__field">
             <span>Città <em>*</em></span>
-            <select value={s2.city} onChange={e => setF2("city", e.target.value)} required>
-              <option value="" disabled>Seleziona…</option>
-              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </label>
+            {s2.city && !locationError ? (
+              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                <strong>📍 {s2.city}</strong>
+                <button type="button" className="mreg__privacy-link" onClick={handleUseLocation} disabled={locating}>
+                  {locating ? "Rilevo…" : "Rileva di nuovo"}
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="mreg__btn mreg__btn--ghost"
+                  onClick={handleUseLocation}
+                  disabled={locating}
+                >
+                  {locating ? "Rilevo la posizione…" : "📍 Rileva la mia posizione"}
+                </button>
+                {locationError && (
+                  <>
+                    <small style={{ color: "#e04c4c", display: "block", marginTop: "0.4rem" }}>{locationError}</small>
+                    <select value={s2.city} onChange={e => setF2("city", e.target.value)} required style={{ marginTop: "0.4rem" }}>
+                      <option value="" disabled>Seleziona manualmente…</option>
+                      {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </>
+                )}
+              </>
+            )}
+          </div>
 
           <label className="mreg__field">
             <span>Conto medio per cliente <em>*</em></span>

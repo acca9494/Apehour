@@ -11,14 +11,8 @@ import { useLang } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { getBees } from "@/lib/bees/store";
 import { MapClient } from "@/components/map/map-client";
+import { LAZIO_CITY_CENTERS } from "@/lib/lazio-cities";
 import type { SVGProps } from "react";
-
-const LAZIO_CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
-  "Roma": { lat: 41.9028, lng: 12.4964 },
-  "Ostia": { lat: 41.7313, lng: 12.2887 },
-  "Fregene": { lat: 41.8283, lng: 12.2015 },
-  "Ladispoli": { lat: 41.956, lng: 12.0745 },
-};
 
 type NavItem = {
   href: string;
