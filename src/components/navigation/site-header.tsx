@@ -165,13 +165,18 @@ export function SiteHeader() {
       .map((item) => item.href.split("#")[1]!);
 
     function onScroll() {
-      const triggerY = 100; // just below the sticky header
+      // "Visibile sotto l'header" invece di un singolo punto di trigger fisso:
+      // con un solo link-ancora in nav basta che la sezione sia a schermo —
+      // un punto fisso (es. y=100) non si attivava mai se la sezione, essendo
+      // tra le ultime della pagina, non riusciva a scorrere fino a coprire
+      // esattamente quel punto (la pagina finisce prima).
+      const headerHeight = 90;
       let current: string | null = null;
       for (const id of anchorIds) {
         const el = document.getElementById(id);
         if (!el) continue;
         const rect = el.getBoundingClientRect();
-        if (rect.top <= triggerY && rect.bottom > triggerY) {
+        if (rect.bottom > headerHeight && rect.top < window.innerHeight) {
           current = id;
           break;
         }
