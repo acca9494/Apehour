@@ -168,6 +168,11 @@ export const T = {
       similarVenuesSub:   "Stessa qualità, orari ancora disponibili.",
       backToSearch:      "Torna alla ricerca",
       outOf5:            (n: number) => `${n} su 5`,
+      viewMenu:          "Guarda il menu",
+      maxCapacity:       (n: number) => `Fino a ${n} coperti`,
+      cancellationPolicy: "Politica di cancellazione",
+      paymentMethods:    "Metodi di pagamento accettati",
+      accessibility:     "Accessibilità",
     },
     booking: {
       bookTable:      "Prenota il tavolo",
@@ -465,6 +470,11 @@ export const T = {
       similarVenuesSub:   "Same quality, still-open time slots.",
       backToSearch:      "Back to search",
       outOf5:            (n: number) => `${n} out of 5`,
+      viewMenu:          "View the menu",
+      maxCapacity:       (n: number) => `Up to ${n} seats`,
+      cancellationPolicy: "Cancellation policy",
+      paymentMethods:    "Accepted payment methods",
+      accessibility:     "Accessibility",
     },
     booking: {
       bookTable:      "Book the table",

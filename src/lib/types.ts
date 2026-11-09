@@ -42,6 +42,12 @@ export type Restaurant = {
   tags: string[];
   menuPreview: MenuItem[];
   videoUrl?: string;
+  facebook?: string;
+  maxCapacity?: number;
+  menuUrl?: string;
+  cancellationPolicy?: string;
+  paymentMethods: string[];
+  accessibilityTags: string[];
   openingHours: OpeningHour[];
   coordinates: {
     lat: number;

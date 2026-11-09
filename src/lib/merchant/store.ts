@@ -68,14 +68,23 @@ export interface VenueSettings {
   email: string;
   website?: string;
   instagram?: string;
+  facebook?: string;
   videoUrl?: string;
   heroImage: string;
   deposit: DepositSettings;
   legalName?: string;   // ragione sociale (può differire dal nome pubblico del locale)
   vatNumber?: string;   // partita IVA / codice fiscale, per fatturazione
   iban?: string;        // per pagamenti/commissioni future
+  pec?: string;         // per fatturazione elettronica
+  sdiCode?: string;     // per fatturazione elettronica
   openingHours: OpeningHoursRow[];
   tags: string[];
+  cuisine: string;              // categoria/tipo di locale (es. "Spritz Bar", "Wine Bar")
+  maxCapacity?: number;         // coperti massimi
+  menuUrl?: string;             // link a carta/menu (PDF o pagina esterna)
+  cancellationPolicy?: string;  // testo libero mostrato ai clienti
+  paymentMethods: string[];     // es. ["contanti", "carta", "satispay"]
+  accessibilityTags: string[];  // es. ["parcheggio", "accesso_disabili"]
 }
 
 // ── Keys localStorage ────────────────────────────────────────────────────────
@@ -100,6 +109,9 @@ const DEFAULT_SETTINGS: VenueSettings = {
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80",
   openingHours: [],
   tags: [],
+  cuisine: "Spritz Bar",
+  paymentMethods: [],
+  accessibilityTags: [],
   deposit: {
     required: false,
     amount: 5,

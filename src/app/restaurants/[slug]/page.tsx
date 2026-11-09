@@ -50,27 +50,38 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
           <div className="detail-block detail-desc">
             <p className="detail-desc__text">{restaurant.description}</p>
             <div className="detail-pills" style={{ marginTop: "1rem" }}>
+              <span>{restaurant.cuisine}</span>
               <span>{restaurant.priceRange}</span>
               <span>{restaurant.rating.toFixed(1)} ★ · {formatReviewCount(restaurant.reviewCount)} {restaurant.reviewCount === 1 ? d.review : d.reviewsPlural}</span>
+              {restaurant.maxCapacity ? <span>{d.maxCapacity(restaurant.maxCapacity)}</span> : null}
               {restaurant.discount ? <span className="detail-pill--yellow">{d.discountToday(restaurant.discount)}</span> : null}
             </div>
           </div>
 
           {/* ── Carta e drink ─────────────────────────────────────────── */}
-          <section className="detail-block">
-            <h2>{d.menu}</h2>
-            <div className="menu-list">
-              {restaurant.menuPreview.map((item) => (
-                <div key={item.name}>
-                  <div>
-                    <h3>{item.name}</h3>
-                    <p>{item.description}</p>
-                  </div>
-                  <strong>€{item.price}</strong>
+          {(restaurant.menuPreview.length > 0 || restaurant.menuUrl) && (
+            <section className="detail-block">
+              <h2>{d.menu}</h2>
+              {restaurant.menuPreview.length > 0 && (
+                <div className="menu-list">
+                  {restaurant.menuPreview.map((item) => (
+                    <div key={item.name}>
+                      <div>
+                        <h3>{item.name}</h3>
+                        <p>{item.description}</p>
+                      </div>
+                      <strong>€{item.price}</strong>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </section>
+              )}
+              {restaurant.menuUrl && (
+                <a href={restaurant.menuUrl} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
+                  {d.viewMenu}
+                </a>
+              )}
+            </section>
+          )}
 
           {/* ── 8. Punti forti ────────────────────────────────────────── */}
           <section className="detail-block">
@@ -120,12 +131,47 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             </section>
           )}
 
-          {restaurant.videoUrl && (
-            <div className="detail-video-link">
-              <a href={restaurant.videoUrl} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
-                ▶ {d.watchVideo}
-              </a>
+          {(restaurant.videoUrl || restaurant.facebook) && (
+            <div className="detail-video-link" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              {restaurant.videoUrl && (
+                <a href={restaurant.videoUrl} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
+                  ▶ {d.watchVideo}
+                </a>
+              )}
+              {restaurant.facebook && (
+                <a href={restaurant.facebook} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
+                  Facebook
+                </a>
+              )}
             </div>
+          )}
+
+          {(restaurant.paymentMethods.length > 0 || restaurant.accessibilityTags.length > 0 || restaurant.cancellationPolicy) && (
+            <section className="detail-block split-block">
+              {restaurant.paymentMethods.length > 0 && (
+                <div>
+                  <h2>{d.paymentMethods}</h2>
+                  <div className="detail-pills">
+                    {restaurant.paymentMethods.map((m) => <span key={m}>{m}</span>)}
+                  </div>
+                </div>
+              )}
+              {restaurant.accessibilityTags.length > 0 && (
+                <div>
+                  <h2>{d.accessibility}</h2>
+                  <div className="detail-pills">
+                    {restaurant.accessibilityTags.map((a) => <span key={a}>{a}</span>)}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {restaurant.cancellationPolicy && (
+            <section className="detail-block">
+              <h2>{d.cancellationPolicy}</h2>
+              <p>{restaurant.cancellationPolicy}</p>
+            </section>
           )}
 
           {/* ── Orari + Mappa ─────────────────────────────────────────── */}

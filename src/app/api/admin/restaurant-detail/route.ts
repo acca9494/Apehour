@@ -19,7 +19,8 @@ export async function GET(request: Request) {
     .from("restaurants")
     .select(
       "id, name, description, cuisine, tags, address, neighborhood, city, country, phone, website, email, " +
-      "instagram, legal_name, vat_number, opening_hours, price_range, max_party_size, cover_image_url, " +
+      "instagram, facebook, legal_name, vat_number, pec, sdi_code, opening_hours, price_range, max_party_size, " +
+      "max_capacity, menu_url, cancellation_policy, payment_methods, accessibility_tags, cover_image_url, " +
       "is_active, is_verified, created_at"
     )
     .eq("id", id)

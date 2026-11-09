@@ -21,6 +21,7 @@ export interface RestaurantRow {
   website: string | null;
   email: string | null;
   instagram: string | null;
+  facebook: string | null;
   video_url: string | null;
   rating: number;
   review_count: number;
@@ -31,12 +32,19 @@ export interface RestaurantRow {
   deposit_per_person: boolean;
   deposit_policy: string | null;
   max_party_size: number;
+  max_capacity: number | null;
+  menu_url: string | null;
+  cancellation_policy: string | null;
+  payment_methods: string[];
+  accessibility_tags: string[];
   is_active: boolean;
   is_verified: boolean;
   org_type: "locale" | "associazione";
   legal_name: string | null;
   vat_number: string | null;
   iban: string | null;
+  pec: string | null;
+  sdi_code: string | null;
   opening_hours: { day: string; hours: string }[];
 }
 
@@ -80,7 +88,7 @@ export async function createRestaurant(input: CreateRestaurantInput): Promise<Re
       owner_id: input.ownerId,
       name: input.name,
       slug,
-      cuisine: input.cuisine ?? "Aperitivo",
+      cuisine: input.cuisine ?? "Spritz Bar",
       address: input.address,
       city: input.city,
       price_range: input.priceRange,
@@ -136,6 +144,7 @@ export interface VenueSettingsPatch {
   email: string;
   website?: string;
   instagram?: string;
+  facebook?: string;
   videoUrl?: string;
   heroImage: string;
   depositRequired: boolean;
@@ -145,8 +154,16 @@ export interface VenueSettingsPatch {
   legalName?: string;
   vatNumber?: string;
   iban?: string;
+  pec?: string;
+  sdiCode?: string;
   openingHours: { day: string; hours: string }[];
   tags: string[];
+  cuisine: string;
+  maxCapacity?: number;
+  menuUrl?: string;
+  cancellationPolicy?: string;
+  paymentMethods: string[];
+  accessibilityTags: string[];
 }
 
 export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPatch): Promise<RestaurantRow> {
@@ -162,6 +179,7 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
       email: patch.email,
       website: patch.website ?? null,
       instagram: patch.instagram ?? null,
+      facebook: patch.facebook ?? null,
       video_url: patch.videoUrl ?? null,
       cover_image_url: patch.heroImage,
       deposit_required: patch.depositRequired,
@@ -171,8 +189,16 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
       legal_name: patch.legalName ?? null,
       vat_number: patch.vatNumber ?? null,
       iban: patch.iban ?? null,
+      pec: patch.pec ?? null,
+      sdi_code: patch.sdiCode ?? null,
       opening_hours: patch.openingHours,
       tags: patch.tags,
+      cuisine: patch.cuisine,
+      max_capacity: patch.maxCapacity ?? null,
+      menu_url: patch.menuUrl ?? null,
+      cancellation_policy: patch.cancellationPolicy ?? null,
+      payment_methods: patch.paymentMethods,
+      accessibility_tags: patch.accessibilityTags,
     })
     .eq("id", id)
     .select()
@@ -184,7 +210,7 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
 // Locali pubblici (ricerca, mappa, pagina locale): letti da restaurants_public,
 // una vista senza le colonne sensibili (legal_name/vat_number/iban) — mai
 // dalla tabella restaurants, che le espone tramite select("*").
-export type PublicRestaurantRow = Omit<RestaurantRow, "owner_id" | "legal_name" | "vat_number" | "iban">;
+export type PublicRestaurantRow = Omit<RestaurantRow, "owner_id" | "legal_name" | "vat_number" | "iban" | "pec" | "sdi_code">;
 
 export async function getAllActiveRestaurants(): Promise<PublicRestaurantRow[]> {
   const supabase = createClient();

@@ -61,6 +61,11 @@ CREATE TABLE public.restaurants (
   description      TEXT,
   cuisine          TEXT        NOT NULL,                  -- es. 'Spritz Bar', 'Wine Bar'
   tags             TEXT[]      DEFAULT '{}',              -- es. ['aperitivo', 'rooftop']
+  max_capacity     INTEGER,                                -- coperti massimi del locale (fiducia + capienza)
+  menu_url         TEXT,        -- link a carta/menu (PDF o pagina esterna)
+  cancellation_policy TEXT,     -- testo libero mostrato ai clienti (standard TheFork/OpenTable)
+  payment_methods  TEXT[]      DEFAULT '{}',              -- es. ['contanti', 'carta', 'satispay']
+  accessibility_tags TEXT[]    DEFAULT '{}',              -- es. ['parcheggio', 'accesso_disabili']
 
   -- Posizione
   address          TEXT,
@@ -75,12 +80,15 @@ CREATE TABLE public.restaurants (
   website          TEXT,
   email            TEXT,
   instagram        TEXT,
+  facebook         TEXT,
   video_url        TEXT,        -- link a un video del locale (YouTube, Instagram Reel, ecc.) — niente upload/hosting
 
   -- Dati fiscali/legali (necessari per contratto e fatturazione)
   legal_name       TEXT,        -- ragione sociale, può differire dal nome pubblico
   vat_number       TEXT,        -- partita IVA / codice fiscale
   iban             TEXT,        -- per pagamenti/commissioni future
+  pec              TEXT,        -- PEC, per fatturazione elettronica
+  sdi_code         TEXT,        -- Codice SDI, per fatturazione elettronica
 
   -- Orari di apertura generali (distinti dagli slot prenotabili)
   opening_hours    JSONB       NOT NULL DEFAULT '[]'::jsonb,  -- [{ "day": "Lun - Ven", "hours": "17:30 - 23:30" }, ...]
@@ -1024,9 +1032,10 @@ CREATE POLICY "restaurants: owner delete"
 -- interrogata (app o chiamata REST diretta con la anon key).
 CREATE OR REPLACE VIEW public.restaurants_public AS
   SELECT r.id, r.name, r.slug, r.description, r.cuisine, r.tags, r.address, r.neighborhood, r.city, r.country,
-         r.lat, r.lng, r.phone, r.website, r.email, r.instagram, r.video_url, r.opening_hours,
+         r.lat, r.lng, r.phone, r.website, r.email, r.instagram, r.facebook, r.video_url, r.opening_hours,
          r.price_range, r.deposit_required, r.deposit_amount, r.deposit_per_person, r.deposit_policy,
          r.max_party_size, r.booking_window_days, r.rating, r.review_count,
+         r.max_capacity, r.menu_url, r.cancellation_policy, r.payment_methods, r.accessibility_tags,
          r.zone_names, r.closed_days, COALESCE(r.cover_image_url, img.url) AS cover_image_url,
          r.urgency_label, r.social_proof,
          r.is_active, r.is_verified, r.created_at, r.updated_at

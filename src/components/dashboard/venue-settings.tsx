@@ -24,6 +24,28 @@ const TAG_OPTIONS = [
   { value: "cocktail artigianali", label: "Cocktail artigianali", emoji: "🍸" },
 ];
 
+// Stesso vocabolario del tipo Cuisine (src/lib/types.ts) — valori diversi
+// qui non comparirebbero mai nel filtro categoria della ricerca.
+const CUISINE_OPTIONS = [
+  "Spritz Bar", "Wine Bar", "Cocktail Bar", "Vermouth Bar", "Cicchetti Bar",
+  "Rooftop Bar", "Negroni Bar", "Champagne Bar", "Brunch", "Beer Bar", "Whisky Bar",
+];
+
+const PAYMENT_OPTIONS = [
+  { value: "contanti", label: "Contanti" },
+  { value: "carta",    label: "Carta" },
+  { value: "satispay",  label: "Satispay" },
+  { value: "bancomat", label: "Bancomat" },
+];
+
+const ACCESSIBILITY_OPTIONS = [
+  { value: "accesso disabili", label: "Accesso disabili",   emoji: "♿" },
+  { value: "parcheggio",       label: "Parcheggio",         emoji: "🅿️" },
+  { value: "bike parking",     label: "Bike parking",       emoji: "🚲" },
+  { value: "aria condizionata", label: "Aria condizionata", emoji: "❄️" },
+  { value: "wifi",             label: "Wi-Fi",              emoji: "📶" },
+];
+
 export function VenueSettingsPanel() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<VenueSettings | null>(null);
@@ -188,6 +210,87 @@ export function VenueSettingsPanel() {
                 onChange={(e) => patch("city", e.target.value)}
               />
             </label>
+
+            <label>
+              Categoria
+              <select
+                value={settings.cuisine}
+                onChange={(e) => patch("cuisine", e.target.value)}
+              >
+                {CUISINE_OPTIONS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Coperti massimi
+              <input
+                type="number"
+                min={0}
+                value={settings.maxCapacity ?? ""}
+                onChange={(e) => patch("maxCapacity", e.target.value ? Number(e.target.value) : undefined)}
+                placeholder="Es. 60"
+              />
+            </label>
+
+            <label className="settings-form__full">
+              Menu (link)
+              <input
+                type="url"
+                value={settings.menuUrl ?? ""}
+                onChange={(e) => patch("menuUrl", e.target.value || undefined)}
+                placeholder="Link a PDF o pagina con la carta/menu"
+              />
+            </label>
+
+            <label className="settings-form__full">
+              Politica di cancellazione
+              <textarea
+                rows={3}
+                value={settings.cancellationPolicy ?? ""}
+                onChange={(e) => patch("cancellationPolicy", e.target.value || undefined)}
+                placeholder="Es. Cancellazione gratuita fino a 2 ore prima."
+              />
+            </label>
+          </div>
+
+          <h3 style={{ marginTop: "2rem" }}>Metodi di pagamento accettati</h3>
+          <div className="settings-tags">
+            {PAYMENT_OPTIONS.map((opt) => (
+              <label key={opt.value} className="settings-tags__item">
+                <input
+                  type="checkbox"
+                  checked={settings.paymentMethods.includes(opt.value)}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...settings.paymentMethods, opt.value]
+                      : settings.paymentMethods.filter((p) => p !== opt.value);
+                    patch("paymentMethods", next);
+                  }}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+
+          <h3 style={{ marginTop: "2rem" }}>Accessibilità</h3>
+          <div className="settings-tags">
+            {ACCESSIBILITY_OPTIONS.map((opt) => (
+              <label key={opt.value} className="settings-tags__item">
+                <input
+                  type="checkbox"
+                  checked={settings.accessibilityTags.includes(opt.value)}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...settings.accessibilityTags, opt.value]
+                      : settings.accessibilityTags.filter((a) => a !== opt.value);
+                    patch("accessibilityTags", next);
+                  }}
+                />
+                {opt.emoji} {opt.label}
+              </label>
+            ))}
           </div>
 
           <h3 style={{ marginTop: "2rem" }}>Orari di apertura</h3>
@@ -307,6 +410,16 @@ export function VenueSettingsPanel() {
               />
             </label>
 
+            <label>
+              Facebook
+              <input
+                type="text"
+                value={settings.facebook ?? ""}
+                onChange={(e) => patch("facebook", e.target.value || undefined)}
+                placeholder="Link alla pagina Facebook"
+              />
+            </label>
+
             <label className="settings-form__full">
               Video del locale
               <input
@@ -354,6 +467,26 @@ export function VenueSettingsPanel() {
                 value={settings.iban ?? ""}
                 onChange={(e) => patch("iban", e.target.value || undefined)}
                 placeholder="IT60X0542811101000000123456"
+              />
+            </label>
+
+            <label>
+              PEC
+              <input
+                type="email"
+                value={settings.pec ?? ""}
+                onChange={(e) => patch("pec", e.target.value || undefined)}
+                placeholder="nome@pec.it"
+              />
+            </label>
+
+            <label>
+              Codice SDI
+              <input
+                type="text"
+                value={settings.sdiCode ?? ""}
+                onChange={(e) => patch("sdiCode", e.target.value || undefined)}
+                placeholder="Es. 0000000 o XXXXXXX per fattura PA"
               />
             </label>
           </div>

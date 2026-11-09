@@ -68,11 +68,19 @@ interface RestaurantDetail {
   website: string | null;
   email: string | null;
   instagram: string | null;
+  facebook: string | null;
   legal_name: string | null;
   vat_number: string | null;
+  pec: string | null;
+  sdi_code: string | null;
   opening_hours: { day: string; hours: string }[] | null;
   price_range: string;
   max_party_size: number;
+  max_capacity: number | null;
+  menu_url: string | null;
+  cancellation_policy: string | null;
+  payment_methods: string[] | null;
+  accessibility_tags: string[] | null;
   cover_image_url: string | null;
   is_active: boolean;
   is_verified: boolean;
@@ -158,7 +166,10 @@ export function RestaurantPreviewRow({ row, hasSchedule }: { row: RestaurantAdmi
               <div>
                 <h3>Descrizione</h3>
                 <p>{detail.description || "— nessuna descrizione —"}</p>
-                <p className="admin-row-sub">{detail.cuisine} · {detail.price_range} · max {detail.max_party_size} persone</p>
+                <p className="admin-row-sub">
+                  {detail.cuisine} · {detail.price_range} · max {detail.max_party_size} persone per tavolo
+                  {detail.max_capacity ? ` · ${detail.max_capacity} coperti max` : ""}
+                </p>
               </div>
               <div>
                 <h3>Indirizzo</h3>
@@ -170,21 +181,48 @@ export function RestaurantPreviewRow({ row, hasSchedule }: { row: RestaurantAdmi
                   {detail.email && <>{detail.email}<br /></>}
                   {detail.phone && <>{detail.phone}<br /></>}
                   {detail.website && <>{detail.website}<br /></>}
-                  {detail.instagram && <>@{detail.instagram}</>}
-                  {!detail.email && !detail.phone && !detail.website && !detail.instagram && "—"}
+                  {detail.instagram && <>@{detail.instagram}<br /></>}
+                  {detail.facebook && <>{detail.facebook}</>}
+                  {!detail.email && !detail.phone && !detail.website && !detail.instagram && !detail.facebook && "—"}
                 </p>
               </div>
               <div>
                 <h3>Dati fiscali</h3>
                 <p>
                   {detail.legal_name && <>{detail.legal_name}<br /></>}
-                  {detail.vat_number ? `P.IVA ${detail.vat_number}` : "— non inseriti —"}
+                  {detail.vat_number ? `P.IVA ${detail.vat_number}` : "— non inseriti —"}<br />
+                  {detail.pec && <>PEC: {detail.pec}<br /></>}
+                  {detail.sdi_code && <>SDI: {detail.sdi_code}</>}
                 </p>
               </div>
               {detail.opening_hours && detail.opening_hours.length > 0 && (
                 <div>
                   <h3>Orari di apertura</h3>
                   {detail.opening_hours.map((o, i) => <p key={i}>{o.day}: {o.hours}</p>)}
+                </div>
+              )}
+              {detail.menu_url && (
+                <div>
+                  <h3>Menu</h3>
+                  <p><a href={detail.menu_url} target="_blank" rel="noopener noreferrer">{detail.menu_url}</a></p>
+                </div>
+              )}
+              {detail.cancellation_policy && (
+                <div>
+                  <h3>Politica di cancellazione</h3>
+                  <p>{detail.cancellation_policy}</p>
+                </div>
+              )}
+              {detail.payment_methods && detail.payment_methods.length > 0 && (
+                <div>
+                  <h3>Pagamenti accettati</h3>
+                  <p>{detail.payment_methods.join(", ")}</p>
+                </div>
+              )}
+              {detail.accessibility_tags && detail.accessibility_tags.length > 0 && (
+                <div>
+                  <h3>Accessibilità</h3>
+                  <p>{detail.accessibility_tags.join(", ")}</p>
                 </div>
               )}
             </div>

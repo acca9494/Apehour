@@ -102,6 +102,7 @@ export async function fetchVenueSettings(userId: string): Promise<VenueSettings>
     email: restaurant.email ?? "",
     website: restaurant.website ?? undefined,
     instagram: restaurant.instagram ?? undefined,
+    facebook: restaurant.facebook ?? undefined,
     videoUrl: restaurant.video_url ?? undefined,
     heroImage: restaurant.cover_image_url ?? "",
     deposit: {
@@ -113,8 +114,16 @@ export async function fetchVenueSettings(userId: string): Promise<VenueSettings>
     legalName: restaurant.legal_name ?? undefined,
     vatNumber: restaurant.vat_number ?? undefined,
     iban: restaurant.iban ?? undefined,
+    pec: restaurant.pec ?? undefined,
+    sdiCode: restaurant.sdi_code ?? undefined,
     openingHours: restaurant.opening_hours ?? [],
     tags: restaurant.tags ?? [],
+    cuisine: restaurant.cuisine ?? "Spritz Bar",
+    maxCapacity: restaurant.max_capacity ?? undefined,
+    menuUrl: restaurant.menu_url ?? undefined,
+    cancellationPolicy: restaurant.cancellation_policy ?? undefined,
+    paymentMethods: restaurant.payment_methods ?? [],
+    accessibilityTags: restaurant.accessibility_tags ?? [],
   };
 }
 
@@ -129,6 +138,7 @@ export async function updateVenueSettings(settings: VenueSettings, userId: strin
     email: settings.email,
     website: settings.website,
     instagram: settings.instagram,
+    facebook: settings.facebook,
     videoUrl: settings.videoUrl,
     heroImage: settings.heroImage,
     depositRequired: settings.deposit.required,
@@ -138,8 +148,16 @@ export async function updateVenueSettings(settings: VenueSettings, userId: strin
     legalName: settings.legalName,
     vatNumber: settings.vatNumber,
     iban: settings.iban,
+    pec: settings.pec,
+    sdiCode: settings.sdiCode,
     openingHours: settings.openingHours,
     tags: settings.tags,
+    cuisine: settings.cuisine,
+    maxCapacity: settings.maxCapacity,
+    menuUrl: settings.menuUrl,
+    cancellationPolicy: settings.cancellationPolicy,
+    paymentMethods: settings.paymentMethods,
+    accessibilityTags: settings.accessibilityTags,
   });
 }
 
