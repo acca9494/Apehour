@@ -144,7 +144,7 @@ export default function RegisterPage() {
           <>
             <p className="eyebrow" style={{ marginTop: "1rem" }}>Registra il tuo locale</p>
             <h1>Per i locali</h1>
-            <p>Gratis per i primi 30 giorni. Nessun contratto.</p>
+            <p>Iscrizione in pochi minuti. Il team ApeHour ti contatta per attivare il locale.</p>
             <div style={{ marginTop: "1rem" }}>
               <MerchantRegisterForm eventSource={evento} onAccountCreating={() => { holdRedirect.current = true; }} />
             </div>

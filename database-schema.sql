@@ -90,6 +90,12 @@ CREATE TABLE public.restaurants (
   pec              TEXT,        -- PEC, per fatturazione elettronica
   sdi_code         TEXT,        -- Codice SDI, per fatturazione elettronica
 
+  -- Richiesta di cancellazione account commerciante: non elimina nulla da
+  -- sola — avvisa il team (via email), che contatta il locale prima di
+  -- procedere con l'eliminazione vera e propria da /admin.
+  deletion_requested_at TIMESTAMPTZ,
+  deletion_reason       TEXT,
+
   -- Orari di apertura generali (distinti dagli slot prenotabili)
   opening_hours    JSONB       NOT NULL DEFAULT '[]'::jsonb,  -- [{ "day": "Lun - Ven", "hours": "17:30 - 23:30" }, ...]
 

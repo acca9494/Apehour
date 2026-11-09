@@ -507,10 +507,7 @@ export function VenueSettingsPanel() {
       </div>
 
       <div style={{ marginTop: "2.5rem" }}>
-        <p className="settings-hint" style={{ color: "#e04c4c" }}>
-          Attenzione: eliminando l&apos;account elimini anche il tuo locale e tutto ciò che contiene (tavoli, disponibilità, eventi, offerte).
-        </p>
-        <DangerZoneDeleteAccount />
+        <DangerZoneDeleteAccount accountType="commerciante" />
       </div>
     </div>
   );

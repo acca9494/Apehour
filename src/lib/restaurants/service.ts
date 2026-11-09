@@ -45,6 +45,8 @@ export interface RestaurantRow {
   iban: string | null;
   pec: string | null;
   sdi_code: string | null;
+  deletion_requested_at: string | null;
+  deletion_reason: string | null;
   opening_hours: { day: string; hours: string }[];
 }
 
@@ -210,7 +212,7 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
 // Locali pubblici (ricerca, mappa, pagina locale): letti da restaurants_public,
 // una vista senza le colonne sensibili (legal_name/vat_number/iban) — mai
 // dalla tabella restaurants, che le espone tramite select("*").
-export type PublicRestaurantRow = Omit<RestaurantRow, "owner_id" | "legal_name" | "vat_number" | "iban" | "pec" | "sdi_code">;
+export type PublicRestaurantRow = Omit<RestaurantRow, "owner_id" | "legal_name" | "vat_number" | "iban" | "pec" | "sdi_code" | "deletion_requested_at" | "deletion_reason">;
 
 export async function getAllActiveRestaurants(): Promise<PublicRestaurantRow[]> {
   const supabase = createClient();

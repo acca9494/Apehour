@@ -4,13 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 
-export function DangerZoneDeleteAccount() {
+export function DangerZoneDeleteAccount({ accountType = "cliente" }: { accountType?: "cliente" | "commerciante" }) {
   const { logout } = useAuth();
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const [reason, setReason] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [requestSent, setRequestSent] = useState(false);
 
   async function handleDelete() {
     setDeleting(true);
@@ -25,6 +27,74 @@ export function DangerZoneDeleteAccount() {
       setError(e instanceof Error ? e.message : "Errore durante la cancellazione");
       setDeleting(false);
     }
+  }
+
+  async function handleRequestDelete() {
+    setDeleting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/account/request-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? "Errore durante l'invio della richiesta");
+      setRequestSent(true);
+      setConfirming(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Errore durante l'invio della richiesta");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  if (accountType === "commerciante") {
+    return (
+      <div className="dash-table-card settings-section" style={{ borderColor: "#e04c4c" }}>
+        <h3 style={{ color: "#e04c4c", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span aria-hidden="true">⚠️</span> Elimina il tuo account
+        </h3>
+        <p className="settings-hint">
+          Gli account locale non si eliminano in automatico: invia una richiesta e il team ApeHour ti contatterà per capire il motivo prima di procedere.
+        </p>
+
+        {requestSent ? (
+          <p style={{ color: "var(--text-2)" }}>✓ Richiesta inviata. Il team ti contatterà a breve.</p>
+        ) : !confirming ? (
+          <button type="button" className="clay-button clay-button--secondary" onClick={() => setConfirming(true)}>
+            Richiedi cancellazione
+          </button>
+        ) : (
+          <div className="settings-form" style={{ maxWidth: 420 }}>
+            <label className="settings-form__full">
+              Perché vuoi eliminare l&apos;account? (opzionale)
+              <textarea
+                rows={3}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Aiutaci a capire il motivo…"
+              />
+            </label>
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button
+                type="button"
+                className="clay-button clay-button--primary"
+                style={{ background: "#e04c4c" }}
+                disabled={deleting}
+                onClick={handleRequestDelete}
+              >
+                {deleting ? "Invio…" : "Invia richiesta"}
+              </button>
+              <button type="button" className="clay-button clay-button--secondary" onClick={() => { setConfirming(false); setReason(""); }}>
+                Annulla
+              </button>
+            </div>
+            {error && <p style={{ color: "#e04c4c" }}>{error}</p>}
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
