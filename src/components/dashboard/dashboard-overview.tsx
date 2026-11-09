@@ -131,7 +131,7 @@ export function DashboardOverview() {
             </div>
           </div>
           <p style={{ padding: "0 1.5rem 1.25rem", margin: 0, color: "var(--text-2)" }}>
-            Il team ApeHour verifica ogni nuovo locale prima di pubblicarlo in ricerca. Ti contatteremo a breve per confermare i dati — nel frattempo puoi configurare tranquillamente tavoli, disponibilità e offerte.
+            Il team ApeHour verifica ogni nuovo locale prima di pubblicarlo in ricerca. Ti contatteremo a breve per confermare i dati — nel frattempo puoi configurare tranquillamente tavoli, disponibilità e offerte, e inserire i tuoi dati fiscali e di contatto in Impostazioni del locale.
           </p>
         </div>
       )}
