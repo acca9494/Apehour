@@ -9,10 +9,12 @@ const MAINTENANCE_WHEN_LIVE = true;
 const MAINTENANCE = MAINTENANCE_WHEN_LIVE && process.env.NODE_ENV === "production";
 // Esclusi dalla manutenzione: /admin (devi poterci lavorare anche a sito
 // fermo), /api (le email automatiche e le route server devono continuare
-// a funzionare), e /register /login /dashboard per permettere l'onboarding
-// rapido di un locale anche mentre il resto del sito è fermo (il locale non
-// diventa comunque visibile al pubblico finché non lo verifichi da /admin).
-const MAINTENANCE_EXEMPT = ["/admin", "/api", "/register", "/login", "/dashboard"];
+// a funzionare), e /register /login /dashboard /profile per permettere
+// l'onboarding rapido di un locale anche mentre il resto del sito è fermo
+// (il locale non diventa comunque visibile al pubblico finché non lo
+// verifichi da /admin). /profile serve perché dopo il login un account
+// cliente viene rimandato lì prima di poter raggiungere /admin.
+const MAINTENANCE_EXEMPT = ["/admin", "/api", "/register", "/login", "/dashboard", "/profile"];
 
 const PROTECTED_ANY = ["/profile", "/favorites"];
 const PROTECTED_MERCHANT = ["/dashboard"];
