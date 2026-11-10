@@ -35,10 +35,23 @@ export default async function AdminPage() {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const { data: restaurants } = await service
+  const { data: restaurants, error: restaurantsError } = await service
     .from("restaurants")
     .select("id, owner_id, name, city, address, email, phone, is_active, is_verified, org_type, pickup_enabled, created_at, deletion_requested_at, deletion_reason")
     .order("created_at", { ascending: false });
+
+  // Un errore qui (es. una colonna nuova non ancora migrata su Supabase) non
+  // deve sembrare "zero locali" — è già successo e ha nascosto un'iscrizione
+  // vera per minuti prima di essere notato.
+  if (restaurantsError) {
+    return (
+      <div className="dashboard-page-header">
+        <h1>Errore nel caricamento dei locali</h1>
+        <p style={{ color: "#e04c4c" }}>{restaurantsError.message}</p>
+        <p>Controlla che tutte le migrazioni SQL siano state lanciate su Supabase.</p>
+      </div>
+    );
+  }
 
   const { data: schedules } = await service.from("availability_schedules").select("restaurant_id").eq("is_active", true);
   const hasSchedule = new Set((schedules ?? []).map((s) => s.restaurant_id as string));
