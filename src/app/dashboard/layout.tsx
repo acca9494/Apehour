@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/tavoli",        icon: "⊞",  label: "Tavoli",        localeOnly: true },
   { href: "/dashboard/disponibilita", icon: "◷",  label: "Disponibilità", localeOnly: true },
   { href: "/dashboard/offerte",       icon: "%",  label: "Offerte",       localeOnly: true },
+  { href: "/dashboard/ritiri",        icon: "🔔", label: "Ritiri",        localeOnly: true, pickupOnly: true },
   { href: "/dashboard/eventi",        icon: "✦",  label: "Eventi" },
   { href: "/dashboard/artisti",       icon: "▣",  label: "ApeJobs", comingSoon: true, localeOnly: true },
   { href: "/dashboard/impostazioni",  icon: "◌",  label: "Impostazioni" },
@@ -55,16 +56,25 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   // Crea il locale su Supabase al primo accesso confermato, se la registrazione
   // era rimasta "in sospeso" per la conferma email (vedi merchant-register-form).
   const [orgType, setOrgType] = useState<"locale" | "associazione" | null>(null);
+  const [pickupEnabled, setPickupEnabled] = useState(false);
   useEffect(() => {
     if (user?.role === "commerciante") {
       void ensureRestaurantForOwner(user.id).then(() => {
-        getMyRestaurant(user.id).then((r) => setOrgType(r?.org_type ?? "locale")).catch(() => setOrgType("locale"));
+        getMyRestaurant(user.id).then((r) => {
+          setOrgType(r?.org_type ?? "locale");
+          setPickupEnabled(r?.pickup_enabled ?? false);
+        }).catch(() => setOrgType("locale"));
       });
     }
   }, [user]);
 
   // Le associazioni non gestiscono prenotazioni/tavoli: pubblicano solo eventi/attività.
-  const navItems = orgType === "associazione" ? NAV_ITEMS.filter((i) => !i.localeOnly) : NAV_ITEMS;
+  // "Ritiri" compare solo se il team ApeHour lo ha attivato per questo locale da /admin.
+  const navItems = NAV_ITEMS.filter((i) => {
+    if (i.localeOnly && orgType === "associazione") return false;
+    if (i.pickupOnly && !pickupEnabled) return false;
+    return true;
+  });
 
   if (loading || !user) return null;
 

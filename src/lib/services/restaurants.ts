@@ -39,6 +39,7 @@ function mapRow(row: RestaurantRow, slots: BookingSlot[] = [], gallery?: string[
     cancellationPolicy: row.cancellation_policy ?? undefined,
     paymentMethods: row.payment_methods ?? [],
     accessibilityTags: row.accessibility_tags ?? [],
+    pickupEnabled: row.pickup_enabled ?? false,
     openingHours: row.opening_hours ?? [],
     coordinates: { lat: row.lat ?? 0, lng: row.lng ?? 0 },
     slots,

@@ -17,6 +17,7 @@ interface RestaurantAdminRow {
   is_active: boolean;
   is_verified: boolean;
   org_type: "locale" | "associazione";
+  pickup_enabled: boolean;
   created_at: string;
   deletion_requested_at: string | null;
   deletion_reason: string | null;
@@ -36,7 +37,7 @@ export default async function AdminPage() {
 
   const { data: restaurants } = await service
     .from("restaurants")
-    .select("id, owner_id, name, city, address, email, phone, is_active, is_verified, org_type, created_at, deletion_requested_at, deletion_reason")
+    .select("id, owner_id, name, city, address, email, phone, is_active, is_verified, org_type, pickup_enabled, created_at, deletion_requested_at, deletion_reason")
     .order("created_at", { ascending: false });
 
   const { data: schedules } = await service.from("availability_schedules").select("restaurant_id").eq("is_active", true);
@@ -75,7 +76,7 @@ export default async function AdminPage() {
       ) : (
         <div className="dash-card" style={{ overflowX: "auto" }}>
           <table className="dash-table admin-table">
-            <thead><tr><th>Locale</th><th>Contatti</th><th>Tipo</th><th>Disponibilità</th><th>Stato</th><th></th></tr></thead>
+            <thead><tr><th>Locale</th><th>Contatti</th><th>Tipo</th><th>Buzzer ritiri</th><th>Disponibilità</th><th>Stato</th><th></th></tr></thead>
             <tbody>{pending.map(renderRow)}</tbody>
           </table>
         </div>
@@ -87,7 +88,7 @@ export default async function AdminPage() {
       ) : (
         <div className="dash-card" style={{ overflowX: "auto" }}>
           <table className="dash-table admin-table">
-            <thead><tr><th>Locale</th><th>Contatti</th><th>Tipo</th><th>Disponibilità</th><th>Stato</th><th></th></tr></thead>
+            <thead><tr><th>Locale</th><th>Contatti</th><th>Tipo</th><th>Buzzer ritiri</th><th>Disponibilità</th><th>Stato</th><th></th></tr></thead>
             <tbody>{verified.map(renderRow)}</tbody>
           </table>
         </div>

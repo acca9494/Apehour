@@ -48,6 +48,7 @@ export type Restaurant = {
   cancellationPolicy?: string;
   paymentMethods: string[];
   accessibilityTags: string[];
+  pickupEnabled: boolean;
   openingHours: OpeningHour[];
   coordinates: {
     lat: number;

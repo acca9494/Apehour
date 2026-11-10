@@ -130,6 +130,10 @@ CREATE TABLE public.restaurants (
   org_type         TEXT        NOT NULL DEFAULT 'locale'
                      CHECK (org_type IN ('locale', 'associazione')), -- associazione: niente prenotazioni/tavoli, solo eventi/attività
 
+  -- "Buzzer virtuale" (pickup_orders): attivabile per singolo locale da
+  -- /admin, non visibile/usabile finché non lo accendi tu.
+  pickup_enabled   BOOLEAN     NOT NULL DEFAULT FALSE,
+
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -546,6 +550,43 @@ CREATE INDEX idx_tickets_status   ON public.ticket_requests(status);
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
+--  11b. PICKUP ORDERS
+--  "Buzzer virtuale": per locali con una zona (es. dehor) che non possono
+--  servire al tavolo. Il cliente lascia cosa vuole dall'app, il locale
+--  segna quando è pronto, il cliente lo ritira di persona e lo porta al suo
+--  tavolo (si paga lì, nessun pagamento online). Pensata riusabile da più
+--  locali: attivabile per singolo locale via restaurants.pickup_enabled.
+-- ═══════════════════════════════════════════════════════════════════════════
+CREATE TABLE public.pickup_orders (
+  id               UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_ref        TEXT        NOT NULL UNIQUE,     -- es. APE-ORD-000042 (generato da trigger)
+  restaurant_id    UUID        NOT NULL REFERENCES public.restaurants(id) ON DELETE CASCADE,
+  -- Nullable + SET NULL: se il cliente cancella l'account (diritto all'oblio),
+  -- l'ordine resta nello storico del locale ma si scollega dal profilo eliminato.
+  customer_id      UUID        REFERENCES public.profiles(id) ON DELETE SET NULL,
+
+  customer_name    TEXT        NOT NULL,   -- snapshot al momento dell'ordine
+  customer_phone   TEXT,
+
+  item_description TEXT        NOT NULL,   -- cosa vuole, testo libero
+  status           TEXT        NOT NULL DEFAULT 'richiesto'
+                     CHECK (status IN ('richiesto', 'pronto', 'ritirato', 'annullato')),
+
+  requested_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ready_at         TIMESTAMPTZ,
+  picked_up_at     TIMESTAMPTZ,
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+COMMENT ON TABLE public.pickup_orders IS
+  'Ordini da ritirare di persona (buzzer virtuale) per locali con pickup_enabled = TRUE.';
+
+CREATE INDEX idx_pickup_orders_restaurant ON public.pickup_orders(restaurant_id);
+CREATE INDEX idx_pickup_orders_customer   ON public.pickup_orders(customer_id);
+CREATE INDEX idx_pickup_orders_status     ON public.pickup_orders(status);
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
 --  12. OFFERS
 --  Nota: questa tabella era stata creata live su Supabase con SQL ad-hoc
 --  durante lo sviluppo e non era mai stata sincronizzata in questo file —
@@ -662,6 +703,21 @@ BEGIN
 END;
 $$;
 
+-- Contatore atomico globale per gli ordini ritiro, stesso schema di ticket_ref_seq.
+CREATE SEQUENCE IF NOT EXISTS public.pickup_order_ref_seq;
+
+-- Genera order_ref nel formato APE-ORD-NNNNNN
+CREATE OR REPLACE FUNCTION public.generate_pickup_order_ref()
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN 'APE-ORD-' || LPAD(NEXTVAL('public.pickup_order_ref_seq')::TEXT, 6, '0');
+END;
+$$;
+
 -- Aggiorna updated_at automaticamente
 CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS TRIGGER
@@ -767,6 +823,10 @@ CREATE TRIGGER trg_tickets_updated_at
   BEFORE UPDATE ON public.ticket_requests
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+CREATE TRIGGER trg_pickup_orders_updated_at
+  BEFORE UPDATE ON public.pickup_orders
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
 -- ticket_ref auto-generato
 CREATE OR REPLACE FUNCTION public.set_ticket_ref()
 RETURNS TRIGGER
@@ -783,6 +843,52 @@ $$;
 CREATE TRIGGER trg_tickets_ref
   BEFORE INSERT ON public.ticket_requests
   FOR EACH ROW EXECUTE FUNCTION public.set_ticket_ref();
+
+-- order_ref auto-generato
+CREATE OR REPLACE FUNCTION public.set_pickup_order_ref()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF NEW.order_ref IS NULL OR NEW.order_ref = '' THEN
+    NEW.order_ref := public.generate_pickup_order_ref();
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_pickup_orders_ref
+  BEFORE INSERT ON public.pickup_orders
+  FOR EACH ROW EXECUTE FUNCTION public.set_pickup_order_ref();
+
+-- Stesso tipo di protezione già applicata a bookings/ticket_requests: un
+-- cliente può solo annullare il proprio ordine, non riscriverne i dati
+-- restando dentro la UPDATE di "annullamento" permessa dalla RLS.
+CREATE OR REPLACE FUNCTION public.restrict_customer_pickup_order_update()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF auth.uid() = OLD.customer_id THEN
+    IF NEW.restaurant_id      IS DISTINCT FROM OLD.restaurant_id
+      OR NEW.customer_id      IS DISTINCT FROM OLD.customer_id
+      OR NEW.customer_name    IS DISTINCT FROM OLD.customer_name
+      OR NEW.customer_phone   IS DISTINCT FROM OLD.customer_phone
+      OR NEW.item_description IS DISTINCT FROM OLD.item_description
+      OR NEW.order_ref        IS DISTINCT FROM OLD.order_ref
+      OR NEW.ready_at         IS DISTINCT FROM OLD.ready_at
+      OR NEW.picked_up_at     IS DISTINCT FROM OLD.picked_up_at
+    THEN
+      RAISE EXCEPTION 'Puoi solo annullare il tuo ordine, non modificarne i dati.';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_restrict_customer_pickup_order_update
+  BEFORE UPDATE ON public.pickup_orders
+  FOR EACH ROW EXECUTE FUNCTION public.restrict_customer_pickup_order_update();
 
 -- booking_ref auto-generato
 CREATE OR REPLACE FUNCTION public.set_booking_ref()
@@ -1004,6 +1110,7 @@ ALTER TABLE public.reviews            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.favorites          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticket_requests    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pickup_orders      ENABLE ROW LEVEL SECURITY;
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -1073,7 +1180,7 @@ CREATE OR REPLACE VIEW public.restaurants_public AS
          r.max_capacity, r.menu_url, r.cancellation_policy, r.payment_methods, r.accessibility_tags,
          r.zone_names, r.closed_days, COALESCE(r.cover_image_url, img.url) AS cover_image_url,
          r.urgency_label, r.social_proof,
-         r.is_active, r.is_verified, r.created_at, r.updated_at
+         r.is_active, r.is_verified, r.created_at, r.updated_at, r.pickup_enabled
   FROM public.restaurants r
   LEFT JOIN public.restaurant_images img
     ON img.restaurant_id = r.id AND img.is_cover = TRUE
@@ -1425,6 +1532,47 @@ CREATE POLICY "tickets: owner update status"
       JOIN public.restaurants r ON r.id = e.restaurant_id
       WHERE e.id = event_id AND r.owner_id = auth.uid()
     )
+  );
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+--  POLICY: pickup_orders
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Cliente vede solo i propri ordini
+CREATE POLICY "pickup_orders: customer read own"
+  ON public.pickup_orders FOR SELECT
+  USING (auth.uid() = customer_id);
+
+-- Il commerciante vede gli ordini del proprio locale
+CREATE POLICY "pickup_orders: owner read venue"
+  ON public.pickup_orders FOR SELECT
+  USING (
+    EXISTS (SELECT 1 FROM public.restaurants r WHERE r.id = restaurant_id AND r.owner_id = auth.uid())
+  );
+
+-- Cliente autenticato può ordinare, solo se il locale ha attivato la funzione
+CREATE POLICY "pickup_orders: customer insert"
+  ON public.pickup_orders FOR INSERT
+  WITH CHECK (
+    auth.uid() = customer_id
+    AND public.get_my_role() = 'cliente'
+    AND EXISTS (
+      SELECT 1 FROM public.restaurants r
+      WHERE r.id = restaurant_id AND r.pickup_enabled = TRUE AND r.is_active = TRUE AND r.is_verified = TRUE
+    )
+  );
+
+-- Cliente: può solo annullare il proprio ordine
+CREATE POLICY "pickup_orders: customer cancel"
+  ON public.pickup_orders FOR UPDATE
+  USING (auth.uid() = customer_id)
+  WITH CHECK (auth.uid() = customer_id AND status = 'annullato');
+
+-- Commerciante: aggiorna lo stato degli ordini del proprio locale
+CREATE POLICY "pickup_orders: owner update status"
+  ON public.pickup_orders FOR UPDATE
+  USING (
+    EXISTS (SELECT 1 FROM public.restaurants r WHERE r.id = restaurant_id AND r.owner_id = auth.uid())
   );
 
 

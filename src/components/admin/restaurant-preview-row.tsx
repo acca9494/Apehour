@@ -15,7 +15,43 @@ interface RestaurantAdminRow {
   is_active: boolean;
   is_verified: boolean;
   org_type: "locale" | "associazione";
+  pickup_enabled: boolean;
   created_at: string;
+}
+
+function PickupToggle({ restaurantId, pickupEnabled }: { restaurantId: string; pickupEnabled: boolean }) {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function toggle(checked: boolean) {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/set-pickup-enabled", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restaurantId, pickupEnabled: checked }),
+      });
+      if (!res.ok) {
+        alert("Operazione fallita. Riprova.");
+        return;
+      }
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <label onClick={(e) => e.stopPropagation()} style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
+      <input
+        type="checkbox"
+        checked={pickupEnabled}
+        disabled={loading}
+        onChange={(e) => toggle(e.target.checked)}
+      />
+      <span className="admin-row-sub">{pickupEnabled ? "Attivo" : "Spento"}</span>
+    </label>
+  );
 }
 
 function OrgTypeSelect({ restaurantId, orgType }: { restaurantId: string; orgType: "locale" | "associazione" }) {
@@ -129,6 +165,13 @@ export function RestaurantPreviewRow({ row, hasSchedule }: { row: RestaurantAdmi
         </td>
         <td onClick={(e) => e.stopPropagation()}>
           <OrgTypeSelect restaurantId={row.id} orgType={row.org_type} />
+        </td>
+        <td onClick={(e) => e.stopPropagation()}>
+          {row.org_type === "associazione" ? (
+            <span className="admin-row-sub">—</span>
+          ) : (
+            <PickupToggle restaurantId={row.id} pickupEnabled={row.pickup_enabled} />
+          )}
         </td>
         <td>
           {row.org_type === "associazione" ? (

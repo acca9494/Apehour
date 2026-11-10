@@ -47,6 +47,7 @@ export interface RestaurantRow {
   sdi_code: string | null;
   deletion_requested_at: string | null;
   deletion_reason: string | null;
+  pickup_enabled: boolean;
   opening_hours: { day: string; hours: string }[];
 }
 

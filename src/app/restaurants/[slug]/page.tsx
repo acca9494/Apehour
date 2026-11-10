@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BookingPanel } from "@/components/booking/booking-panel";
+import { PickupOrderPanel } from "@/components/booking/pickup-order-panel";
 import { DetailHero } from "@/components/detail/detail-hero";
 import { MapClient } from "@/components/map/map-client";
 import { RestaurantCard } from "@/components/restaurant-card";
@@ -172,6 +173,10 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
               <h2>{d.cancellationPolicy}</h2>
               <p>{restaurant.cancellationPolicy}</p>
             </section>
+          )}
+
+          {restaurant.pickupEnabled && (
+            <PickupOrderPanel restaurantId={restaurant.id} restaurantSlug={restaurant.slug} />
           )}
 
           {/* ── Orari + Mappa ─────────────────────────────────────────── */}
