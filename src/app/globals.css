@@ -276,7 +276,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   align-items: center;
   gap: 0.6rem;
   flex-shrink: 0;
-  margin-right: 0.75rem;
+  margin-right: 1.5rem;
 }
 
 /* ── LANGUAGE TOGGLE ────────────────────────────── */
@@ -285,6 +285,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   align-items: center;
   gap: 0.2rem;
   margin-left: 1.25rem;
+  margin-right: 0.5rem;
   padding: 0.35rem 0.75rem;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
