@@ -6560,21 +6560,28 @@ body:has(.search-page--map) > main {
   border-radius: 50%;
   flex-shrink: 0;
 }
+.btn-plus-icon { width: 0.85rem; height: 0.85rem; flex-shrink: 0; }
+
 .floor-legend__add-btn {
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.3rem;
+  height: 1.3rem;
   border-radius: 50%;
-  border: 1.5px solid var(--border-2);
-  background: transparent;
-  color: var(--text-3);
-  font-size: 0.7rem;
-  line-height: 1;
+  border: 1.5px solid var(--gold-mid);
+  background: var(--gold-soft);
+  color: var(--gold-dk);
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: all 140ms;
+  transition: transform 140ms, box-shadow 140ms, background 140ms;
 }
-.floor-legend__add-btn:hover { border-color: var(--gold); color: var(--gold-dk); background: var(--gold-soft); }
+.floor-legend__add-btn svg { width: 0.6rem; height: 0.6rem; }
+.floor-legend__add-btn:hover {
+  background: var(--gold);
+  color: #fff;
+  transform: scale(1.12);
+  box-shadow: 0 2px 8px rgba(245, 168, 0, 0.35);
+}
+.floor-legend__add-btn:active { transform: scale(0.96); }
 
 .floor-add-zone {
   display: flex;
@@ -6601,17 +6608,26 @@ body:has(.search-page--map) > main {
 .floor-add-zone button:hover { background: var(--gold); color: #fff; }
 
 .floor-add-zone-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--text-3);
-  background: transparent;
-  border: 1.5px dashed var(--border-2);
-  border-radius: var(--radius-sm);
-  padding: 0.3rem 0.75rem;
+  color: var(--gold-dk);
+  background: var(--gold-soft);
+  border: 1.5px solid var(--gold-mid);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
   cursor: pointer;
-  transition: all 140ms;
+  transition: background 140ms, transform 140ms, box-shadow 140ms;
 }
-.floor-add-zone-btn:hover { border-color: var(--gold); color: var(--gold-dk); }
+.floor-add-zone-btn:hover {
+  background: var(--gold);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(245, 168, 0, 0.3);
+}
+.floor-add-zone-btn:active { transform: translateY(0); }
 
 .floor-layout {
   display: flex;

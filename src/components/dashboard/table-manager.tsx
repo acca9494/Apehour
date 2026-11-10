@@ -7,6 +7,14 @@ import { useAuth } from "@/lib/auth/context";
 
 const ZONE_COLOR_PALETTE = ["#F5A800", "#22C55E", "#3B82F6", "#A855F7", "#EF4444", "#14B8A6", "#F97316", "#EC4899"];
 
+function PlusIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
 function zoneColor(zone: string, zones: string[]): string {
   const idx = zones.indexOf(zone);
   return ZONE_COLOR_PALETTE[idx % ZONE_COLOR_PALETTE.length] ?? "var(--border)";
@@ -325,7 +333,7 @@ export function TableManager() {
           <span>Posti totali</span>
         </div>
         <button type="button" className="clay-button clay-button--primary" onClick={() => handleAdd()}>
-          + Aggiungi tavolo
+          <PlusIcon className="btn-plus-icon" /> Aggiungi tavolo
         </button>
       </div>
 
@@ -340,7 +348,7 @@ export function TableManager() {
               title={`Aggiungi tavolo in ${z}`}
               onClick={() => handleAdd(z)}
             >
-              +
+              <PlusIcon />
             </button>
           </span>
         ))}
@@ -359,7 +367,7 @@ export function TableManager() {
           </form>
         ) : (
           <button type="button" className="floor-add-zone-btn" onClick={() => setAddingZone(true)}>
-            + Aggiungi zona
+            <PlusIcon className="btn-plus-icon" /> Aggiungi zona
           </button>
         )}
       </div>
