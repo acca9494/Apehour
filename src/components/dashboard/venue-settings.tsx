@@ -8,7 +8,7 @@ import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { DangerZoneDeleteAccount } from "@/components/ui/danger-zone-delete-account";
 import { listGalleryImages, addGalleryImage, removeGalleryImage, type GalleryImage } from "@/lib/restaurants/gallery";
 
-type Tab = "locale" | "contatti" | "fiscali";
+type Tab = "locale" | "contatti" | "fiscali" | "account";
 
 // Stesso vocabolario del filtro "Caratteristiche" in ricerca
 // (src/components/search/search-results-client.tsx CHARACTERISTIC_OPTIONS):
@@ -115,14 +115,14 @@ export function VenueSettingsPanel() {
 
       {/* Tabs */}
       <div className="settings-tabs">
-        {(["locale", "contatti", "fiscali"] as Tab[]).map((t) => (
+        {(["locale", "contatti", "fiscali", "account"] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
             className={`settings-tab${tab === t ? " is-active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "locale" ? "Locale" : t === "contatti" ? "Contatti" : "Dati fiscali"}
+            {t === "locale" ? "Locale" : t === "contatti" ? "Contatti" : t === "fiscali" ? "Dati fiscali" : "Account"}
           </button>
         ))}
       </div>
@@ -493,22 +493,27 @@ export function VenueSettingsPanel() {
         </div>
       )}
 
-      {/* Save bar */}
-      <div className="settings-save-bar">
-        <button
-          type="button"
-          className={`clay-button clay-button--primary${saving ? " is-loading" : ""}`}
-          onClick={handleSave}
-          disabled={saving}
-        >
-          {saving ? "Salvataggio…" : saved ? "✓ Salvato" : "Salva modifiche"}
-        </button>
-        {saved && <span className="settings-saved-msg">Modifiche salvate con successo.</span>}
-      </div>
+      {/* ── Tab: Account ── */}
+      {tab === "account" && (
+        <div className="dash-table-card settings-section">
+          <DangerZoneDeleteAccount accountType="commerciante" />
+        </div>
+      )}
 
-      <div style={{ marginTop: "2.5rem" }}>
-        <DangerZoneDeleteAccount accountType="commerciante" />
-      </div>
+      {/* Save bar — non serve nella tab Account, non c'è niente da salvare lì */}
+      {tab !== "account" && (
+        <div className="settings-save-bar">
+          <button
+            type="button"
+            className={`clay-button clay-button--primary${saving ? " is-loading" : ""}`}
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? "Salvataggio…" : saved ? "✓ Salvato" : "Salva modifiche"}
+          </button>
+          {saved && <span className="settings-saved-msg">Modifiche salvate con successo.</span>}
+        </div>
+      )}
     </div>
   );
 }
