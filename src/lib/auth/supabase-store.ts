@@ -45,6 +45,15 @@ export async function register(data: RegisterData): Promise<AuthSession> {
     console.error("[register] Supabase error:", error.message, error);
     throw new Error(error.message.toLowerCase().includes("already registered") ? "email_taken" : "unknown");
   }
+  // Per email già registrate e confermate, Supabase non dà un errore esplicito
+  // (anti-enumerazione): risponde con un utente "finto" senza sessione, con
+  // identities: [] — identico in apparenza a un nuovo signup in attesa di
+  // conferma, ma qui non parte nessuna mail perché non è stato creato nulla.
+  // Senza questo controllo l'utente vedeva il popup "controlla la tua email"
+  // per un'email che in realtà esisteva già.
+  if (signUpData.user && signUpData.user.identities?.length === 0) {
+    throw new Error("email_taken");
+  }
   if (!signUpData.session || !signUpData.user) {
     // Progetto con "Confirm email" attivo: l'utente deve confermare via email prima di avere una sessione.
     throw new Error("email_confirmation_required");
