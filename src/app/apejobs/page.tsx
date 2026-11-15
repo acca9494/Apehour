@@ -46,7 +46,7 @@ export default function ApeJobsPage() {
           ))}
         </div>
 
-        <p className="eyebrow eyebrow--apejobs">ApeJobs</p>
+        <p className="eyebrow eyebrow--apejobs">ApeJobs (in arrivo)</p>
         <h1>Cerca lavoro nei locali,<br />o trova subito chi ti serve</h1>
         <p className="hiwp-hero__sub">
           ApeJobs collega i locali che cercano personale — bartender, camerieri, DJ, animatori —
