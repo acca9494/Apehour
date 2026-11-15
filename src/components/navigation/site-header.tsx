@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ClayLink } from "@/components/ui/clay-button";
 import { useAuth } from "@/lib/auth/context";
@@ -755,16 +755,9 @@ export function SiteHeader() {
               );
             }
             return (
-              <Fragment key={item.href}>
-                <Link href={item.href} onClick={close}>
-                  {label}
-                </Link>
-                {item.key === "activities" && (
-                  <Link href="/offers" onClick={close}>
-                    Offerte
-                  </Link>
-                )}
-              </Fragment>
+              <Link key={item.href} href={item.href} onClick={close}>
+                {label}
+              </Link>
             );
           })}
           {isMerchant && (
