@@ -15,7 +15,9 @@ const MAINTENANCE = MAINTENANCE_WHEN_LIVE && process.env.NODE_ENV === "productio
 // (il locale non diventa comunque visibile al pubblico finché non lo
 // verifichi da /admin). /profile serve perché dopo il login un account
 // cliente viene rimandato lì prima di poter raggiungere /admin.
-const MAINTENANCE_EXEMPT = ["/admin", "/api", "/register", "/login", "/dashboard", "/profile"];
+// /forgot-password e /reset-password: chi è già registrato deve poter
+// recuperare la password anche a sito fermo, altrimenti resta bloccato fuori.
+const MAINTENANCE_EXEMPT = ["/admin", "/api", "/register", "/login", "/dashboard", "/profile", "/forgot-password", "/reset-password"];
 
 const PROTECTED_ANY = ["/profile", "/favorites"];
 const PROTECTED_MERCHANT = ["/dashboard"];
