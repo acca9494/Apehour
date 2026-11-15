@@ -1544,6 +1544,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   justify-content: center;
   gap: 1.5rem;
   padding-top: 0.75rem;
+  padding-bottom: 1.25rem;
 }
 .mobile-drawer__sub-link {
   font-size: 0.8rem;
