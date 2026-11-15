@@ -4,7 +4,7 @@ export function BeesDashboard() {
       <div className="dashboard-page-header">
         <p className="eyebrow">BEES</p>
         <h1>Il tuo portafoglio BEES</h1>
-        <p>Guadagna punti ad ogni prenotazione e scala i livelli.</p>
+        <p>Guadagna punti prenotando aperitivi e partecipando alle attività sostenibili, poi scala i livelli.</p>
       </div>
 
       <div className="dash-card bees-coming-soon">
