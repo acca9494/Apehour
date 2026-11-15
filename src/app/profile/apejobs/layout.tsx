@@ -1,19 +1,22 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 
-// ApeJobs è "coming soon" (voce nascosta dal menu profilo) e queste pagine
-// girano ancora su dati salvati solo nel browser (localStorage): bloccate
-// anche per chi apre l'URL direttamente, stesso trattamento già dato alla
-// versione commerciante e a /dashboard/pagamenti.
-export default function ApeJobsLayout({ children: _children }: { children: ReactNode }) {
+// Solo la pagina indice (spiegazione "in arrivo") è raggiungibile — le
+// sotto-pagine (cerca-lavoro, pagamenti, impostazioni) mostrano ancora dati
+// finti da localStorage, quindi restano bloccate anche per chi apre l'URL
+// direttamente.
+export default function ApeJobsLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isIndex = pathname === "/profile/apejobs";
 
   useEffect(() => {
-    router.replace("/profile");
-  }, [router]);
+    if (!isIndex) router.replace("/profile/apejobs");
+  }, [isIndex, router]);
 
-  return null;
+  if (!isIndex) return null;
+  return children;
 }

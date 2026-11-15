@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -13,8 +13,8 @@ const NAV_ITEMS = [
   { href: "/profile/ordini",        icon: "🔔", label: "I miei ordini" },
   { href: "/profile/eventi",        icon: "✦",  label: "Eventi" },
   { href: "/profile/attivita",      icon: "◷",  label: "Attività" },
-  { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES", comingSoon: true },
-  { href: "/profile/apejobs",       icon: "▣",  label: "ApeJobs", comingSoon: true },
+  { href: "/profile/bees",          icon: "⬡",  label: "I miei BEES (in arrivo)" },
+  { href: "/profile/apejobs",       icon: "▣",  label: "ApeJobs (in arrivo)" },
   { href: "/profile/impostazioni",  icon: "◌",  label: "Impostazioni" },
 ];
 
@@ -22,6 +22,14 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [navScroll, setNavScroll] = useState<"start" | "mid" | "end">("start");
+
+  function handleNavScroll(e: React.UIEvent<HTMLElement>) {
+    const el = e.currentTarget;
+    const atStart = el.scrollLeft <= 4;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    setNavScroll(atStart ? "start" : atEnd ? "end" : "mid");
+  }
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login?from=/profile");
@@ -37,15 +45,6 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
         {/* Nav */}
         <nav className="user-dash-nav">
           {NAV_ITEMS.map((item) => {
-            if (item.comingSoon) {
-              return (
-                <span key={item.href} className="user-dash-nav__item user-dash-nav__item--soon" aria-disabled="true">
-                  <span className="user-dash-nav__icon">{item.icon}</span>
-                  {item.label}
-                  <span className="user-dash-nav__soon-badge">Presto</span>
-                </span>
-              );
-            }
             const exact = item.href === "/profile";
             const active = exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
@@ -97,30 +96,30 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
 
       <div className="user-dash-main">
         {/* Mobile-only horizontal tab nav */}
-        <nav className="profile-mobile-nav" aria-label="Navigazione profilo">
-          {NAV_ITEMS.map((item) => {
-            if (item.comingSoon) {
+        <div className="profile-mobile-nav-wrap">
+          <nav className="profile-mobile-nav" aria-label="Navigazione profilo" onScroll={handleNavScroll}>
+            {NAV_ITEMS.map((item) => {
+              const exact = item.href === "/profile";
+              const active = exact ? pathname === item.href : pathname.startsWith(item.href);
               return (
-                <span key={item.href} className="profile-mobile-nav__item profile-mobile-nav__item--soon" aria-disabled="true">
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn("profile-mobile-nav__item", active && "is-active")}
+                >
                   <span className="profile-mobile-nav__icon">{item.icon}</span>
                   <span>{item.label}</span>
-                </span>
+                </Link>
               );
-            }
-            const exact = item.href === "/profile";
-            const active = exact ? pathname === item.href : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn("profile-mobile-nav__item", active && "is-active")}
-              >
-                <span className="profile-mobile-nav__icon">{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+            })}
+          </nav>
+          {navScroll !== "end" && (
+            <div className="profile-mobile-nav__hint-right" aria-hidden="true" />
+          )}
+          {navScroll !== "start" && (
+            <div className="profile-mobile-nav__hint-left" aria-hidden="true" />
+          )}
+        </div>
 
         <div className="profile-mobile-content">
           {children}

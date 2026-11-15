@@ -4,6 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLang } from "@/lib/i18n/context";
 
+function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
+      <circle cx="12" cy="12" r="4.2" />
+      <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function Footer() {
   const { t } = useLang();
   const f = t.footer;
@@ -22,6 +32,16 @@ export function Footer() {
             </span>
           </Link>
           <p className="footer-brand__desc">{f.desc}</p>
+          <a
+            href="https://www.instagram.com/apehourofficial/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-social-link"
+            aria-label="ApeHour su Instagram"
+          >
+            <InstagramIcon width={18} height={18} />
+            @apehourofficial
+          </a>
           <div className="footer-trust">
             <Link href="/cookie-policy" className="footer-trust__link">Cookie policy</Link>
             <Link href="/privacy" className="footer-trust__link">Privacy policy</Link>

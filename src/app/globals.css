@@ -3707,6 +3707,19 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   line-height: 1.7;
 }
 
+.footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 140ms;
+}
+.footer-social-link:hover { color: var(--gold); }
+
 .footer-trust {
   display: flex;
   flex-direction: row;
@@ -9113,6 +9126,21 @@ body:has(.search-page--map) > main {
     flex-shrink: 0;
   }
   .profile-mobile-nav::-webkit-scrollbar { display: none; }
+
+  /* Ombreggiatura arancione per far capire che ci sono altre voci da
+     scorrere — stesso trattamento già usato nella nav mobile del locale. */
+  .profile-mobile-nav-wrap { position: relative; }
+  .profile-mobile-nav__hint-right,
+  .profile-mobile-nav__hint-left {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3rem;
+    pointer-events: none;
+    z-index: 31;
+  }
+  .profile-mobile-nav__hint-right { right: 0; background: linear-gradient(to left, rgba(245,130,0,0.22), transparent); }
+  .profile-mobile-nav__hint-left { left: 0; background: linear-gradient(to right, rgba(245,130,0,0.22), transparent); }
 
   .profile-mobile-nav__item {
     display: flex;

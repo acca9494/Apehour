@@ -1,18 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 
-// ApeJobs è "coming soon" (voce nascosta dal menu dashboard) e queste pagine
-// mostrano ancora dati finti da localStorage: bloccate anche per chi apre
-// l'URL direttamente, stesso trattamento già dato a /dashboard/pagamenti.
-export default function ApeJobsMerchantLayout({ children: _children }: { children: ReactNode }) {
+// Solo la pagina indice (spiegazione "in arrivo") è raggiungibile — le
+// sotto-pagine (offerte, pagamenti) mostrano ancora dati finti da
+// localStorage, quindi restano bloccate anche per chi apre l'URL direttamente.
+export default function ApeJobsMerchantLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isIndex = pathname === "/dashboard/artisti";
 
   useEffect(() => {
-    router.replace("/dashboard");
-  }, [router]);
+    if (!isIndex) router.replace("/dashboard/artisti");
+  }, [isIndex, router]);
 
-  return null;
+  if (!isIndex) return null;
+  return children;
 }

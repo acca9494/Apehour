@@ -32,7 +32,9 @@ export default function MaintenancePage() {
 
       <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
         <a
-          href="https://instagram.com"
+          href="https://www.instagram.com/apehourofficial/"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{ padding: "0.6rem 1.4rem", background: "#f5a800", color: "#fff", borderRadius: "999px", fontWeight: 800, fontSize: "0.88rem", textDecoration: "none" }}
         >
           Seguici su Instagram
