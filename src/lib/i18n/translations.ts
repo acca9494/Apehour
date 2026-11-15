@@ -51,7 +51,7 @@ export const T = {
     ],
     home: {
       offersEyebrow:    "Offerte",
-      save40:           "Risparmia fino al 40%",
+      save40:           "Offerte del momento",
       bookNowEyebrow:   "Prenota ora",
       chooseTitle:      ["Scegli il tuo ", "Ape", "ritivo"],
       bookOffer:        "Prenota l'offerta",
@@ -353,7 +353,7 @@ export const T = {
     ],
     home: {
       offersEyebrow:    "Offers",
-      save40:           "Save up to 40%",
+      save40:           "Today's offers",
       bookNowEyebrow:   "Book now",
       chooseTitle:      ["Choose your ", "Ape", "ritivo"],
       bookOffer:        "Book the offer",

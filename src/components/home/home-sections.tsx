@@ -202,6 +202,9 @@ export function CategoriesSection() {
               />
               <span className="event-card__category">{cat.tag}</span>
               <span className="act-card__bees">+{cat.bees} 🐝 BEES</span>
+              <div className="act-card__soon-overlay" aria-hidden="true">
+                <span>Coming soon</span>
+              </div>
             </div>
             <div className="event-card__body">
               <h3>{cat.label}</h3>

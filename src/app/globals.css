@@ -2929,6 +2929,27 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   box-shadow: 0 2px 8px rgba(245,168,0,0.35);
 }
 
+.act-card__soon-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 16, 10, 0.55);
+  backdrop-filter: blur(1px);
+}
+.act-card__soon-overlay span {
+  padding: 0.5rem 1.1rem;
+  border: 1.5px solid rgba(255,255,255,0.6);
+  border-radius: var(--radius-full);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 /* ── Events page ────────────────────────────── */
 .events-page__header {
   background: var(--bg-dark);
@@ -8405,13 +8426,13 @@ body:has(.search-page--map) > main {
   position: absolute;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.9rem;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
   border-radius: var(--radius-full);
   background: rgba(255,255,255,0.08);
   border: 1.5px solid rgba(255,255,255,0.16);
   backdrop-filter: blur(6px);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: rgba(255,255,255,0.8);
   white-space: nowrap;
@@ -8419,7 +8440,7 @@ body:has(.search-page--map) > main {
   transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), background 0.2s;
 }
 .apejobs-scatter-chip:hover { background: rgba(245,168,0,0.16); border-color: rgba(245,168,0,0.4); transform: translateY(-2px); }
-.apejobs-scatter-chip__icon { font-size: 1rem; }
+.apejobs-scatter-chip__icon { font-size: 0.88rem; }
 
 /* Two calm, evenly spaced columns flanking the hero copy — no tilt, no clutter. */
 .apejobs-scatter-chip--1  { top: 10%; left: 13%; }

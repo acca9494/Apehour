@@ -31,11 +31,10 @@ function ZapIcon(props: IconProps) {
     </svg>
   );
 }
-function TagIcon(props: IconProps) {
+function StarIcon(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12.5 2H7a2 2 0 0 0-2 2v5.5a1 1 0 0 0 .3.7l9 9a2 2 0 0 0 2.8 0l4.7-4.7a2 2 0 0 0 0-2.8l-9-9A1 1 0 0 0 12.5 2Z" />
-      <circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none" />
+      <path d="m12 3 2.6 5.7 6.2.6-4.7 4.2 1.4 6.1L12 16.8 6.5 19.6l1.4-6.1-4.7-4.2 6.2-.6L12 3Z" />
     </svg>
   );
 }
@@ -58,7 +57,7 @@ function ChevronDownIcon(props: IconProps) {
 const FEATURES = [
   { title: "Prenota in 1 minuto",    Icon: ClockIcon },
   { title: "Conferma immediata",     Icon: ZapIcon },
-  { title: "Sconti fino al 40%",     Icon: TagIcon },
+  { title: "Recensioni verificate",  Icon: StarIcon },
   { title: "Cancellazione gratuita", Icon: ShieldCheckIcon },
 ];
 

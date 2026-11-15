@@ -67,7 +67,6 @@ export default function EventDetailPage() {
           <p className="event-detail__meta">{event.date} · {event.location}</p>
           <div className="event-detail__badges">
             <span className="event-detail__price">{event.price}</span>
-            <span className="event-detail__bees">+{event.bees} 🐝 BEES</span>
           </div>
         </div>
       </div>
@@ -95,10 +94,6 @@ export default function EventDetailPage() {
             <div className="event-detail__info-item">
               <span className="event-detail__info-label">🎟️ Prezzo</span>
               <span className="event-detail__info-value">{event.price}</span>
-            </div>
-            <div className="event-detail__info-item">
-              <span className="event-detail__info-label">🐝 BEES</span>
-              <span className="event-detail__info-value">+{event.bees} BEES</span>
             </div>
           </div>
         </section>

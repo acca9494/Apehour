@@ -216,7 +216,6 @@ export default function EventsPage() {
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                       />
                       <span className="event-card__category">{event.category}</span>
-                      <span className="event-card__bees">+{event.bees} 🐝</span>
                     </div>
                     <div className="event-card__body">
                       <h3>{event.title}</h3>
