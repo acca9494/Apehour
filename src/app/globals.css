@@ -8924,6 +8924,10 @@ body:has(.search-page--map) > main {
   /* Logged-in header: hide Prenota ora and Esci */
   .header-actions .header-cta { display: none; }
   .header-actions .logout-btn { display: none; }
+  /* Il sottotitolo sotto "Eventi" restava visibile tra 481px e 768px (la
+     regola che lo nasconde era scritta solo sotto i 480px), lasciando poco
+     respiro prima delle card su molti telefoni. */
+  .events-copy-desktop { display: none; }
   /* Horizontal card scroll for home sections */
   .offer-grid, .event-grid {
     display: flex;
@@ -8933,7 +8937,7 @@ body:has(.search-page--map) > main {
     scroll-padding-left: 1.25rem;
     -webkit-overflow-scrolling: touch;
     gap: 0.65rem;
-    padding: 0 1rem 0.75rem 1.25rem;
+    padding: 0.5rem 1rem 0.75rem 1.25rem;
     scrollbar-width: none;
   }
   .offer-grid::-webkit-scrollbar, .event-grid::-webkit-scrollbar { display: none; }
