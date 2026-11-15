@@ -104,7 +104,6 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
                 <span key={item.href} className="profile-mobile-nav__item profile-mobile-nav__item--soon" aria-disabled="true">
                   <span className="profile-mobile-nav__icon">{item.icon}</span>
                   <span>{item.label}</span>
-                  <span className="user-dash-nav__soon-badge">Presto</span>
                 </span>
               );
             }

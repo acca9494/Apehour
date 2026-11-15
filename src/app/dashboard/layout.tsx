@@ -190,7 +190,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   <span key={item.href} className="dashboard-mobile-nav__item dashboard-mobile-nav__item--soon" aria-disabled="true">
                     <span className="dashboard-mobile-nav__icon">{item.icon}</span>
                     <span>{item.label}</span>
-                    <span className="user-dash-nav__soon-badge">Presto</span>
                   </span>
                 );
               }
