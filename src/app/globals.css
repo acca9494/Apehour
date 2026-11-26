@@ -182,7 +182,8 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   display: flex;
   align-items: center;
   gap: 3.5rem;
-  width: 100%;
+  width: min(1280px, 100%);
+  margin: 0 auto;
   padding: 0 1.5rem;
   height: 72px;
 }
@@ -197,8 +198,8 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   flex-shrink: 0;
   color: var(--text);
   position: relative;
-  padding-left: 3.6rem;
-  margin-left: -2.25rem;
+  padding-left: 5.1rem;
+  margin-left: -0.75rem;
 }
 
 .brand__mark {
@@ -8873,14 +8874,9 @@ body:has(.search-page--map) > main {
     max-width: 0;
     opacity: 0;
   }
-  /* Il logo da 120px + il suo padding-left spingevano tutto verso destra
-     (e un margine negativo troppo grande lo tagliava fuori schermo a
-     sinistra). Soluzione reale: logo più piccolo su mobile, non un trucco
-     di margini — così si stringe tutto senza rischiare di finire invisibile. */
-  .site-header__inner { padding-left: 0.5rem; justify-content: space-between; }
-  .brand              { padding-left: 2.9rem; margin-left: 0; }
-  .brand__mark        { width: 2.6rem; height: 2.6rem; }
-  .brand__logo-img    { width: 2.6rem; height: 2.6rem; }
+  /* Shift brand left: logo -20px, text -25px; push header-actions to right */
+  .site-header__inner { padding-left: 0.25rem; justify-content: space-between; }
+  .brand              { padding-left: calc(5.5rem - 5px); }
   .restaurant-grid,
   .search-grid   { grid-template-columns: 1fr; gap: 1.5rem; }
   .search-body   { grid-template-columns: 1fr; }
