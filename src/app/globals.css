@@ -238,6 +238,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   gap: 0.3rem;
   flex: 1;
   justify-content: center;
+  transform: translateX(40px);
 }
 
 .desktop-nav a,
@@ -277,6 +278,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   gap: 0.6rem;
   flex-shrink: 0;
   margin-right: 1.5rem;
+  transform: translateX(40px);
 }
 
 /* ── LANGUAGE TOGGLE ────────────────────────────── */
