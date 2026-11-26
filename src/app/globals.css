@@ -8876,7 +8876,7 @@ body:has(.search-page--map) > main {
   }
   /* Shift brand left: logo -20px, text -25px; push header-actions to right */
   .site-header__inner { padding-left: 0; justify-content: space-between; }
-  .brand              { padding-left: 3.4rem; margin-left: -1.4rem; }
+  .brand              { padding-left: 1.8rem; margin-left: -2.6rem; }
   .restaurant-grid,
   .search-grid   { grid-template-columns: 1fr; gap: 1.5rem; }
   .search-body   { grid-template-columns: 1fr; }
