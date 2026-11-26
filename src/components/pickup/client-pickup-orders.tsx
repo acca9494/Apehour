@@ -56,6 +56,7 @@ export function ClientPickupOrders() {
   }
 
   const active = orders.filter((o) => o.status === "richiesto" || o.status === "pronto");
+  const preparing = orders.filter((o) => o.status === "richiesto");
 
   return (
     <div className="user-bookings">
@@ -64,6 +65,16 @@ export function ClientPickupOrders() {
         <h1>I miei ordini</h1>
         <p>Ordini da ritirare di persona nei locali che hanno questo servizio.</p>
       </div>
+
+      {preparing.length > 0 && (
+        <div className="pickup-waiting-banner">
+          <span className="pickup-waiting-banner__icon" aria-hidden="true">🍹</span>
+          <div>
+            <strong>Stiamo preparando il tuo ordine…</strong>
+            <p>Questa pagina si aggiorna da sola — resta qui e ti avviso appena è pronto.</p>
+          </div>
+        </div>
+      )}
 
       <div className="dash-table-card">
         {loading ? (

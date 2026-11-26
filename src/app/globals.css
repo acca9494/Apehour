@@ -6230,6 +6230,28 @@ body:has(.search-page--map) > main {
   padding: 1.5rem;
 }
 
+.pickup-waiting-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--gold-soft);
+  border: 1.5px solid var(--gold-mid);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.4rem;
+  margin-bottom: 1.25rem;
+}
+.pickup-waiting-banner__icon {
+  font-size: 1.8rem;
+  animation: pickup-pulse 1.6s ease-in-out infinite;
+}
+.pickup-waiting-banner strong { display: block; color: var(--gold-dk); font-size: 0.95rem; }
+.pickup-waiting-banner p { margin: 0.2rem 0 0; font-size: 0.82rem; color: var(--text-2); }
+
+@keyframes pickup-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.18); opacity: 0.75; }
+}
+
 /* Summary bar (availability + tables) */
 .avail-summary-bar {
   display: flex;
