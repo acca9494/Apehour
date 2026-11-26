@@ -32,7 +32,7 @@ export default function OffersPage() {
     <div className="offers-page">
 
       <div className="offers-page__header">
-        <span className="eyebrow">Offerte attive</span>
+        <span className="eyebrow">Promozioni attive</span>
         <h1>Prenota e risparmia</h1>
         <p className="offers-page__sub">Sconti esclusivi sui migliori locali. Disponibilità limitata.</p>
       </div>

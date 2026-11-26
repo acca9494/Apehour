@@ -288,11 +288,11 @@ export function DashboardOverview() {
         )}
       </div>
 
-      {/* ── Offerte attive ──────────────────────────── */}
+      {/* ── Promozioni attive ──────────────────────────── */}
       <div className="dash-card">
         <div className="dash-card__header">
           <div>
-            <h2>Offerte attive</h2>
+            <h2>Promozioni attive</h2>
             <p>Sconti e promozioni pubblicati sul sito</p>
           </div>
         </div>

@@ -67,15 +67,15 @@ export function OffersManager() {
   return (
     <div className="avail-manager">
       <div className="dashboard-page-header">
-        <p className="eyebrow">Offerte</p>
-        <h1>Gestisci le tue offerte</h1>
-        <p>Crea sconti e promozioni visibili nella pagina Offerte del sito.</p>
+        <p className="eyebrow">Promozioni</p>
+        <h1>Gestisci le tue promozioni</h1>
+        <p>Crea sconti e promozioni visibili nella pagina Promozioni del sito.</p>
       </div>
 
       <div className="avail-summary-bar">
         <div className="avail-summary-item">
           <strong>{offers.length}</strong>
-          <span>Offerte attive</span>
+          <span>Promozioni attive</span>
         </div>
         <button
           type="button"

@@ -112,7 +112,7 @@ export default function ComeFunzionaPage() {
             <ul className="hiwp-bars__list">
               <li>Visibilità garantita nelle ricerche</li>
               <li>Dashboard prenotazioni in tempo reale</li>
-              <li>Offerte happy hour personalizzate</li>
+              <li>Promozioni happy hour personalizzate</li>
               <li>Recensioni verificate dai clienti</li>
             </ul>
             <ClayLink href="/#per-i-locali" variant="secondary">
@@ -127,7 +127,7 @@ export default function ComeFunzionaPage() {
                   <span>Tavolo</span><strong>2 persone · 19:30</strong>
                 </div>
                 <div className="hiwp-bars__booking-row">
-                  <span>Offerta</span><strong>Spritz + stuzzichini -20%</strong>
+                  <span>Promozione</span><strong>Spritz + stuzzichini -20%</strong>
                 </div>
                 <div className="hiwp-bars__booking-row">
                   <span>Stato</span>

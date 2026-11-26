@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/prenotazioni",  icon: "≡",  label: "Prenotazioni",  localeOnly: true },
   { href: "/dashboard/tavoli",        icon: "⊞",  label: "Tavoli",        localeOnly: true },
   { href: "/dashboard/disponibilita", icon: "◷",  label: "Disponibilità", localeOnly: true },
-  { href: "/dashboard/offerte",       icon: "%",  label: "Offerte",       localeOnly: true },
+  { href: "/dashboard/offerte",       icon: "%",  label: "Promozioni",    localeOnly: true },
   { href: "/dashboard/ritiri",        icon: "🔔", label: "Ritiri",        localeOnly: true, pickupOnly: true },
   { href: "/dashboard/eventi",        icon: "✦",  label: "Eventi" },
   { href: "/dashboard/artisti",       icon: "▣",  label: "ApeJobs (in arrivo)", localeOnly: true },
