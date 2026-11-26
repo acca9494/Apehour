@@ -8874,9 +8874,14 @@ body:has(.search-page--map) > main {
     max-width: 0;
     opacity: 0;
   }
-  /* Shift brand left: logo -20px, text -25px; push header-actions to right */
-  .site-header__inner { padding-left: 0; justify-content: space-between; }
-  .brand              { padding-left: 1.8rem; margin-left: -2.6rem; }
+  /* Il logo da 120px + il suo padding-left spingevano tutto verso destra
+     (e un margine negativo troppo grande lo tagliava fuori schermo a
+     sinistra). Soluzione reale: logo più piccolo su mobile, non un trucco
+     di margini — così si stringe tutto senza rischiare di finire invisibile. */
+  .site-header__inner { padding-left: 0.5rem; justify-content: space-between; }
+  .brand              { padding-left: 2.9rem; margin-left: 0; }
+  .brand__mark        { width: 2.6rem; height: 2.6rem; }
+  .brand__logo-img    { width: 2.6rem; height: 2.6rem; }
   .restaurant-grid,
   .search-grid   { grid-template-columns: 1fr; gap: 1.5rem; }
   .search-body   { grid-template-columns: 1fr; }
