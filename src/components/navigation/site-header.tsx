@@ -347,16 +347,9 @@ export function SiteHeader() {
               className="lang-toggle"
               onClick={toggleLang}
               aria-label={lang === "it" ? "Switch to English" : "Passa all'italiano"}
+              title={lang === "it" ? "Switch to English" : "Passa all'italiano"}
             >
-              <span className={`lang-toggle__opt${lang === "it" ? " is-active" : ""}`}>
-                <FlagIT className="lang-toggle__flag" />
-                IT
-              </span>
-              <span className="lang-toggle__sep">|</span>
-              <span className={`lang-toggle__opt${lang === "en" ? " is-active" : ""}`}>
-                <FlagGB className="lang-toggle__flag" />
-                EN
-              </span>
+              {lang === "it" ? <FlagIT className="lang-toggle__flag" /> : <FlagGB className="lang-toggle__flag" />}
             </button>
             {!loading && isMerchant && (
               <ClayLink href="/dashboard" className="header-cta">
