@@ -3983,7 +3983,7 @@ main:has(.app-preview-page) ~ * { display: none !important; }
 .highlight-grid strong { font-size: 0.85rem; font-weight: 800; color: var(--text); }
 .highlight-grid p { font-size: 0.82rem; color: var(--text-3); margin: 0; line-height: 1.5; }
 
-.detail-gallery-strip .gallery-strip {
+.gallery-strip {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 0.5rem;
@@ -4464,7 +4464,7 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   .detail-booking-mobile { display: block; }
   .detail-booking-desktop { display: none; }
   /* Gallery: horizontal scroll */
-  .detail-gallery-strip .gallery-strip {
+  .gallery-strip {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -4474,7 +4474,7 @@ main:has(.app-preview-page) ~ * { display: none !important; }
     gap: 0.5rem;
     padding-bottom: 0.25rem;
   }
-  .detail-gallery-strip .gallery-strip::-webkit-scrollbar { display: none; }
+  .gallery-strip::-webkit-scrollbar { display: none; }
   .gallery-strip__tile {
     flex: 0 0 72vw;
     max-width: 320px;
