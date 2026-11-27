@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/navigation/site-header";
 // import { GlobalChat } from "@/components/chat/global-chat"; // Chat globale disattivata temporaneamente
 import { SearchViewPill } from "@/components/search/search-view-pill";
 import { CookieBanner } from "@/components/ui/cookie-banner";
+import { TrafficTracker } from "@/components/analytics/traffic-tracker";
 import { AppModeBody } from "@/components/layout/app-mode-body";
 import { LanguageProvider } from "@/lib/i18n/context";
 import "./globals.css";
@@ -41,6 +42,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <LanguageProvider>
           <MobileMenuProvider>
             <Suspense><AppModeBody /></Suspense>
+            <Suspense><TrafficTracker /></Suspense>
             {!isMaintenance && <SiteHeader />}
             <main>
               {children}

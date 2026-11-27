@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/admin/auth";
 import { RestaurantPreviewRow } from "@/components/admin/restaurant-preview-row";
@@ -76,7 +77,7 @@ export default async function AdminPage() {
     <div className="dashboard-page-header admin-page">
       <p className="eyebrow">Admin</p>
       <h1>Verifica locali</h1>
-      <p>Un locale diventa visibile ai clienti solo quando lo verifichi qui. {rows.length} locali totali, {pending.length} da verificare. Clicca su una riga per vedere i dettagli prima di approvare.</p>
+      <p>Un locale diventa visibile ai clienti solo quando lo verifichi qui. {rows.length} locali totali, {pending.length} da verificare. Clicca su una riga per vedere i dettagli prima di approvare. <Link href="/admin/traffico">Vedi traffico del sito →</Link></p>
 
       <h2 className="admin-section-title">Richieste di call ({(callRequests ?? []).length})</h2>
       {(callRequests ?? []).length === 0 ? (

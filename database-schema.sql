@@ -1712,6 +1712,27 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.call_requests TO service_role;
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
+--  TRAFFICO SITO (analytics interne, anonime)
+--  Nessun IP, nessuna cookie persistente: session_id è generato lato client
+--  in sessionStorage (si azzera a fine sessione del browser) solo per
+--  distinguere "visite" da "pagine viste" nello stesso giro di navigazione.
+--  Accesso solo lato server (service role): la route /api/track scrive qui,
+--  la dashboard /admin/traffico legge qui.
+-- ═══════════════════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS public.page_views (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  path         TEXT NOT NULL,
+  referrer     TEXT,
+  session_id   TEXT NOT NULL
+);
+ALTER TABLE public.page_views ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.page_views TO service_role;
+CREATE INDEX idx_page_views_created_at ON public.page_views(created_at);
+CREATE INDEX idx_page_views_path       ON public.page_views(path);
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
 --  RIEPILOGO PERMESSI
 -- ═══════════════════════════════════════════════════════════════════════════
 /*
