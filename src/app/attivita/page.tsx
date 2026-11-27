@@ -42,8 +42,10 @@ export default function AttivitaPage() {
                   <Image src={p.image} alt="" fill sizes="(max-width: 600px) 90vw, 320px" style={{ objectFit: "contain" }} />
                 </span>
               </span>
-              <strong>{p.name}</strong>
-              <p>{p.description}</p>
+              <span className="activities-partners__body">
+                <strong>{p.name}</strong>
+                <p>{p.description}</p>
+              </span>
               <span className="activities-partners__cta">
                 <span className="activities-partners__cta-text">Vai al sito</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
