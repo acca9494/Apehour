@@ -6109,9 +6109,16 @@ body:has(.search-page--map) > main {
   width: 100%;
   aspect-ratio: 4 / 3;
 }
-.activities-partners__photo img {
-  border-radius: 28px;
+/* Margine interno: senza, il bordo arrotondato tocca i pixel esatti della
+   foto (object-fit: contain la riempie fino ai bordi su un asse) e sembra
+   "mordere"/tagliare l'immagine agli angoli. */
+.activities-partners__photo-inner {
+  position: absolute;
+  inset: 10px;
   z-index: 1;
+}
+.activities-partners__photo img {
+  border-radius: 20px;
 }
 /* Macchia di colore "a schizzo", non un riquadro: forma organica che
    sporge oltre i bordi della foto, dietro l'immagine. */
