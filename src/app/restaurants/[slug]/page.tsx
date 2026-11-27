@@ -13,6 +13,7 @@ import { getReviews } from "@/lib/services/reviews";
 import { getRestaurantBySlug, getSimilarRestaurants } from "@/lib/services/restaurants";
 import { formatReviewCount } from "@/lib/utils";
 import { getServerT } from "@/lib/i18n/server";
+import { normalizeInstagram } from "@/lib/instagram";
 
 type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
 
@@ -162,30 +163,36 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
                   Facebook
                 </a>
               )}
-              {restaurant.instagram && (
-                <a
-                  href={restaurant.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="clay-button clay-button--secondary"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
-                >
-                  <InstagramIcon width={16} height={16} />
-                  Instagram
-                </a>
-              )}
-              {restaurant.instagram2 && (
-                <a
-                  href={restaurant.instagram2}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="clay-button clay-button--secondary"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
-                >
-                  <InstagramIcon width={16} height={16} />
-                  {restaurant.instagram2Label || "Instagram"}
-                </a>
-              )}
+              {restaurant.instagram && (() => {
+                const ig = normalizeInstagram(restaurant.instagram);
+                return (
+                  <a
+                    href={ig.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="clay-button clay-button--secondary"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+                  >
+                    <InstagramIcon width={16} height={16} />
+                    {ig.handle}
+                  </a>
+                );
+              })()}
+              {restaurant.instagram2 && (() => {
+                const ig = normalizeInstagram(restaurant.instagram2);
+                return (
+                  <a
+                    href={ig.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="clay-button clay-button--secondary"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+                  >
+                    <InstagramIcon width={16} height={16} />
+                    {restaurant.instagram2Label || ig.handle}
+                  </a>
+                );
+              })()}
             </div>
           )}
 
