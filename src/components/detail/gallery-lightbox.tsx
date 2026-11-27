@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 
 function computeFitSize(naturalWidth: number, naturalHeight: number) {
@@ -18,7 +19,12 @@ function computeFitSize(naturalWidth: number, naturalHeight: number) {
 export function GalleryLightbox({ images, name }: { images: string[]; name: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [fitSize, setFitSize] = useState<{ width: number; height: number } | null>(null);
+  const [mounted, setMounted] = useState(false);
   const isOpen = openIndex !== null;
+
+  // Il portal richiede document.body, che non esiste durante il render
+  // server: montiamo solo lato client.
+  useEffect(() => setMounted(true), []);
 
   // Si riadatta anche se la finestra cambia dimensione/orientamento mentre
   // la foto è aperta.
@@ -98,7 +104,7 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
         ))}
       </div>
 
-      {openIndex !== null && (
+      {openIndex !== null && mounted && createPortal(
         <div
           className="gallery-lightbox"
           role="dialog"
@@ -153,7 +159,8 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
           {images.length > 1 && (
             <span className="gallery-lightbox__counter">{openIndex + 1} / {images.length}</span>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
