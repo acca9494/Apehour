@@ -35,7 +35,7 @@ export default function AttivitaPage() {
           {PARTNERS.map((p) => (
             <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="activities-partners__card">
               <span className="activities-partners__photo">
-                <Image src={p.image} alt="" fill sizes="120px" />
+                <Image src={p.image} alt="" fill sizes="(max-width: 600px) 90vw, 340px" />
               </span>
               <strong>{p.name}</strong>
               <p>{p.description}</p>
