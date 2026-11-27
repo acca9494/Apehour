@@ -3,6 +3,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/admin/auth";
 import { RestaurantPreviewRow } from "@/components/admin/restaurant-preview-row";
 import { DeletionRequestRow } from "@/components/admin/deletion-request-row";
+import { CallRequestRow } from "@/components/admin/call-request-row";
 
 export const metadata = { title: "Admin — Locali" };
 
@@ -53,6 +54,12 @@ export default async function AdminPage() {
     );
   }
 
+  const { data: callRequests } = await service
+    .from("call_requests")
+    .select("id, created_at, contact_name, email, phone, venue_name, address, city, avg_spend, slot_date, slot_time, event_source, status")
+    .order("slot_date", { ascending: true })
+    .order("slot_time", { ascending: true });
+
   const { data: schedules } = await service.from("availability_schedules").select("restaurant_id").eq("is_active", true);
   const hasSchedule = new Set((schedules ?? []).map((s) => s.restaurant_id as string));
 
@@ -70,6 +77,18 @@ export default async function AdminPage() {
       <p className="eyebrow">Admin</p>
       <h1>Verifica locali</h1>
       <p>Un locale diventa visibile ai clienti solo quando lo verifichi qui. {rows.length} locali totali, {pending.length} da verificare. Clicca su una riga per vedere i dettagli prima di approvare.</p>
+
+      <h2 className="admin-section-title">Richieste di call ({(callRequests ?? []).length})</h2>
+      {(callRequests ?? []).length === 0 ? (
+        <p className="admin-empty">Nessuna richiesta di call.</p>
+      ) : (
+        <div className="dash-card" style={{ overflowX: "auto" }}>
+          <table className="dash-table admin-table">
+            <thead><tr><th>Locale</th><th>Contatti</th><th>Call richiesta</th><th>Provenienza</th><th>Stato</th><th></th></tr></thead>
+            <tbody>{(callRequests ?? []).map((r) => <CallRequestRow key={r.id} row={r} />)}</tbody>
+          </table>
+        </div>
+      )}
 
       {deletionRequests.length > 0 && (
         <>

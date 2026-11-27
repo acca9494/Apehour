@@ -10122,6 +10122,11 @@ body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
 .admin-empty { color: var(--text-3); font-size: 0.9rem; }
 .admin-table th, .admin-table td { vertical-align: middle; }
 .admin-row-sub { font-size: 0.78rem; color: var(--text-3); margin-top: 0.15rem; }
+
+.admin-status-pill { display: inline-block; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+.admin-status-pill--new { background: rgba(230, 160, 40, 0.18); color: #e6a028; }
+.admin-status-pill--contacted { background: rgba(70, 130, 220, 0.18); color: #4682dc; }
+.admin-status-pill--done { background: rgba(60, 170, 100, 0.18); color: #3caa64; }
 .admin-badge {
   display: inline-block; padding: 0.25rem 0.6rem; border-radius: 999px;
   font-size: 0.75rem; font-weight: 700; white-space: nowrap;
