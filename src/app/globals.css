@@ -9910,8 +9910,6 @@ body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
   right: 0;
   padding: 2.5rem 2rem 2rem;
   color: #fff;
-  max-width: 900px;
-  margin: 0 auto;
 }
 .event-detail__category {
   display: inline-block;
