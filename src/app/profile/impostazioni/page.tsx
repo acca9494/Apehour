@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth/context";
 import { getMyProfile, updateMyProfile, type MyProfile } from "@/lib/auth/profile";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { DangerZoneDeleteAccount } from "@/components/ui/danger-zone-delete-account";
+import { ChangePasswordForm } from "@/components/ui/change-password-form";
 
 export default function ProfileSettingsPage() {
   const { user } = useAuth();
@@ -94,6 +95,10 @@ export default function ProfileSettingsPage() {
           {saving ? "Salvataggio…" : saved ? "✓ Salvato" : "Salva modifiche"}
         </button>
         {saved && <span className="settings-saved-msg">Modifiche salvate con successo.</span>}
+      </div>
+
+      <div style={{ marginTop: "2.5rem" }}>
+        <ChangePasswordForm />
       </div>
 
       <div style={{ marginTop: "2.5rem" }}>

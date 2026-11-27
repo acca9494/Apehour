@@ -6,6 +6,7 @@ import type { VenueSettings } from "@/lib/merchant/store";
 import { useAuth } from "@/lib/auth/context";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { DangerZoneDeleteAccount } from "@/components/ui/danger-zone-delete-account";
+import { ChangePasswordForm } from "@/components/ui/change-password-form";
 import { listGalleryImages, addGalleryImage, removeGalleryImage, type GalleryImage } from "@/lib/restaurants/gallery";
 
 type Tab = "locale" | "contatti" | "fiscali" | "account";
@@ -495,9 +496,12 @@ export function VenueSettingsPanel() {
 
       {/* ── Tab: Account ── */}
       {tab === "account" && (
-        <div className="dash-table-card settings-section">
-          <DangerZoneDeleteAccount accountType="commerciante" />
-        </div>
+        <>
+          <ChangePasswordForm />
+          <div style={{ marginTop: "1.5rem" }}>
+            <DangerZoneDeleteAccount accountType="commerciante" />
+          </div>
+        </>
       )}
 
       {/* Save bar — non serve nella tab Account, non c'è niente da salvare lì */}
