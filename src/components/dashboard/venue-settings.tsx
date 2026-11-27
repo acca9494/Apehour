@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth/context";
 import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { DangerZoneDeleteAccount } from "@/components/ui/danger-zone-delete-account";
 import { ChangePasswordForm } from "@/components/ui/change-password-form";
-import { listGalleryImages, addGalleryImage, removeGalleryImage, type GalleryImage } from "@/lib/restaurants/gallery";
+import { PhotoManager } from "@/components/dashboard/photo-manager";
 
 type Tab = "locale" | "contatti" | "fiscali" | "account";
 
@@ -54,41 +54,14 @@ export function VenueSettingsPanel() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [gallery, setGallery] = useState<GalleryImage[]>([]);
-  const [uploadingGallery, setUploadingGallery] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     fetchVenueSettings(user.id).then((s) => {
       setSettings(s);
       setLoading(false);
-      listGalleryImages(s.restaurantId).then(setGallery).catch(() => {});
     });
   }, [user]);
-
-  async function handleAddGalleryImage(url: string) {
-    if (!settings) return;
-    setUploadingGallery(true);
-    try {
-      const img = await addGalleryImage(settings.restaurantId, url);
-      setGallery((prev) => [...prev, img]);
-    } catch {
-      alert("Non è stato possibile aggiungere la foto. Riprova.");
-    } finally {
-      setUploadingGallery(false);
-    }
-  }
-
-  async function handleRemoveGalleryImage(id: string) {
-    const prev = gallery;
-    setGallery((g) => g.filter((img) => img.id !== id));
-    try {
-      await removeGalleryImage(id);
-    } catch {
-      setGallery(prev);
-      alert("Non è stato possibile rimuovere la foto. Riprova.");
-    }
-  }
 
   async function handleSave() {
     if (!settings || !user) return;
@@ -161,38 +134,12 @@ export function VenueSettingsPanel() {
               />
             </div>
 
-            <div className="settings-form__full">
-              <span className="auth-form__label" style={{ display: "block", marginBottom: "0.5rem" }}>
-                Galleria foto
-              </span>
-              <p className="settings-hint" style={{ marginTop: 0 }}>
-                Altre foto mostrate nella pagina pubblica del locale (oltre all&apos;immagine hero). Carica quelle che ti manda il locale.
-              </p>
-              <div className="settings-gallery">
-                {gallery.map((img) => (
-                  <div key={img.id} className="settings-gallery__item">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt="" />
-                    <button
-                      type="button"
-                      className="settings-gallery__remove"
-                      onClick={() => handleRemoveGalleryImage(img.id)}
-                      aria-label="Rimuovi foto"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-                <div className="settings-gallery__add">
-                  <ImageUploadField
-                    label=""
-                    value=""
-                    onChange={handleAddGalleryImage}
-                  />
-                </div>
-              </div>
-              {uploadingGallery && <p className="settings-hint">Aggiunta foto…</p>}
-            </div>
+            <PhotoManager
+              restaurantId={settings.restaurantId}
+              category="gallery"
+              title="Galleria foto (ambiente)"
+              hint="Foto dell'ambiente/locale mostrate nella pagina pubblica (oltre all'immagine hero). Usa le frecce per riordinarle."
+            />
 
             <label>
               Indirizzo
@@ -244,6 +191,20 @@ export function VenueSettingsPanel() {
                 placeholder="Link a PDF o pagina con la carta/menu"
               />
             </label>
+
+            <PhotoManager
+              restaurantId={settings.restaurantId}
+              category="menu"
+              title="Foto del menu"
+              hint="Carica le foto delle pagine del tuo menu cartaceo, nell'ordine in cui vuoi che siano lette. Se non carichi nulla, questa sezione non compare nella pagina pubblica."
+            />
+
+            <PhotoManager
+              restaurantId={settings.restaurantId}
+              category="dish"
+              title="Foto dei piatti"
+              hint="Foto dei piatti/drink mostrate accanto al menu nella pagina pubblica. Se non carichi nulla, questa sezione non compare."
+            />
 
             <label className="settings-form__full">
               Politica di cancellazione

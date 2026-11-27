@@ -90,16 +90,18 @@ export function DetailHero({ restaurant, t }: { restaurant: Restaurant; t: Await
         </div>
 
         {/* Tags */}
-        <div className="detail-hero__tags">
-          {restaurant.tags.map((tag) => (
-            <span key={tag} className="detail-hero__tag">{tag}</span>
-          ))}
-          {restaurant.discount && (
-            <span className="detail-hero__tag detail-hero__tag--discount">
-              {t.discountToday(restaurant.discount)}
-            </span>
-          )}
-        </div>
+        {(restaurant.tags.length > 0 || restaurant.discount) && (
+          <div className="detail-hero__tags">
+            {restaurant.tags.map((tag) => (
+              <span key={tag} className="detail-hero__tag">{tag}</span>
+            ))}
+            {restaurant.discount && (
+              <span className="detail-hero__tag detail-hero__tag--discount">
+                {t.discountToday(restaurant.discount)}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Type badge — bottom right, only the one matching this venue's price tier */}

@@ -218,8 +218,8 @@ export function CategoriesSection() {
       </div>
       <Link href="/attivita" className="activities-partners-teaser">
         <span className="activities-partners-teaser__logos">
-          <Image src="/sotto-al-mare-logo.png" alt="Sotto al Mare" title="Sotto al Mare" width={44} height={44} />
-          <Image src="/arnia-ets-logo.png" alt="Arnia ETS" title="Arnia ETS" width={72} height={44} />
+          <Image src="/sotto-al-mare-logo.png" alt="Sotto al Mare" title="Sotto al Mare" width={54} height={54} />
+          <Image src="/arnia-ets-logo.png" alt="Arnia ETS" title="Arnia ETS" width={88} height={54} />
         </span>
         In collaborazione con &ldquo;Sotto al Mare&rdquo; e &ldquo;Arnia ETS&rdquo; — scopri le associazioni con cui lavoriamo
         <span className="activities-partners-teaser__arrow" aria-hidden="true">→</span>

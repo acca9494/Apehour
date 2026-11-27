@@ -46,6 +46,8 @@ export type Restaurant = {
   instagram?: string;
   maxCapacity?: number;
   menuUrl?: string;
+  menuPhotos: string[];
+  dishPhotos: string[];
   cancellationPolicy?: string;
   paymentMethods: string[];
   accessibilityTags: string[];

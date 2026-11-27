@@ -2415,7 +2415,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   gap: 1.1rem;
   text-align: center;
   margin-top: 2.5rem;
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--text-2);
   text-decoration: none;
@@ -2433,7 +2433,7 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   gap: 1rem;
   flex-shrink: 0;
 }
-.activities-partners-teaser__logos img { display: block; height: 52px; width: auto; }
+.activities-partners-teaser__logos img { display: block; height: 64px; width: auto; }
 
 .section-cta-link {
   display: none;
@@ -3947,6 +3947,12 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
+}
+
+.detail-menu-row { display: flex; gap: 1.25rem; align-items: flex-start; }
+.detail-menu-row__col { flex: 1; min-width: 0; }
+@media (max-width: 768px) {
+  .detail-menu-row { flex-direction: column; }
 }
 .detail-video-link { margin-top: -0.5rem; }
 .detail-verified-badge {
@@ -7314,6 +7320,27 @@ body:has(.search-page--map) > main {
 }
 .settings-gallery__add > div { aspect-ratio: 4 / 3; }
 .settings-gallery__add .apejobs-cv-drop { height: 100%; font-size: 0.78rem; }
+
+.settings-gallery__reorder {
+  position: absolute;
+  bottom: 0.35rem;
+  left: 0.35rem;
+  right: 0.35rem;
+  display: flex;
+  justify-content: space-between;
+}
+.settings-gallery__reorder button {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(23,22,15,0.75);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+.settings-gallery__reorder button:disabled { opacity: 0.35; cursor: default; }
 
 .settings-tags {
   display: flex;

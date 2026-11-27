@@ -50,7 +50,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
 
           {/* ── 7. Descrizione + tag ───────────────────────────────────── */}
           <div className="detail-block detail-desc">
-            <p className="detail-desc__text">{restaurant.description}</p>
+            {restaurant.description && <p className="detail-desc__text">{restaurant.description}</p>}
             <div className="detail-pills" style={{ marginTop: "1rem" }}>
               <span>{restaurant.cuisine}</span>
               <span>{restaurant.priceRange}</span>
@@ -60,54 +60,78 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             </div>
           </div>
 
-          {/* ── Carta e drink ─────────────────────────────────────────── */}
-          {(restaurant.menuPreview.length > 0 || restaurant.menuUrl) && (
-            <section className="detail-block">
-              <h2>{d.menu}</h2>
-              {restaurant.menuPreview.length > 0 && (
-                <div className="menu-list">
-                  {restaurant.menuPreview.map((item) => (
-                    <div key={item.name}>
-                      <div>
-                        <h3>{item.name}</h3>
-                        <p>{item.description}</p>
-                      </div>
-                      <strong>€{item.price}</strong>
+          {/* ── Carta e drink + Foto dei piatti ──────────────────────────── */}
+          {(restaurant.menuPreview.length > 0 || restaurant.menuUrl || restaurant.menuPhotos.length > 0 || restaurant.dishPhotos.length > 0) && (
+            <div className="detail-menu-row">
+              {(restaurant.menuPreview.length > 0 || restaurant.menuUrl || restaurant.menuPhotos.length > 0) && (
+                <section className="detail-block detail-menu-row__col">
+                  <h2>{d.menu}</h2>
+                  {restaurant.menuPreview.length > 0 && (
+                    <div className="menu-list">
+                      {restaurant.menuPreview.map((item) => (
+                        <div key={item.name}>
+                          <div>
+                            <h3>{item.name}</h3>
+                            <p>{item.description}</p>
+                          </div>
+                          <strong>€{item.price}</strong>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  )}
+                  {restaurant.menuUrl && (
+                    <a href={restaurant.menuUrl} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
+                      {d.viewMenu}
+                    </a>
+                  )}
+                  {restaurant.menuPhotos.length > 0 && (
+                    <div style={{ marginTop: restaurant.menuUrl ? "1rem" : 0 }}>
+                      <GalleryLightbox images={restaurant.menuPhotos} name={`${restaurant.name} — menu`} />
+                    </div>
+                  )}
+                </section>
               )}
-              {restaurant.menuUrl && (
-                <a href={restaurant.menuUrl} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
-                  {d.viewMenu}
-                </a>
+
+              {restaurant.dishPhotos.length > 0 && (
+                <section className="detail-block detail-menu-row__col">
+                  <h2>{d.dishPhotos}</h2>
+                  <GalleryLightbox images={restaurant.dishPhotos} name={`${restaurant.name} — piatti`} />
+                </section>
               )}
-            </section>
+            </div>
           )}
 
           {/* ── 8. Punti forti ────────────────────────────────────────── */}
-          <section className="detail-block">
-            <h2>{d.whyBookHere}</h2>
-            <div className="highlight-grid">
-              <div>
-                <strong>{d.atmosphere}</strong>
-                <p>{restaurant.urgencyLabel} — {restaurant.socialProof}</p>
+          {(restaurant.urgencyLabel || restaurant.socialProof || restaurant.menuPreview.length > 0 || restaurant.tags.length > 0) && (
+            <section className="detail-block">
+              <h2>{d.whyBookHere}</h2>
+              <div className="highlight-grid">
+                {(restaurant.urgencyLabel || restaurant.socialProof) && (
+                  <div>
+                    <strong>{d.atmosphere}</strong>
+                    <p>{[restaurant.urgencyLabel, restaurant.socialProof].filter(Boolean).join(" — ")}</p>
+                  </div>
+                )}
+                {restaurant.menuPreview.length > 0 && (
+                  <div>
+                    <strong>{d.drinksAndFood}</strong>
+                    <p>
+                      {restaurant.menuPreview
+                        .slice(0, 2)
+                        .map((i) => i.name)
+                        .join(", ")} {d.andOtherClassics(restaurant.menuPreview.length)}
+                    </p>
+                  </div>
+                )}
+                {restaurant.tags.length > 0 && (
+                  <div>
+                    <strong>{d.idealFor}</strong>
+                    <p>{restaurant.tags.join(", ")}</p>
+                  </div>
+                )}
               </div>
-              <div>
-                <strong>{d.drinksAndFood}</strong>
-                <p>
-                  {restaurant.menuPreview
-                    .slice(0, 2)
-                    .map((i) => i.name)
-                    .join(", ")} {d.andOtherClassics(restaurant.menuPreview.length)}
-                </p>
-              </div>
-              <div>
-                <strong>{d.idealFor}</strong>
-                <p>{restaurant.tags.join(", ")}</p>
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* ── Booking panel inline — mobile only, before gallery ──── */}
           <div className="detail-booking-mobile">
@@ -149,7 +173,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             </div>
           )}
 
-          {(restaurant.paymentMethods.length > 0 || restaurant.accessibilityTags.length > 0 || restaurant.cancellationPolicy) && (
+          {(restaurant.paymentMethods.length > 0 || restaurant.accessibilityTags.length > 0) && (
             <section className="detail-block split-block">
               {restaurant.paymentMethods.length > 0 && (
                 <div>
@@ -182,37 +206,48 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
           )}
 
           {/* ── Orari + Mappa ─────────────────────────────────────────── */}
-          <section className="detail-block split-block">
-            <div>
-              <h2>{d.hours}</h2>
-              <dl className="hours-list">
-                {restaurant.openingHours.map((item) => (
-                  <div key={item.day}>
-                    <dt>{item.day}</dt>
-                    <dd>{item.hours}</dd>
+          {(() => {
+            const hasHours = restaurant.openingHours.length > 0;
+            const hasCoordinates = restaurant.coordinates.lat !== 0 || restaurant.coordinates.lng !== 0;
+            if (!hasHours && !hasCoordinates) return null;
+            return (
+              <section className="detail-block split-block">
+                {hasHours && (
+                  <div>
+                    <h2>{d.hours}</h2>
+                    <dl className="hours-list">
+                      {restaurant.openingHours.map((item) => (
+                        <div key={item.day}>
+                          <dt>{item.day}</dt>
+                          <dd>{item.hours}</dd>
+                        </div>
+                      ))}
+                    </dl>
                   </div>
-                ))}
-              </dl>
-            </div>
-            <div className="detail-map-wrap">
-              <MapClient
-                center={restaurant.coordinates}
-                zoom={15}
-                markers={[{
-                  lat: restaurant.coordinates.lat,
-                  lng: restaurant.coordinates.lng,
-                  label: restaurant.name,
-                  slug: restaurant.slug,
-                  image: restaurant.heroImage,
-                  neighborhood: restaurant.neighborhood,
-                  cuisine: restaurant.cuisine,
-                  budget: restaurant.priceRange,
-                  rating: restaurant.rating,
-                }]}
-                className="detail-map-iframe"
-              />
-            </div>
-          </section>
+                )}
+                {hasCoordinates && (
+                  <div className="detail-map-wrap">
+                    <MapClient
+                      center={restaurant.coordinates}
+                      zoom={15}
+                      markers={[{
+                        lat: restaurant.coordinates.lat,
+                        lng: restaurant.coordinates.lng,
+                        label: restaurant.name,
+                        slug: restaurant.slug,
+                        image: restaurant.heroImage,
+                        neighborhood: restaurant.neighborhood,
+                        cuisine: restaurant.cuisine,
+                        budget: restaurant.priceRange,
+                        rating: restaurant.rating,
+                      }]}
+                      className="detail-map-iframe"
+                    />
+                  </div>
+                )}
+              </section>
+            );
+          })()}
 
           {/* ── Recensioni ────────────────────────────────────────────── */}
           {reviews.length > 0 && (

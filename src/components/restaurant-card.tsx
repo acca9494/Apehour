@@ -50,7 +50,7 @@ export function RestaurantCard({ restaurant, priority = false }: RestaurantCardP
 
         <p className="restaurant-card__meta">
           {restaurant.reviewCount > 0
-            ? `${formatReviewCount(restaurant.reviewCount)} recensioni · ${restaurant.distance}`
+            ? [`${formatReviewCount(restaurant.reviewCount)} recensioni`, restaurant.distance].filter(Boolean).join(" · ")
             : restaurant.distance || "Ancora nessuna recensione"}
         </p>
 
@@ -63,20 +63,24 @@ export function RestaurantCard({ restaurant, priority = false }: RestaurantCardP
           </div>
         )}
 
-        <p className="trust-label">{restaurant.urgencyLabel}</p>
+        {restaurant.urgencyLabel && <p className="trust-label">{restaurant.urgencyLabel}</p>}
 
-        <div className="slot-row" aria-label="Orari disponibili">
-          {restaurant.slots.slice(0, 3).map((slot) => (
-            <Link key={slot.id} href={`/restaurants/${restaurant.slug}?slot=${slot.time}`}>
-              {slot.time}
-            </Link>
-          ))}
-        </div>
+        {restaurant.slots.length > 0 && (
+          <div className="slot-row" aria-label="Orari disponibili">
+            {restaurant.slots.slice(0, 3).map((slot) => (
+              <Link key={slot.id} href={`/restaurants/${restaurant.slug}?slot=${slot.time}`}>
+                {slot.time}
+              </Link>
+            ))}
+          </div>
+        )}
 
         <div className="restaurant-card__footer">
-          <span>
-            {firstSlot ? `${firstSlot.availableSeats} posti alle ${firstSlot.time}` : restaurant.socialProof}
-          </span>
+          {(firstSlot || restaurant.socialProof) && (
+            <span>
+              {firstSlot ? `${firstSlot.availableSeats} posti alle ${firstSlot.time}` : restaurant.socialProof}
+            </span>
+          )}
           <ClayLink href={`/restaurants/${restaurant.slug}`}>Prenota</ClayLink>
         </div>
       </div>

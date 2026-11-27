@@ -217,11 +217,12 @@ CREATE TABLE public.restaurant_images (
   alt            TEXT,
   position       SMALLINT    NOT NULL DEFAULT 0,   -- ordine di visualizzazione (0 = prima)
   is_cover       BOOLEAN     NOT NULL DEFAULT FALSE,
+  category       TEXT        NOT NULL DEFAULT 'gallery' CHECK (category IN ('gallery', 'menu', 'dish')),
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 COMMENT ON TABLE public.restaurant_images IS
-  'Galleria foto del locale. position determina l''ordine. is_cover = immagine hero.';
+  'Foto del locale. position determina l''ordine entro ciascuna category. is_cover = immagine hero (solo category=gallery). category: gallery (ambiente), menu (foto del menu cartaceo), dish (foto dei piatti).';
 
 -- Un solo is_cover = TRUE per locale
 CREATE UNIQUE INDEX idx_images_cover ON public.restaurant_images(restaurant_id)

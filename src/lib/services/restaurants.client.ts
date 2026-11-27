@@ -11,7 +11,7 @@ interface ScheduleRow {
   discount_percent: number | null;
 }
 
-function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = [], gallery?: string[]): Restaurant {
+function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = [], gallery?: string[], menuPhotos: string[] = [], dishPhotos: string[] = []): Restaurant {
   return {
     id: row.id,
     slug: row.slug,
@@ -37,6 +37,8 @@ function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = [], gallery?: s
     instagram: row.instagram ?? undefined,
     maxCapacity: row.max_capacity ?? undefined,
     menuUrl: row.menu_url ?? undefined,
+    menuPhotos,
+    dishPhotos,
     cancellationPolicy: row.cancellation_policy ?? undefined,
     paymentMethods: row.payment_methods ?? [],
     accessibilityTags: row.accessibility_tags ?? [],
@@ -156,18 +158,38 @@ export async function getRestaurantBySlugClient(slug: string): Promise<Restauran
   if (schedErr) throw new Error(schedErr.message);
 
   // La cover (is_cover=true) è già mostrata nell'hero: esclusa qui per non
-  // farla comparire duplicata nella striscia foto sotto.
+  // farla comparire duplicata nella striscia foto sotto. category='gallery'
+  // per non mischiarci le foto di menu/piatti, gestite a parte.
   const { data: imageRows, error: imgErr } = await supabase
     .from("restaurant_images")
     .select("url")
     .eq("restaurant_id", row.id)
     .eq("is_cover", false)
+    .eq("category", "gallery")
     .order("position", { ascending: true });
   if (imgErr) throw new Error(imgErr.message);
+
+  const { data: menuRows, error: menuErr } = await supabase
+    .from("restaurant_images")
+    .select("url")
+    .eq("restaurant_id", row.id)
+    .eq("category", "menu")
+    .order("position", { ascending: true });
+  if (menuErr) throw new Error(menuErr.message);
+
+  const { data: dishRows, error: dishErr } = await supabase
+    .from("restaurant_images")
+    .select("url")
+    .eq("restaurant_id", row.id)
+    .eq("category", "dish")
+    .order("position", { ascending: true });
+  if (dishErr) throw new Error(dishErr.message);
 
   return mapRow(
     row,
     groupSlotsByRestaurant((scheduleRows ?? []) as ScheduleRow[]).get(row.id) ?? [],
-    (imageRows ?? []).map((r) => r.url as string)
+    (imageRows ?? []).map((r) => r.url as string),
+    (menuRows ?? []).map((r) => r.url as string),
+    (dishRows ?? []).map((r) => r.url as string)
   );
 }
