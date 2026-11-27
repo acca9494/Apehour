@@ -12,7 +12,7 @@ const PARTNERS = [
   },
   {
     name: "Arnia ETS",
-    icon: "🐝",
+    image: "/arnia-ets.png",
     description: "Associazione dedicata alla tutela delle api e alla sensibilizzazione ambientale.",
     url: "https://www.arniaets.it/",
   },
