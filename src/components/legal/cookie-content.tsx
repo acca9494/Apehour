@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const LAST_UPDATED = "25 maggio 2026";
+const LAST_UPDATED = "27 novembre 2026";
 
 export function CookieContent() {
   return (
@@ -61,10 +61,20 @@ export function CookieContent() {
           alcun cookie sul tuo dispositivo. Non è necessario alcun consenso per questa funzionalità.
         </p>
 
-        <h3>Cookie analitici (solo con consenso)</h3>
+        <h3>Analytics interne (nessun consenso richiesto)</h3>
         <p>
-          Non utilizziamo attualmente cookie di analisi o profilazione. Qualora in futuro dovessimo
-          introdurli, aggiorneremo questa policy e ti chiederemo un nuovo consenso esplicito.
+          Per capire quali pagine e quali locali vengono visitati raccogliamo alcune informazioni di
+          navigazione (la pagina visitata e il sito di provenienza, se presente) in forma aggregata e
+          anonima. Non utilizziamo un cookie ma un identificativo temporaneo salvato nella memoria di
+          sessione del browser (<code>sessionStorage</code>), che viene cancellato automaticamente alla
+          chiusura della scheda o del browser: non è quindi in grado di riconoscerti tra una visita e
+          l'altra. Non salviamo il tuo indirizzo IP, non incrociamo questi dati con il tuo account e non
+          li condividiamo con terze parti. I dati raccolti vengono cancellati automaticamente dopo 13
+          mesi, in linea con quanto indicato nella nostra Privacy Policy per i dati di navigazione.
+          Trattandosi di uno strumento assimilabile ai cookie tecnici (nessuna profilazione,
+          nessuna condivisione con terzi, nessun identificativo persistente), non richiede il tuo
+          consenso ai sensi delle linee guida del Garante Privacy sui cookie e altri strumenti di
+          tracciamento.
         </p>
       </section>
 

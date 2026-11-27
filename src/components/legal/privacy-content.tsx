@@ -29,6 +29,12 @@ export function PrivacyContent() {
             della sessione — per garantire la sicurezza e il corretto funzionamento del servizio.
           </li>
           <li>
+            <strong>Statistiche di utilizzo anonime:</strong> pagina visitata e sito di provenienza,
+            associati a un identificativo temporaneo che viene cancellato alla chiusura del browser (non
+            un cookie, non un IP, non collegato al tuo account) — per capire quali pagine e quali locali
+            vengono visitati di più. Maggiori dettagli nella <Link href="/cookie-policy">Cookie Policy</Link>.
+          </li>
+          <li>
             <strong>Comunicazioni:</strong> messaggi inviati tramite il modulo di contatto o la chat
             integrata — per rispondere alle richieste.
           </li>
