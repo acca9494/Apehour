@@ -479,6 +479,28 @@ export function VenueSettingsPanel() {
             </label>
 
             <label>
+              Secondo profilo Instagram <span style={{ fontWeight: 400, textTransform: "none" }}>(facoltativo, es. canale eventi)</span>
+              <input
+                type="text"
+                value={settings.instagram2 ?? ""}
+                onChange={(e) => patch("instagram2", e.target.value || undefined)}
+                placeholder="@secondapagina"
+              />
+            </label>
+
+            {settings.instagram2 && (
+              <label>
+                Testo del secondo bottone <span style={{ fontWeight: 400, textTransform: "none" }}>(facoltativo)</span>
+                <input
+                  type="text"
+                  value={settings.instagram2Label ?? ""}
+                  onChange={(e) => patch("instagram2Label", e.target.value || undefined)}
+                  placeholder="Es. @bucoliche_parties — default: Instagram"
+                />
+              </label>
+            )}
+
+            <label>
               Facebook
               <input
                 type="text"

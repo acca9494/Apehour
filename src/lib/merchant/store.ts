@@ -69,6 +69,8 @@ export interface VenueSettings {
   website?: string;
   websiteLabel?: string;
   instagram?: string;
+  instagram2?: string;
+  instagram2Label?: string;
   facebook?: string;
   videoUrl?: string;
   heroImage: string;

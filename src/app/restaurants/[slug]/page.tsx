@@ -144,7 +144,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             </section>
           )}
 
-          {(restaurant.videoUrl || restaurant.facebook || restaurant.instagram || restaurant.website) && (
+          {(restaurant.videoUrl || restaurant.facebook || restaurant.instagram || restaurant.instagram2 || restaurant.website) && (
             <div className="detail-video-link" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
               {restaurant.website && (
                 <a href={restaurant.website} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
@@ -171,6 +171,18 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
                 >
                   <InstagramIcon width={16} height={16} />
                   Instagram
+                </a>
+              )}
+              {restaurant.instagram2 && (
+                <a
+                  href={restaurant.instagram2}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="clay-button clay-button--secondary"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+                >
+                  <InstagramIcon width={16} height={16} />
+                  {restaurant.instagram2Label || "Instagram"}
                 </a>
               )}
             </div>
