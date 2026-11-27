@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 function computeFitSize(naturalWidth: number, naturalHeight: number) {
-  const maxW = Math.min(window.innerWidth * 0.92, 1200);
-  const maxH = Math.min(window.innerHeight * 0.82, 900);
+  // visualViewport è più preciso di innerHeight su mobile quando la barra
+  // indirizzi è visibile (innerHeight può includere area in realtà coperta).
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+  const maxW = Math.min(window.innerWidth * 0.9, 1200);
+  const maxH = Math.min(viewportHeight * 0.75, 900);
   // Non ingrandiamo mai oltre la risoluzione reale della foto (causerebbe
   // sfocatura), solo rimpiccioliamo se non entra nello schermo.
   const scale = Math.min(1, maxW / naturalWidth, maxH / naturalHeight);

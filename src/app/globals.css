@@ -4026,6 +4026,13 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   display: block;
   border-radius: var(--radius-md);
   transition: opacity 0.15s ease;
+  /* Tetto di sicurezza indipendente dal calcolo via JS: su mobile "dvh"
+     tiene conto della barra indirizzi che "vh" ignora, quindi anche se il
+     calcolo JS sovrastima lo spazio la foto non esce mai dalla vista. */
+  max-width: 94vw;
+  max-height: 85vh;
+  max-height: 85dvh;
+  object-fit: contain;
 }
 .gallery-lightbox__close {
   position: absolute;
