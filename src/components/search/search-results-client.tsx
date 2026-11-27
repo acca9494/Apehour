@@ -212,27 +212,15 @@ export function SearchResultsClient({ initialFilters }: { initialFilters: Search
 
   const filterControls = (
     <>
-      {/* Città */}
+      {/* Città — disattivato temporaneamente: con pochi locali ancora attivi,
+          un filtro con molte opzioni vuote crea solo frizione. Si riattiva
+          non appena ci sono abbastanza locali distribuiti su più città. */}
       <div className="search-sidebar__field">
         <span>{t.search.city}</span>
         <div className="search-filter-toggles">
-          <button
-            type="button"
-            className={`search-filter-toggle${!filters.city ? " is-active" : ""}`}
-            onClick={() => setFilter("city", undefined)}
-          >
+          <button type="button" className="search-filter-toggle is-active" disabled>
             {t.search.allLazio}
           </button>
-          {Object.keys(CITY_COORDS).map((c) => (
-            <button
-              key={c}
-              type="button"
-              className={`search-filter-toggle${filters.city === c ? " is-active" : ""}`}
-              onClick={() => setFilter("city", c)}
-            >
-              {c}
-            </button>
-          ))}
         </div>
       </div>
 
