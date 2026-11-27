@@ -3843,7 +3843,7 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   background: var(--bg-dark);
 }
 .detail-hero__img { position: absolute; inset: 0; }
-.detail-hero__img img { object-fit: cover; }
+.detail-hero__img img { object-fit: cover; object-position: center 25%; }
 
 .detail-back-btn.detail-hero__favorite-btn {
   left: auto;
