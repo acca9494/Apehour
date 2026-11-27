@@ -25,7 +25,7 @@ function mapRow(row: RestaurantRow, slots: BookingSlot[] = [], gallery?: string[
     neighborhood: row.neighborhood ?? row.city,
     address: row.address ?? "",
     heroImage: row.cover_image_url ?? "/apeapplogo1.png",
-    gallery: gallery && gallery.length > 0 ? gallery : (row.cover_image_url ? [row.cover_image_url] : []),
+    gallery: gallery !== undefined ? gallery : (row.cover_image_url ? [row.cover_image_url] : []),
     discount: undefined,
     urgencyLabel: row.urgency_label ?? "",
     socialProof: row.social_proof ?? "",
@@ -135,10 +135,13 @@ export async function getRestaurantBySlug(slug: string): Promise<Restaurant | nu
     .eq("is_active", true);
   if (schedErr) throw new Error(schedErr.message);
 
+  // La cover (is_cover=true) è già mostrata nell'hero: esclusa qui per non
+  // farla comparire duplicata nella striscia foto sotto.
   const { data: imageRows, error: imgErr } = await supabase
     .from("restaurant_images")
     .select("url")
     .eq("restaurant_id", data.id)
+    .eq("is_cover", false)
     .order("position", { ascending: true });
   if (imgErr) throw new Error(imgErr.message);
 
