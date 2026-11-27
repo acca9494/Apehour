@@ -14,16 +14,19 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
   useEffect(() => {
     if (!isOpen) return;
     const scrollY = window.scrollY;
-    const { overflow, position, top, width } = document.body.style;
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
     return () => {
-      document.body.style.overflow = overflow;
-      document.body.style.position = position;
-      document.body.style.top = top;
-      document.body.style.width = width;
+      // Azzera sempre (non "ripristina il valore di prima"): salvare e
+      // riapplicare il valore precedente poteva ri-bloccare lo scroll in modo
+      // permanente se quel valore era già "fixed" per qualche motivo. Il sito
+      // non usa altrove questi stili sul body, quindi azzerare è sicuro.
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
       window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
@@ -80,11 +83,15 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
           )}
 
           <div className="gallery-lightbox__frame" onClick={(e) => e.stopPropagation()}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
+              key={images[openIndex]}
               src={images[openIndex]}
               alt={`${name} foto ${openIndex + 1}`}
+              width={2400}
+              height={2400}
+              unoptimized
               className="gallery-lightbox__img"
+              priority
             />
             <button
               type="button"
