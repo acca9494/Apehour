@@ -50,7 +50,15 @@ export default async function AdminTrafficPage() {
     .eq("org_type", "locale")
     .order("name", { ascending: true });
 
+  const { data: bookingsData } = await service
+    .from("bookings")
+    .select("restaurant_id, status, created_at")
+    .gte("created_at", since)
+    .neq("status", "cancelled")
+    .limit(20000);
+
   const rows = views ?? [];
+  const bookingRows = bookingsData ?? [];
   const now = Date.now();
 
   function windowRows(days: number) {
@@ -65,6 +73,14 @@ export default async function AdminTrafficPage() {
   const today = windowRows(1);
   const last7 = windowRows(7);
   const last30 = windowRows(30);
+
+  function bookingWindow(days: number) {
+    const cutoff = now - days * DAY_MS;
+    return bookingRows.filter((b) => new Date(b.created_at).getTime() >= cutoff);
+  }
+  const bookingsToday = bookingWindow(1);
+  const bookings7 = bookingWindow(7);
+  const bookings30 = bookingWindow(30);
 
   const pageCounts = new Map<string, number>();
   for (const r of last30) pageCounts.set(r.path, (pageCounts.get(r.path) ?? 0) + 1);
@@ -97,7 +113,11 @@ export default async function AdminTrafficPage() {
     const v30 = last30.filter((row) => row.path === path).length;
     const v7 = last7.filter((row) => row.path === path).length;
     const vTotal = rows.filter((row) => row.path === path).length;
-    return { ...r, v7, v30, vTotal };
+    const b7 = bookings7.filter((b) => b.restaurant_id === r.id).length;
+    const b30 = bookings30.filter((b) => b.restaurant_id === r.id).length;
+    const bTotal = bookingRows.filter((b) => b.restaurant_id === r.id).length;
+    const conversion30 = v30 > 0 ? (b30 / v30) * 100 : null;
+    return { ...r, v7, v30, vTotal, b7, b30, bTotal, conversion30 };
   }).sort((a, b) => b.v30 - a.v30);
 
   return (
@@ -111,6 +131,16 @@ export default async function AdminTrafficPage() {
         <div className="dash-card admin-kpi"><span className="admin-kpi__value">{last7.length}</span><span className="admin-kpi__label">Pagine viste (7gg)</span></div>
         <div className="dash-card admin-kpi"><span className="admin-kpi__value">{last30.length}</span><span className="admin-kpi__label">Pagine viste (30gg)</span></div>
         <div className="dash-card admin-kpi"><span className="admin-kpi__value">{uniqueSessions(last7)}</span><span className="admin-kpi__label">Visite uniche (7gg)</span></div>
+      </div>
+
+      <div className="admin-kpi-row">
+        <div className="dash-card admin-kpi admin-kpi--accent"><span className="admin-kpi__value">{bookingsToday.length}</span><span className="admin-kpi__label">Prenotazioni oggi</span></div>
+        <div className="dash-card admin-kpi admin-kpi--accent"><span className="admin-kpi__value">{bookings7.length}</span><span className="admin-kpi__label">Prenotazioni (7gg)</span></div>
+        <div className="dash-card admin-kpi admin-kpi--accent"><span className="admin-kpi__value">{bookings30.length}</span><span className="admin-kpi__label">Prenotazioni (30gg)</span></div>
+        <div className="dash-card admin-kpi admin-kpi--accent">
+          <span className="admin-kpi__value">{last30.length > 0 ? `${((bookings30.length / last30.length) * 100).toFixed(1)}%` : "—"}</span>
+          <span className="admin-kpi__label">Conversione visite→prenotazioni (30gg)</span>
+        </div>
       </div>
 
       <h2 className="admin-section-title">Andamento ultimi 14 giorni</h2>
@@ -129,7 +159,17 @@ export default async function AdminTrafficPage() {
       ) : (
         <div className="dash-card" style={{ overflowX: "auto" }}>
           <table className="dash-table admin-table">
-            <thead><tr><th>Locale</th><th>7 giorni</th><th>30 giorni</th><th>Totale (90gg)</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Locale</th>
+                <th>Visite 7gg</th>
+                <th>Visite 30gg</th>
+                <th>Visite tot. (90gg)</th>
+                <th>Prenotazioni 7gg</th>
+                <th>Prenotazioni 30gg</th>
+                <th>Conversione (30gg)</th>
+              </tr>
+            </thead>
             <tbody>
               {venueStats.map((v) => (
                 <tr key={v.id} className="admin-table__row">
@@ -137,6 +177,9 @@ export default async function AdminTrafficPage() {
                   <td>{v.v7}</td>
                   <td>{v.v30}</td>
                   <td>{v.vTotal}</td>
+                  <td>{v.b7}</td>
+                  <td>{v.b30}</td>
+                  <td>{v.conversion30 !== null ? `${v.conversion30.toFixed(1)}%` : "—"}</td>
                 </tr>
               ))}
             </tbody>

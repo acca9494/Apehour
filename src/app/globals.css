@@ -10132,6 +10132,7 @@ body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
 .admin-kpi { flex: 1 1 180px; display: flex; flex-direction: column; gap: 0.25rem; padding: 1.1rem 1.3rem; }
 .admin-kpi__value { font-size: 1.9rem; font-weight: 800; }
 .admin-kpi__label { font-size: 0.8rem; color: var(--text-3); }
+.admin-kpi--accent .admin-kpi__value { color: var(--gold); }
 
 .admin-trend { display: flex; align-items: flex-end; gap: 0.5rem; padding: 1.25rem 1.25rem 0.75rem; height: 160px; }
 .admin-trend__col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 0.4rem; }
