@@ -216,6 +216,9 @@ export function CategoriesSection() {
       <div className="section-cta">
         <ClayLink href="/attivita" variant="secondary">{h.allActivities}</ClayLink>
       </div>
+      <Link href="/attivita" className="activities-partners-teaser">
+        🤝 In collaborazione con Sotto al Mare e Arnia ETS — scopri le associazioni con cui lavoriamo →
+      </Link>
     </section>
   );
 }
