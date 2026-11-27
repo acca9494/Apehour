@@ -54,7 +54,11 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
           <div className="detail-block detail-desc">
             {restaurant.description && <FormattedDescription text={restaurant.description} />}
             <div className="detail-pills" style={{ marginTop: "1rem" }}>
-              <span>{restaurant.rating.toFixed(1)} ★ · {formatReviewCount(restaurant.reviewCount)} {restaurant.reviewCount === 1 ? d.review : d.reviewsPlural}</span>
+              <span>
+                {restaurant.reviewCount > 0
+                  ? `${restaurant.rating.toFixed(1)} ★ · ${formatReviewCount(restaurant.reviewCount)} ${restaurant.reviewCount === 1 ? d.review : d.reviewsPlural}`
+                  : "Nuovo"}
+              </span>
               {restaurant.maxCapacity ? <span>{d.maxCapacity(restaurant.maxCapacity)}</span> : null}
               {restaurant.discount ? <span className="detail-pill--yellow">{d.discountToday(restaurant.discount)}</span> : null}
             </div>
