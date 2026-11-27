@@ -459,6 +459,16 @@ export function VenueSettingsPanel() {
             </label>
 
             <label>
+              Testo del bottone sito web <span style={{ fontWeight: 400, textTransform: "none" }}>(facoltativo)</span>
+              <input
+                type="text"
+                value={settings.websiteLabel ?? ""}
+                onChange={(e) => patch("websiteLabel", e.target.value || undefined)}
+                placeholder="Es. Prenota il tuo evento — default: Sito web"
+              />
+            </label>
+
+            <label>
               Instagram
               <input
                 type="text"

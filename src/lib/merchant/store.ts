@@ -67,6 +67,7 @@ export interface VenueSettings {
   phone: string;
   email: string;
   website?: string;
+  websiteLabel?: string;
   instagram?: string;
   facebook?: string;
   videoUrl?: string;

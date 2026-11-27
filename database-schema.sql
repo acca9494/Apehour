@@ -78,6 +78,7 @@ CREATE TABLE public.restaurants (
   -- Contatti
   phone            TEXT,
   website          TEXT,
+  website_label    TEXT,        -- testo del bottone, es. "Prenota il tuo evento" invece del generico "Sito web"
   email            TEXT,
   instagram        TEXT,
   facebook         TEXT,
@@ -1181,7 +1182,7 @@ CREATE OR REPLACE VIEW public.restaurants_public AS
          r.max_capacity, r.menu_url, r.cancellation_policy, r.payment_methods, r.accessibility_tags,
          r.zone_names, r.closed_days, COALESCE(r.cover_image_url, img.url) AS cover_image_url,
          r.urgency_label, r.social_proof,
-         r.is_active, r.is_verified, r.created_at, r.updated_at, r.pickup_enabled
+         r.is_active, r.is_verified, r.created_at, r.updated_at, r.pickup_enabled, r.website_label
   FROM public.restaurants r
   LEFT JOIN public.restaurant_images img
     ON img.restaurant_id = r.id AND img.is_cover = TRUE

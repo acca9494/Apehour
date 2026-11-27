@@ -45,6 +45,7 @@ export type Restaurant = {
   facebook?: string;
   instagram?: string;
   website?: string;
+  websiteLabel?: string;
   maxCapacity?: number;
   menuUrl?: string;
   menuPhotos: string[];

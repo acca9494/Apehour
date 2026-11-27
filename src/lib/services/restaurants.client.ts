@@ -36,6 +36,7 @@ function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = [], gallery?: s
     facebook: row.facebook ?? undefined,
     instagram: row.instagram ?? undefined,
     website: row.website ?? undefined,
+    websiteLabel: row.website_label ?? undefined,
     maxCapacity: row.max_capacity ?? undefined,
     menuUrl: row.menu_url ?? undefined,
     menuPhotos,

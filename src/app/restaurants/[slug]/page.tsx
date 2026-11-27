@@ -149,7 +149,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             <div className="detail-video-link" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
               {restaurant.website && (
                 <a href={restaurant.website} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
-                  🔗 Sito web
+                  🔗 {restaurant.websiteLabel || "Sito web"}
                 </a>
               )}
               {restaurant.videoUrl && (
