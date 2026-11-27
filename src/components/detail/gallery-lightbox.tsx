@@ -3,9 +3,31 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+function computeFitSize(naturalWidth: number, naturalHeight: number) {
+  const maxW = Math.min(window.innerWidth * 0.92, 1200);
+  const maxH = Math.min(window.innerHeight * 0.82, 900);
+  // Non ingrandiamo mai oltre la risoluzione reale della foto (causerebbe
+  // sfocatura), solo rimpiccioliamo se non entra nello schermo.
+  const scale = Math.min(1, maxW / naturalWidth, maxH / naturalHeight);
+  return { width: naturalWidth * scale, height: naturalHeight * scale };
+}
+
 export function GalleryLightbox({ images, name }: { images: string[]; name: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [fitSize, setFitSize] = useState<{ width: number; height: number } | null>(null);
   const isOpen = openIndex !== null;
+
+  // Si riadatta anche se la finestra cambia dimensione/orientamento mentre
+  // la foto è aperta.
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleResize() {
+      const img = document.querySelector<HTMLImageElement>(".gallery-lightbox__img");
+      if (img?.naturalWidth) setFitSize(computeFitSize(img.naturalWidth, img.naturalHeight));
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isOpen]);
 
   // Blocca lo scroll di sfondo solo all'apertura/chiusura, non ad ogni
   // cambio foto: prima si riapplicava position:fixed ad ogni click
@@ -42,6 +64,16 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
     return () => document.removeEventListener("keydown", handleKey);
   }, [isOpen, images.length]);
 
+  function openAt(i: number) {
+    setFitSize(null);
+    setOpenIndex(i);
+  }
+
+  function step(direction: 1 | -1) {
+    setFitSize(null);
+    setOpenIndex((i) => (i === null ? i : (i + direction + images.length) % images.length));
+  }
+
   return (
     <>
       <div className="gallery-strip">
@@ -50,7 +82,7 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
             key={img + i}
             type="button"
             className="gallery-strip__tile"
-            onClick={() => setOpenIndex(i)}
+            onClick={() => openAt(i)}
             aria-label={`Ingrandisci foto ${i + 1} di ${name}`}
           >
             <Image
@@ -75,7 +107,7 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
             <button
               type="button"
               className="gallery-lightbox__nav gallery-lightbox__nav--prev"
-              onClick={(e) => { e.stopPropagation(); setOpenIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length)); }}
+              onClick={(e) => { e.stopPropagation(); step(-1); }}
               aria-label="Foto precedente"
             >
               ‹
@@ -83,15 +115,16 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
           )}
 
           <div className="gallery-lightbox__frame" onClick={(e) => e.stopPropagation()}>
-            <Image
-              key={images[openIndex]}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={images[openIndex]}
               alt={`${name} foto ${openIndex + 1}`}
-              width={2400}
-              height={2400}
-              unoptimized
               className="gallery-lightbox__img"
-              priority
+              style={fitSize ? { width: fitSize.width, height: fitSize.height } : { opacity: 0 }}
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                setFitSize(computeFitSize(img.naturalWidth, img.naturalHeight));
+              }}
             />
             <button
               type="button"
@@ -107,7 +140,7 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
             <button
               type="button"
               className="gallery-lightbox__nav gallery-lightbox__nav--next"
-              onClick={(e) => { e.stopPropagation(); setOpenIndex((i) => (i === null ? i : (i + 1) % images.length)); }}
+              onClick={(e) => { e.stopPropagation(); step(1); }}
               aria-label="Foto successiva"
             >
               ›
