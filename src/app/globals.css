@@ -6095,6 +6095,14 @@ body:has(.search-page--map) > main {
 }
 .activities-partners__card:hover { border-color: var(--gold); transform: translateY(-2px); }
 .activities-partners__icon { font-size: 1.8rem; }
+.activities-partners__photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.activities-partners__photo img { object-fit: cover; }
 .activities-partners__card strong { font-size: 0.95rem; }
 .activities-partners__card p { margin: 0; font-size: 0.78rem; color: var(--text-3); }
 
