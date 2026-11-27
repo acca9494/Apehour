@@ -69,11 +69,17 @@ export function DetailHero({ restaurant, t }: { restaurant: Restaurant; t: Await
         {/* Meta row */}
         <div className="detail-hero__meta">
           <span className="detail-hero__rating">
-            <Stars rating={restaurant.rating} label={t.outOf5(restaurant.rating)} />
-            <strong>{restaurant.rating.toFixed(1)}</strong>
-            <span className="detail-hero__review-count">
-              ({formatReviewCount(restaurant.reviewCount)} {t.reviewsPlural})
-            </span>
+            {restaurant.reviewCount > 0 ? (
+              <>
+                <Stars rating={restaurant.rating} label={t.outOf5(restaurant.rating)} />
+                <strong>{restaurant.rating.toFixed(1)}</strong>
+                <span className="detail-hero__review-count">
+                  ({formatReviewCount(restaurant.reviewCount)} {t.reviewsPlural})
+                </span>
+              </>
+            ) : (
+              <strong className="detail-hero__new-badge">Nuovo</strong>
+            )}
           </span>
 
           <span className="detail-hero__sep" aria-hidden="true">·</span>

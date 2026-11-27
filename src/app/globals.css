@@ -3892,6 +3892,7 @@ main:has(.app-preview-page) ~ * { display: none !important; }
 }
 .detail-hero__rating { display: flex; align-items: center; gap: 0.4rem; }
 .detail-hero__review-count { color: rgba(255,255,255,0.55); font-size: 0.8rem; }
+.detail-hero__new-badge { color: var(--gold); font-weight: 800; }
 .detail-hero__sep { color: rgba(255,255,255,0.3); }
 .detail-hero__price { font-weight: 700; }
 .detail-hero__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
