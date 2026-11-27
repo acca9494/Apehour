@@ -8,8 +8,16 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
 
   useEffect(() => {
     if (openIndex === null) return;
-    const prevOverflow = document.body.style.overflow;
+    // Oltre a overflow:hidden, blocchiamo il body con position:fixed: su iOS
+    // Safari lo scroll "elastico" di sfondo riesce comunque a trascinare un
+    // overlay fixed, facendolo sembrare non fermo durante lo swipe.
+    const scrollY = window.scrollY;
+    const { overflow, position, top, width } = document.body.style;
     document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpenIndex(null);
       if (e.key === "ArrowRight") setOpenIndex((i) => (i === null ? i : (i + 1) % images.length));
@@ -17,7 +25,11 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
     }
     document.addEventListener("keydown", handleKey);
     return () => {
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = overflow;
+      document.body.style.position = position;
+      document.body.style.top = top;
+      document.body.style.width = width;
+      window.scrollTo(0, scrollY);
       document.removeEventListener("keydown", handleKey);
     };
   }, [openIndex, images.length]);
@@ -71,16 +83,13 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
             </button>
           )}
 
-          <div className="gallery-lightbox__img-wrap" onClick={(e) => e.stopPropagation()}>
-            <Image
-              src={images[openIndex]}
-              alt={`${name} foto ${openIndex + 1}`}
-              fill
-              sizes="100vw"
-              style={{ objectFit: "contain" }}
-              priority
-            />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={images[openIndex]}
+            alt={`${name} foto ${openIndex + 1}`}
+            className="gallery-lightbox__img"
+            onClick={(e) => e.stopPropagation()}
+          />
 
           {images.length > 1 && (
             <button
