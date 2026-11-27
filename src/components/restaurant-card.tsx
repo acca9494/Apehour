@@ -36,7 +36,6 @@ export function RestaurantCard({ restaurant, priority = false }: RestaurantCardP
 
       <div className="restaurant-card__body">
         <div className="restaurant-card__topline">
-          <span>{restaurant.cuisine}</span>
           {restaurant.reviewCount > 0 ? (
             <strong className="restaurant-card__rating">{restaurant.rating.toFixed(1)}</strong>
           ) : (

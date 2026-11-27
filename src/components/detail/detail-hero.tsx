@@ -56,9 +56,11 @@ export function DetailHero({ restaurant, t }: { restaurant: Restaurant; t: Await
         )}
 
         {/* Eyebrow */}
-        <p className="eyebrow" style={{ marginBottom: "0.5rem" }}>
-          {restaurant.cuisine} · {restaurant.neighborhood}
-        </p>
+        {restaurant.neighborhood && (
+          <p className="eyebrow" style={{ marginBottom: "0.5rem" }}>
+            {restaurant.neighborhood}
+          </p>
+        )}
 
         {/* Name */}
         <h1 className="detail-hero__name">{restaurant.name}</h1>
