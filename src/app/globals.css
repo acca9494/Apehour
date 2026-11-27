@@ -6091,7 +6091,9 @@ body:has(.search-page--map) > main {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  background: var(--bg-2);
+  background:
+    radial-gradient(130% 110% at 0% 0%, var(--gold-soft) 0%, transparent 55%),
+    var(--bg-2);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 1.25rem;
@@ -6100,6 +6102,7 @@ body:has(.search-page--map) > main {
   text-decoration: none;
   color: var(--text);
   transition: border-color 160ms, transform 160ms;
+  overflow: hidden;
 }
 .activities-partners__card:hover { border-color: var(--gold); transform: translateY(-2px); }
 .activities-partners__icon { font-size: 1.8rem; }
