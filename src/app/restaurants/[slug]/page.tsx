@@ -4,6 +4,7 @@ import { BookingPanel } from "@/components/booking/booking-panel";
 import { PickupOrderPanel } from "@/components/booking/pickup-order-panel";
 import { DetailHero } from "@/components/detail/detail-hero";
 import { GalleryLightbox } from "@/components/detail/gallery-lightbox";
+import { FormattedDescription } from "@/components/detail/formatted-description";
 import { MapClient } from "@/components/map/map-client";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -50,7 +51,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
 
           {/* ── 7. Descrizione + tag ───────────────────────────────────── */}
           <div className="detail-block detail-desc">
-            {restaurant.description && <p className="detail-desc__text">{restaurant.description}</p>}
+            {restaurant.description && <FormattedDescription text={restaurant.description} />}
             <div className="detail-pills" style={{ marginTop: "1rem" }}>
               <span>{restaurant.rating.toFixed(1)} ★ · {formatReviewCount(restaurant.reviewCount)} {restaurant.reviewCount === 1 ? d.review : d.reviewsPlural}</span>
               {restaurant.maxCapacity ? <span>{d.maxCapacity(restaurant.maxCapacity)}</span> : null}
