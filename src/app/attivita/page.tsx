@@ -37,12 +37,12 @@ export default function AttivitaPage() {
           {PARTNERS.map((p) => (
             <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="activities-partners__card">
               <span className="activities-partners__photo">
-                <Image src={p.image} alt="" fill sizes="(max-width: 600px) 90vw, 420px" />
+                <Image src={p.image} alt="" fill sizes="(max-width: 600px) 90vw, 320px" style={{ objectFit: "contain" }} />
               </span>
               <strong>{p.name}</strong>
               <p>{p.description}</p>
               <span className="activities-partners__cta">
-                Vai al sito
+                <span className="activities-partners__cta-text">Vai al sito</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
