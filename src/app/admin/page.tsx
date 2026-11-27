@@ -1,7 +1,4 @@
-import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { requireAdmin } from "@/lib/admin/auth";
 import { RestaurantPreviewRow } from "@/components/admin/restaurant-preview-row";
 import { DeletionRequestRow } from "@/components/admin/deletion-request-row";
 import { CallRequestRow } from "@/components/admin/call-request-row";
@@ -26,9 +23,6 @@ interface RestaurantAdminRow {
 }
 
 export default async function AdminPage() {
-  const admin = await requireAdmin();
-  if (!admin) redirect("/");
-
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
     return <div className="dashboard-page-header"><h1>Admin non configurato</h1><p>Manca SUPABASE_SERVICE_ROLE_KEY.</p></div>;
@@ -77,9 +71,9 @@ export default async function AdminPage() {
     <div className="dashboard-page-header admin-page">
       <p className="eyebrow">Admin</p>
       <h1>Verifica locali</h1>
-      <p>Un locale diventa visibile ai clienti solo quando lo verifichi qui. {rows.length} locali totali, {pending.length} da verificare. Clicca su una riga per vedere i dettagli prima di approvare. <Link href="/admin/traffico">Vedi traffico del sito →</Link></p>
+      <p>Un locale diventa visibile ai clienti solo quando lo verifichi qui. {rows.length} locali totali, {pending.length} da verificare. Clicca su una riga per vedere i dettagli prima di approvare.</p>
 
-      <h2 className="admin-section-title">Richieste di call ({(callRequests ?? []).length})</h2>
+      <h2 className="admin-section-title" id="call-requests">Richieste di call ({(callRequests ?? []).length})</h2>
       {(callRequests ?? []).length === 0 ? (
         <p className="admin-empty">Nessuna richiesta di call.</p>
       ) : (
@@ -93,7 +87,7 @@ export default async function AdminPage() {
 
       {deletionRequests.length > 0 && (
         <>
-          <h2 className="admin-section-title">Richieste di cancellazione account ({deletionRequests.length})</h2>
+          <h2 className="admin-section-title" id="cancellazioni">Richieste di cancellazione account ({deletionRequests.length})</h2>
           <div className="dash-card" style={{ overflowX: "auto" }}>
             <table className="dash-table admin-table">
               <thead><tr><th>Locale</th><th>Contatti</th><th>Motivo</th><th></th></tr></thead>
@@ -103,7 +97,7 @@ export default async function AdminPage() {
         </>
       )}
 
-      <h2 className="admin-section-title">Da verificare ({pending.length})</h2>
+      <h2 className="admin-section-title" id="da-verificare">Da verificare ({pending.length})</h2>
       {pending.length === 0 ? (
         <p className="admin-empty">Nessun locale in attesa.</p>
       ) : (
@@ -115,7 +109,7 @@ export default async function AdminPage() {
         </div>
       )}
 
-      <h2 className="admin-section-title">Già verificati ({verified.length})</h2>
+      <h2 className="admin-section-title" id="verificati">Già verificati ({verified.length})</h2>
       {verified.length === 0 ? (
         <p className="admin-empty">Nessuno ancora.</p>
       ) : (

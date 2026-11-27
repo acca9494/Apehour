@@ -1,7 +1,4 @@
-import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata = { title: "Admin — Traffico" };
 
@@ -21,9 +18,6 @@ function isOwnDomain(url: string) {
 }
 
 export default async function AdminTrafficPage() {
-  const admin = await requireAdmin();
-  if (!admin) redirect("/");
-
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
     return <div className="dashboard-page-header"><h1>Admin non configurato</h1><p>Manca SUPABASE_SERVICE_ROLE_KEY.</p></div>;
@@ -110,7 +104,7 @@ export default async function AdminTrafficPage() {
     <div className="dashboard-page-header admin-page">
       <p className="eyebrow">Admin</p>
       <h1>Traffico del sito</h1>
-      <p>Statistiche anonime (nessun IP, nessun cookie persistente) sulle ultime visite. <Link href="/admin">← Torna alla verifica locali</Link></p>
+      <p>Statistiche anonime (nessun IP, nessun cookie persistente) sulle ultime visite.</p>
 
       <div className="admin-kpi-row">
         <div className="dash-card admin-kpi"><span className="admin-kpi__value">{today.length}</span><span className="admin-kpi__label">Pagine viste oggi</span></div>

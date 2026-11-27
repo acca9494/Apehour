@@ -44,6 +44,22 @@ export function CallRequestRow({ row }: { row: CallRequest }) {
     }
   }
 
+  async function deleteRequest() {
+    if (!confirm(`Cancellare la richiesta di call di "${row.venue_name}"?`)) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/delete-call-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId: row.id }),
+      });
+      if (!res.ok) { alert("Operazione fallita. Riprova."); return; }
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const slotDateLabel = new Date(`${row.slot_date}T00:00:00`).toLocaleDateString("it-IT", {
     weekday: "short", day: "numeric", month: "short",
   });
@@ -81,6 +97,9 @@ export function CallRequestRow({ row }: { row: CallRequest }) {
             Chiudi
           </button>
         )}
+        <button type="button" className="admin-delete-link" disabled={loading} onClick={deleteRequest} style={{ marginTop: "0.4rem" }}>
+          Cancella
+        </button>
       </td>
     </tr>
   );

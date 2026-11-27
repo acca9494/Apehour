@@ -10137,6 +10137,9 @@ body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
 .admin-trend__col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 0.4rem; }
 .admin-trend__bar { width: 100%; max-width: 22px; background: var(--gold); border-radius: 4px 4px 0 0; min-height: 4px; }
 .admin-trend__label { font-size: 0.65rem; color: var(--text-3); white-space: nowrap; }
+
+.admin-delete-link { display: block; background: none; border: none; padding: 0; font-size: 0.78rem; color: #e04c4c; cursor: pointer; text-decoration: underline; }
+.admin-delete-link:disabled { opacity: 0.5; cursor: default; }
 .admin-badge {
   display: inline-block; padding: 0.25rem 0.6rem; border-radius: 999px;
   font-size: 0.75rem; font-weight: 700; white-space: nowrap;
