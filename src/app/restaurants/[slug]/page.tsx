@@ -7,6 +7,7 @@ import { DetailHero } from "@/components/detail/detail-hero";
 import { MapClient } from "@/components/map/map-client";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { InstagramIcon } from "@/components/ui/instagram-icon";
 import { getReviews } from "@/lib/services/reviews";
 import { getRestaurantBySlug, getSimilarRestaurants } from "@/lib/services/restaurants";
 import { formatReviewCount } from "@/lib/utils";
@@ -132,7 +133,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             </section>
           )}
 
-          {(restaurant.videoUrl || restaurant.facebook) && (
+          {(restaurant.videoUrl || restaurant.facebook || restaurant.instagram) && (
             <div className="detail-video-link" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
               {restaurant.videoUrl && (
                 <a href={restaurant.videoUrl} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
@@ -142,6 +143,18 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
               {restaurant.facebook && (
                 <a href={restaurant.facebook} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
                   Facebook
+                </a>
+              )}
+              {restaurant.instagram && (
+                <a
+                  href={restaurant.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="clay-button clay-button--secondary"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+                >
+                  <InstagramIcon width={16} height={16} />
+                  Instagram
                 </a>
               )}
             </div>

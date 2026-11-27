@@ -43,6 +43,7 @@ export type Restaurant = {
   menuPreview: MenuItem[];
   videoUrl?: string;
   facebook?: string;
+  instagram?: string;
   maxCapacity?: number;
   menuUrl?: string;
   cancellationPolicy?: string;
