@@ -5,34 +5,39 @@ import Image from "next/image";
 
 export function GalleryLightbox({ images, name }: { images: string[]; name: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const isOpen = openIndex !== null;
 
+  // Blocca lo scroll di sfondo solo all'apertura/chiusura, non ad ogni
+  // cambio foto: prima si riapplicava position:fixed ad ogni click
+  // successiva/precedente, causando un salto visibile che sembrava un
+  // ritorno alla pagina del locale.
   useEffect(() => {
-    if (openIndex === null) return;
-    // Oltre a overflow:hidden, blocchiamo il body con position:fixed: su iOS
-    // Safari lo scroll "elastico" di sfondo riesce comunque a trascinare un
-    // overlay fixed, facendolo sembrare non fermo durante lo swipe.
+    if (!isOpen) return;
     const scrollY = window.scrollY;
     const { overflow, position, top, width } = document.body.style;
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
-
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpenIndex(null);
-      if (e.key === "ArrowRight") setOpenIndex((i) => (i === null ? i : (i + 1) % images.length));
-      if (e.key === "ArrowLeft") setOpenIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
-    }
-    document.addEventListener("keydown", handleKey);
     return () => {
       document.body.style.overflow = overflow;
       document.body.style.position = position;
       document.body.style.top = top;
       document.body.style.width = width;
       window.scrollTo(0, scrollY);
-      document.removeEventListener("keydown", handleKey);
     };
-  }, [openIndex, images.length]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpenIndex(null);
+      if (e.key === "ArrowRight") setOpenIndex((i) => (i === null ? i : (i + 1) % images.length));
+      if (e.key === "ArrowLeft") setOpenIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [isOpen, images.length]);
 
   return (
     <>
@@ -63,15 +68,6 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
           aria-label={`Foto ${openIndex + 1} di ${name}`}
           onClick={() => setOpenIndex(null)}
         >
-          <button
-            type="button"
-            className="gallery-lightbox__close"
-            onClick={() => setOpenIndex(null)}
-            aria-label="Chiudi"
-          >
-            ✕
-          </button>
-
           {images.length > 1 && (
             <button
               type="button"
@@ -83,13 +79,22 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
             </button>
           )}
 
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={images[openIndex]}
-            alt={`${name} foto ${openIndex + 1}`}
-            className="gallery-lightbox__img"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="gallery-lightbox__frame" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={images[openIndex]}
+              alt={`${name} foto ${openIndex + 1}`}
+              className="gallery-lightbox__img"
+            />
+            <button
+              type="button"
+              className="gallery-lightbox__close"
+              onClick={() => setOpenIndex(null)}
+              aria-label="Chiudi"
+            >
+              ✕
+            </button>
+          </div>
 
           {images.length > 1 && (
             <button
