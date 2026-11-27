@@ -6091,9 +6091,7 @@ body:has(.search-page--map) > main {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  background:
-    radial-gradient(130% 110% at 0% 0%, var(--gold-soft) 0%, transparent 55%),
-    var(--bg-2);
+  background: var(--bg-2);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 1.25rem;
@@ -6102,7 +6100,6 @@ body:has(.search-page--map) > main {
   text-decoration: none;
   color: var(--text);
   transition: border-color 160ms, transform 160ms;
-  overflow: hidden;
 }
 .activities-partners__card:hover { border-color: var(--gold); transform: translateY(-2px); }
 .activities-partners__icon { font-size: 1.8rem; }
@@ -6110,9 +6107,20 @@ body:has(.search-page--map) > main {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
+}
+.activities-partners__photo img {
   border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--gold-soft);
+  z-index: 1;
+}
+/* Macchia di colore "a schizzo", non un riquadro: forma organica che
+   sporge oltre i bordi della foto, dietro l'immagine. */
+.activities-partners__splash {
+  position: absolute;
+  inset: -16% -14%;
+  z-index: 0;
+  background: var(--gold);
+  border-radius: 58% 42% 63% 37% / 41% 57% 43% 59%;
+  transform: rotate(-7deg);
 }
 .activities-partners__card strong { font-size: 1rem; }
 .activities-partners__card p { margin: 0; font-size: 0.8rem; color: var(--text-3); }

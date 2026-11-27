@@ -37,6 +37,7 @@ export default function AttivitaPage() {
           {PARTNERS.map((p) => (
             <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="activities-partners__card">
               <span className="activities-partners__photo">
+                <span className="activities-partners__splash" aria-hidden="true" />
                 <Image src={p.image} alt="" fill sizes="(max-width: 600px) 90vw, 320px" style={{ objectFit: "contain" }} />
               </span>
               <strong>{p.name}</strong>
