@@ -6099,6 +6099,7 @@ body:has(.search-page--map) > main {
   text-align: center;
   text-decoration: none;
   color: var(--text);
+  overflow: hidden;
   transition: border-color 160ms, transform 160ms;
 }
 .activities-partners__card:hover { border-color: var(--gold); transform: translateY(-2px); }
