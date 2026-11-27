@@ -45,6 +45,10 @@ const TAG_OPTIONS = [
   { value: "servizio al tavolo",         label: "Servizio al tavolo",           emoji: "🧑‍🍳" },
   { value: "tavoli esterni",             label: "Tavoli all'esterno",           emoji: "🌳" },
   { value: "vino e birra",               label: "Vino e birra",                 emoji: "🍷" },
+  { value: "serve alcolici",             label: "Serve alcolici",               emoji: "🍸" },
+  { value: "eventi privati",             label: "Eventi privati",               emoji: "🎉" },
+  { value: "area fumatori",              label: "Area fumatori",                emoji: "🚬" },
+  { value: "terrazza riscaldata",        label: "Terrazza riscaldata",          emoji: "🔥" },
 ];
 
 const CUISINE_TAG_OPTIONS = [
