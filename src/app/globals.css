@@ -3983,8 +3983,80 @@ main:has(.app-preview-page) ~ * { display: none !important; }
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--bg-3);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: block;
 }
-.gallery-strip__tile img { object-fit: cover; }
+.gallery-strip__tile img { object-fit: cover; transition: transform 0.35s ease; }
+@media (hover: hover) {
+  .gallery-strip__tile:hover img { transform: scale(1.08); }
+}
+
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(10, 10, 10, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: gallery-lightbox-in 0.18s ease;
+}
+@keyframes gallery-lightbox-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.gallery-lightbox__img-wrap {
+  position: relative;
+  width: min(92vw, 1100px);
+  height: min(86vh, 800px);
+}
+.gallery-lightbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #fff;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  z-index: 1;
+}
+.gallery-lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #fff;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gallery-lightbox__nav--prev { left: 1rem; }
+.gallery-lightbox__nav--next { right: 1rem; }
+.gallery-lightbox__counter {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.75);
+  font-size: 0.85rem;
+}
+@media (max-width: 768px) {
+  .gallery-lightbox__img-wrap { width: 100vw; height: 70vh; }
+  .gallery-lightbox__nav { width: 2.5rem; height: 2.5rem; font-size: 1.4rem; }
+}
 
 .menu-list { display: flex; flex-direction: column; gap: 0; }
 .menu-list > div {

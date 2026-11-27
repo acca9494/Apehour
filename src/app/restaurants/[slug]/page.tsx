@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BookingPanel } from "@/components/booking/booking-panel";
 import { PickupOrderPanel } from "@/components/booking/pickup-order-panel";
 import { DetailHero } from "@/components/detail/detail-hero";
+import { GalleryLightbox } from "@/components/detail/gallery-lightbox";
 import { MapClient } from "@/components/map/map-client";
 import { RestaurantCard } from "@/components/restaurant-card";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -118,18 +118,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
           {restaurant.gallery.length > 0 && (
             <section className="detail-block detail-gallery-strip" aria-label={d.gallery}>
               <h2>{d.gallery}</h2>
-              <div className="gallery-strip">
-                {restaurant.gallery.map((img, i) => (
-                  <div key={img} className="gallery-strip__tile">
-                    <Image
-                      src={img}
-                      alt={`${restaurant.name} foto ${i + 1}`}
-                      fill
-                      sizes="(max-width: 760px) 80vw, 30vw"
-                    />
-                  </div>
-                ))}
-              </div>
+              <GalleryLightbox images={restaurant.gallery} name={restaurant.name} />
             </section>
           )}
 
