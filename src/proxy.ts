@@ -6,7 +6,7 @@ import { ADMIN_EMAILS } from "@/lib/admin/constants";
 // Attiva/disattiva qui per la produzione (Vercel). In locale (`npm run dev`)
 // resta sempre disattivata in automatico, così non serve ricordarsi di
 // girare il flag avanti e indietro ogni volta che testiamo qualcosa.
-const MAINTENANCE_WHEN_LIVE = true;
+const MAINTENANCE_WHEN_LIVE = false;
 const MAINTENANCE = MAINTENANCE_WHEN_LIVE && process.env.NODE_ENV === "production";
 // Esclusi dalla manutenzione: /admin (devi poterci lavorare anche a sito
 // fermo), /api (le email automatiche e le route server devono continuare
