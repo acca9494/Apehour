@@ -6117,7 +6117,10 @@ body:has(.search-page--map) > main {
    sporge oltre i bordi della foto, dietro l'immagine. */
 .activities-partners__splash {
   position: absolute;
-  inset: -16% -14%;
+  top: -10%;
+  left: -10%;
+  right: -8%;
+  bottom: 18%;
   z-index: 0;
   background: var(--gold);
   border-radius: 58% 42% 63% 37% / 41% 57% 43% 59%;
