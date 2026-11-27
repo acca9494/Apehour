@@ -96,6 +96,7 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
       <div className="bp-header">
         <p className="eyebrow">Prenotazione senza pagamento</p>
         <p className="bp-social-proof">{event.date} · {event.location}</p>
+        <p className="bp-cancel-note">Si prega gentilmente di disdire con almeno un&apos;ora di anticipo, qualora non si potesse più essere presenti.</p>
       </div>
 
       <div>

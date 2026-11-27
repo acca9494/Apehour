@@ -4280,6 +4280,7 @@ main:has(.app-preview-page) ~ * { display: none !important; }
 }
 .bp-header { display: flex; flex-direction: column; gap: 0.2rem; }
 .bp-social-proof { font-size: 0.78rem; color: rgba(255,255,255,0.5); margin: 0; }
+.bp-cancel-note { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin: 0.3rem 0 0; line-height: 1.4; font-style: italic; }
 .bp-label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.7); }
 .bp-label input, .bp-label select {
   background: rgba(255,255,255,0.08);
