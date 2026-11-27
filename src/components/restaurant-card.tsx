@@ -3,16 +3,11 @@ import Link from "next/link";
 import { ClayLink } from "@/components/ui/clay-button";
 import type { Restaurant } from "@/lib/types";
 import { formatReviewCount } from "@/lib/utils";
+import { PRICE_INFO } from "@/lib/price-tiers";
 
 type RestaurantCardProps = {
   restaurant: Restaurant;
   priority?: boolean;
-};
-
-const PRICE_INFO: Record<string, { img: string; label: string; budget: string }> = {
-  "$$":   { img: "/vespa-v2.png", label: "Vespa Sprint", budget: "€" },
-  "$$$":  { img: "/plus-v2.png",  label: "Ape Plus",     budget: "€€" },
-  "$$$$": { img: "/bombo-v2.png", label: "Bombo Queen",  budget: "€€€" },
 };
 
 export function RestaurantCard({ restaurant, priority = false }: RestaurantCardProps) {

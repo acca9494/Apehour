@@ -9,6 +9,7 @@ import { getRestaurantBySlugClient } from "@/lib/services/restaurants.client";
 import { TicketPurchaseForm } from "@/components/booking/ticket-purchase-form";
 import type { EventItem } from "@/lib/data/events";
 import type { Restaurant } from "@/lib/types";
+import { PRICE_INFO } from "@/lib/price-tiers";
 
 export default function EventDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -114,11 +115,10 @@ export default function EventDetailPage() {
               </div>
               <div className="event-detail__venue-info">
                 <h3>{restaurant.name}</h3>
-                <p className="event-detail__venue-cuisine">{restaurant.cuisine}</p>
                 <p className="event-detail__venue-address">{restaurant.address}</p>
                 <div className="event-detail__venue-meta">
                   <span>⭐ {restaurant.rating} ({restaurant.reviewCount})</span>
-                  <span>{restaurant.priceRange}</span>
+                  <span>{PRICE_INFO[restaurant.priceRange].budget}</span>
                   {restaurant.discount && (
                     <span className="event-detail__venue-discount">−{restaurant.discount}%</span>
                   )}

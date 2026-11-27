@@ -7,6 +7,7 @@ import { ClayButton, ClayLink } from "@/components/ui/clay-button";
 import { getRestaurantBySlugClient } from "@/lib/services/restaurants.client";
 import type { Restaurant } from "@/lib/types";
 import { todayInputValue } from "@/lib/utils";
+import { PRICE_INFO } from "@/lib/price-tiers";
 import {
   cancelBooking,
   checkAvailability,
@@ -246,7 +247,7 @@ export function BookingFlow() {
       <div className="booking-flow__intro">
         <p className="eyebrow">{modifyId ? c.modifyBooking : c.bookIn3Steps}</p>
         <h1>{restaurant.name}</h1>
-        <p>{restaurant.neighborhood} · {restaurant.city} · {restaurant.priceRange}</p>
+        <p>{restaurant.neighborhood} · {restaurant.city} · {PRICE_INFO[restaurant.priceRange].budget}</p>
         {modifyId && (
           <p className="booking-flow__modify-note">
             {c.modifyNote}

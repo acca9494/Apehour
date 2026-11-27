@@ -4,6 +4,7 @@ import type { Restaurant } from "@/lib/types";
 import { formatReviewCount } from "@/lib/utils";
 import { FavoriteHeartButton } from "@/components/favorites/favorite-heart-button";
 import type { getServerT } from "@/lib/i18n/server";
+import { PRICE_INFO } from "@/lib/price-tiers";
 
 function Stars({ rating, label }: { rating: number; label: string }) {
   const full = Math.floor(rating);
@@ -77,7 +78,7 @@ export function DetailHero({ restaurant, t }: { restaurant: Restaurant; t: Await
 
           <span className="detail-hero__sep" aria-hidden="true">·</span>
 
-          <span className="detail-hero__price">{restaurant.priceRange}</span>
+          <span className="detail-hero__price">{PRICE_INFO[restaurant.priceRange].budget}</span>
 
           <span className="detail-hero__sep" aria-hidden="true">·</span>
 
