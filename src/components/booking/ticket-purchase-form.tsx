@@ -66,7 +66,7 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
 
   if (confirmed) {
     return (
-      <aside className="booking-panel" aria-label="Biglietto confermato">
+      <aside className="booking-panel" aria-label="Richiesta confermata">
         <div className="booking-confirmed" style={{ padding: 0 }}>
           <div className="booking-confirmed__icon" aria-hidden="true">⏳</div>
           <p className="eyebrow">Richiesta inviata</p>
@@ -92,7 +92,7 @@ export function TicketPurchaseForm({ event }: { event: EventItem }) {
   }
 
   return (
-    <aside className="booking-panel" id="biglietti" aria-label="Acquista il biglietto">
+    <aside className="booking-panel" id="biglietti" aria-label="Prenota il tuo posto">
       <div className="bp-header">
         <p className="eyebrow">Prenotazione senza pagamento</p>
         <p className="bp-social-proof">{event.date} · {event.location}</p>

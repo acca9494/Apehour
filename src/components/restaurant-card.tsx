@@ -37,7 +37,11 @@ export function RestaurantCard({ restaurant, priority = false }: RestaurantCardP
       <div className="restaurant-card__body">
         <div className="restaurant-card__topline">
           <span>{restaurant.cuisine}</span>
-          <strong className="restaurant-card__rating">{restaurant.rating.toFixed(1)}</strong>
+          {restaurant.reviewCount > 0 ? (
+            <strong className="restaurant-card__rating">{restaurant.rating.toFixed(1)}</strong>
+          ) : (
+            <strong className="restaurant-card__rating restaurant-card__rating--new">Nuovo</strong>
+          )}
         </div>
 
         <h3>
@@ -45,7 +49,9 @@ export function RestaurantCard({ restaurant, priority = false }: RestaurantCardP
         </h3>
 
         <p className="restaurant-card__meta">
-          {formatReviewCount(restaurant.reviewCount)} recensioni · {restaurant.distance}
+          {restaurant.reviewCount > 0
+            ? `${formatReviewCount(restaurant.reviewCount)} recensioni · ${restaurant.distance}`
+            : restaurant.distance || "Ancora nessuna recensione"}
         </p>
 
         {priceInfo && (

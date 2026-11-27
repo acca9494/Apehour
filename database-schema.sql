@@ -1184,7 +1184,7 @@ CREATE OR REPLACE VIEW public.restaurants_public AS
   FROM public.restaurants r
   LEFT JOIN public.restaurant_images img
     ON img.restaurant_id = r.id AND img.is_cover = TRUE
-  WHERE r.is_active = TRUE AND r.is_verified = TRUE;
+  WHERE r.is_active = TRUE AND r.is_verified = TRUE AND r.org_type = 'locale';
 
 GRANT SELECT ON public.restaurants_public TO anon, authenticated;
 

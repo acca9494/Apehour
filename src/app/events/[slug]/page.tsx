@@ -128,9 +128,8 @@ export default function EventDetailPage() {
           </section>
         )}
 
-        {/* ── Biglietti ── */}
+        {/* ── Prenotazione ── */}
         <section className="event-detail__section" id="biglietti">
-          <h2>Biglietti</h2>
           <TicketPurchaseForm event={event} />
         </section>
 
