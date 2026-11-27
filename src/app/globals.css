@@ -2920,6 +2920,9 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
 
 .event-card__image img {
   object-fit: cover;
+  /* "top" invece di centrato: molte locandine eventi sono verticali con
+     titolo/data in alto, un crop centrato le taglia proprio lì. */
+  object-position: top;
   transition: transform 320ms ease;
 }
 
@@ -9886,8 +9889,13 @@ body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
   left: 0;
   margin-bottom: 1rem;
 }
-.event-detail__hero-img {
+.event-detail__hero-bg {
   object-fit: cover;
+  filter: blur(40px) brightness(0.55);
+  transform: scale(1.15);
+}
+.event-detail__hero-img {
+  object-fit: contain;
   object-position: center;
 }
 .event-detail__hero-overlay {

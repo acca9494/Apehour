@@ -55,6 +55,14 @@ export default function EventDetailPage() {
         </Link>
         <Image
           src={event.image}
+          alt=""
+          aria-hidden="true"
+          fill
+          sizes="100vw"
+          className="event-detail__hero-bg"
+        />
+        <Image
+          src={event.image}
           alt={event.title}
           fill
           priority
