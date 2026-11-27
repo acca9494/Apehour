@@ -145,8 +145,13 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             </section>
           )}
 
-          {(restaurant.videoUrl || restaurant.facebook || restaurant.instagram) && (
+          {(restaurant.videoUrl || restaurant.facebook || restaurant.instagram || restaurant.website) && (
             <div className="detail-video-link" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              {restaurant.website && (
+                <a href={restaurant.website} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
+                  🔗 Sito web
+                </a>
+              )}
               {restaurant.videoUrl && (
                 <a href={restaurant.videoUrl} target="_blank" rel="noopener noreferrer" className="clay-button clay-button--secondary">
                   ▶ {d.watchVideo}

@@ -44,6 +44,7 @@ export type Restaurant = {
   videoUrl?: string;
   facebook?: string;
   instagram?: string;
+  website?: string;
   maxCapacity?: number;
   menuUrl?: string;
   menuPhotos: string[];
