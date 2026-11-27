@@ -12,9 +12,10 @@ import { PhotoManager } from "@/components/dashboard/photo-manager";
 type Tab = "locale" | "contatti" | "fiscali" | "account";
 
 // Stesso vocabolario del filtro "Caratteristiche" in ricerca
-// (src/components/search/search-results-client.tsx CHARACTERISTIC_OPTIONS):
-// il valore salvato qui deve combaciare con la keyword cercata là, altrimenti
-// il locale non comparirà mai per quel filtro anche se la caratteristica c'è.
+// (src/components/search/search-results-client.tsx CHARACTERISTIC_VALUES):
+// il valore salvato qui deve combaciare (anche come sottostringa) con la
+// keyword cercata là, altrimenti il locale non comparirà mai per quel
+// filtro anche se la caratteristica c'è.
 const TAG_OPTIONS = [
   { value: "pet",                  label: "Pet Friendly",         emoji: "🐾" },
   { value: "outdoor",              label: "Spazio all'aperto",    emoji: "🌿" },
@@ -23,7 +24,39 @@ const TAG_OPTIONS = [
   { value: "gruppi",               label: "Ideale per gruppi",    emoji: "👥" },
   { value: "vini naturali",        label: "Vini naturali",        emoji: "🍇" },
   { value: "cocktail artigianali", label: "Cocktail artigianali", emoji: "🍸" },
+  // Da qui in giù: caratteristiche aggiuntive (stile scheda Google Maps),
+  // mostrate sulla pagina pubblica ma senza un filtro dedicato in ricerca.
+  { value: "accetta carte di credito",   label: "Accetta carte di credito",     emoji: "💳" },
+  { value: "ammette i cani",             label: "Ammette i cani",               emoji: "🐕" },
+  { value: "parcheggio gratuito",        label: "Area parcheggio gratuita",     emoji: "🅿️" },
+  { value: "bar completo",               label: "Bar completo",                 emoji: "🍹" },
+  { value: "musica jazz",                label: "Bar con musica jazz",          emoji: "🎷" },
+  { value: "buoni regalo",               label: "Buoni regalo disponibili",     emoji: "🎁" },
+  { value: "musica dal vivo",            label: "Con musica dal vivo",          emoji: "🎸" },
+  { value: "wifi gratuito",              label: "Connessione Wi-Fi gratuita",   emoji: "📶" },
+  { value: "consegna a domicilio",       label: "Consegna a domicilio",         emoji: "🛵" },
+  { value: "da asporto",                 label: "Da asporto",                   emoji: "🥡" },
+  { value: "mastercard",                 label: "Mastercard",                   emoji: "💳" },
+  { value: "visa",                       label: "Visa",                         emoji: "💳" },
+  { value: "pagamenti digitali",         label: "Pagamenti digitali",           emoji: "📱" },
+  { value: "parcheggio in strada",       label: "Parcheggio in strada",         emoji: "🅿️" },
+  { value: "posti a sedere",             label: "Posti a sedere",               emoji: "🪑" },
+  { value: "prenotazioni",               label: "Prenotazioni",                 emoji: "📅" },
+  { value: "servizio al tavolo",         label: "Servizio al tavolo",           emoji: "🧑‍🍳" },
+  { value: "tavoli esterni",             label: "Tavoli all'esterno",           emoji: "🌳" },
+  { value: "vino e birra",               label: "Vino e birra",                 emoji: "🍷" },
 ];
+
+const CUISINE_TAG_OPTIONS = [
+  "Italiana", "Indiana", "Birreria", "Bar", "Caffetteria",
+  "Mediterranea", "Gastronomia", "Fusion", "Street food",
+];
+
+const MEAL_TYPE_OPTIONS = ["Pranzo", "Cena", "Aperto fino a tardi", "Bevande"];
+
+// Stesso vocabolario del tipo FoodType (src/lib/types.ts): valori diversi
+// qui non comparirebbero mai nel filtro "Diete speciali" della ricerca.
+const DIET_OPTIONS = ["Vegano", "Vegetariano", "Senza Glutine", "Halal", "Bio"];
 
 // Stesso vocabolario del tipo Cuisine (src/lib/types.ts) — valori diversi
 // qui non comparirebbero mai nel filtro categoria della ricerca.
@@ -304,8 +337,67 @@ export function VenueSettingsPanel() {
             </button>
           </div>
 
-          <h3 style={{ marginTop: "2rem" }}>Caratteristiche</h3>
+          <h3 style={{ marginTop: "2rem" }}>Cucine</h3>
+          <p className="settings-hint">Tipi di cucina offerti dal locale.</p>
+          <div className="settings-tags">
+            {CUISINE_TAG_OPTIONS.map((label) => (
+              <label key={label} className="settings-tags__item">
+                <input
+                  type="checkbox"
+                  checked={settings.tags.includes(label)}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...settings.tags, label]
+                      : settings.tags.filter((t) => t !== label);
+                    patch("tags", next);
+                  }}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          <h3 style={{ marginTop: "2rem" }}>Tipi di pasto</h3>
+          <div className="settings-tags">
+            {MEAL_TYPE_OPTIONS.map((label) => (
+              <label key={label} className="settings-tags__item">
+                <input
+                  type="checkbox"
+                  checked={settings.tags.includes(label)}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...settings.tags, label]
+                      : settings.tags.filter((t) => t !== label);
+                    patch("tags", next);
+                  }}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          <h3 style={{ marginTop: "2rem" }}>Diete speciali</h3>
           <p className="settings-hint">Usate dai clienti per filtrare la ricerca — senza queste, il tuo locale non comparirà mai se qualcuno le seleziona.</p>
+          <div className="settings-tags">
+            {DIET_OPTIONS.map((label) => (
+              <label key={label} className="settings-tags__item">
+                <input
+                  type="checkbox"
+                  checked={settings.tags.includes(label)}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...settings.tags, label]
+                      : settings.tags.filter((t) => t !== label);
+                    patch("tags", next);
+                  }}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          <h3 style={{ marginTop: "2rem" }}>Caratteristiche</h3>
+          <p className="settings-hint">Alcune sono usate dai clienti per filtrare la ricerca — senza quelle, il tuo locale non comparirà mai se qualcuno le seleziona.</p>
           <div className="settings-tags">
             {TAG_OPTIONS.map((opt) => (
               <label key={opt.value} className="settings-tags__item">
