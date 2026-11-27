@@ -34,13 +34,9 @@ export default function AttivitaPage() {
         <div className="activities-partners__grid">
           {PARTNERS.map((p) => (
             <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="activities-partners__card">
-              {p.image ? (
-                <span className="activities-partners__photo">
-                  <Image src={p.image} alt="" fill sizes="120px" />
-                </span>
-              ) : (
-                <span className="activities-partners__icon" aria-hidden="true">{p.icon}</span>
-              )}
+              <span className="activities-partners__photo">
+                <Image src={p.image} alt="" fill sizes="120px" />
+              </span>
               <strong>{p.name}</strong>
               <p>{p.description}</p>
             </a>
