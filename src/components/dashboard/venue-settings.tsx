@@ -232,8 +232,8 @@ export function VenueSettingsPanel() {
             <PhotoManager
               restaurantId={settings.restaurantId}
               category="menu"
-              title="Foto del menu"
-              hint="Carica le foto delle pagine del tuo menu cartaceo, nell'ordine in cui vuoi che siano lette. Se non carichi nulla, questa sezione non compare nella pagina pubblica."
+              title="Foto del menu e locandine"
+              hint="Inserisci qui le foto del tuo menu cartaceo e le locandine con offerte, formule aperitivo o eventi speciali, nell'ordine in cui vuoi che siano viste. Se non carichi nulla, questa sezione non compare nella pagina pubblica."
             />
 
             <PhotoManager
