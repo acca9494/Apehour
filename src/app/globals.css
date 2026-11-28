@@ -9191,7 +9191,7 @@ body:has(.search-page--map) > main {
     opacity: 0;
   }
   /* Shift brand left: logo -20px, text -25px; push header-actions to right */
-  .site-header__inner { padding-left: 0.25rem; padding-right: 0.5rem; justify-content: space-between; }
+  .site-header__inner { padding-left: 0.25rem; padding-right: 1rem; justify-content: space-between; }
   .brand              { padding-left: calc(5.5rem - 5px); }
   .restaurant-grid,
   .search-grid   { grid-template-columns: 1fr; gap: 1.5rem; }
