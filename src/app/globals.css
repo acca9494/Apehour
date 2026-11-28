@@ -54,7 +54,7 @@
 
 /* ── BASE ────────────────────────────────────────── */
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
+html { scroll-behavior: smooth; overflow-x: clip; }
 
 body {
   margin: 0;
@@ -63,6 +63,7 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
 
 main { min-height: 70vh; padding-bottom: 5rem; }
