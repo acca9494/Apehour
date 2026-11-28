@@ -9249,10 +9249,14 @@ body:has(.search-page--map) > main {
   /* Auth buttons: show on mobile */
   .header-auth-link {
     display: inline-flex;
-    padding: 0.45rem 0.95rem;
-    font-size: 0.8rem;
+    flex-shrink: 0;
+    padding: 0.42rem 0.75rem;
+    font-size: 0.76rem;
     clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
   }
+  .header-actions { flex-wrap: nowrap; flex-shrink: 0; }
+  .brand { flex-shrink: 0; min-width: 0; }
+  .brand__text { white-space: nowrap; }
   /* Logged-in header: hide Prenota ora and Esci */
   .header-actions .header-cta { display: none; }
   .header-actions .logout-btn { display: none; }
