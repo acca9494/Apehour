@@ -9082,7 +9082,7 @@ body:has(.search-page--map) > main {
   .bottom-nav { display: flex; }
   /* Senza il menu (che prima riempiva lo spazio centrale con flex:1),
      i bottoni restavano appiccicati al logo: li rispingo a destra. */
-  .header-actions { margin-left: auto; }
+  .header-actions { margin-left: auto; margin-right: 0; transform: none; }
   /* La chat flottante non deve finire sotto la nuova barra in basso */
   .gchat { bottom: calc(4rem + env(safe-area-inset-bottom) + 1.25rem); right: 0.75rem; }
 
@@ -9254,7 +9254,7 @@ body:has(.search-page--map) > main {
     font-size: 0.76rem;
     clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
   }
-  .header-actions { flex-wrap: nowrap; flex-shrink: 0; }
+  .header-actions { flex-wrap: nowrap; flex-shrink: 0; margin-right: 0; transform: none; }
   .brand { flex-shrink: 0; min-width: 0; }
   .brand__text { white-space: nowrap; }
   /* Logged-in header: hide Prenota ora and Esci */
