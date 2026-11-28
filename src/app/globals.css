@@ -6232,6 +6232,7 @@ body:has(.search-page--map) > main {
 }
 @media (max-width: 600px) {
   .activities-partners__grid { grid-template-columns: 1fr; }
+  .activities-partners__card { padding-bottom: 3.5rem; }
 }
 .activities-partners__card {
   position: relative;
