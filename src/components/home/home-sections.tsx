@@ -128,7 +128,7 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
       {/* Mobile: filtri veloci fissi (Vespa/Ape/Bombo), non legati alle
           offerte reali — portano dritti a "Scopri i locali" col filtro
           prezzo già selezionato. */}
-      <div className="offer-grid offer-grid--mobile-only">
+      <ScrollHintGrid className="offer-grid offer-grid--mobile-only">
         {QUICK_APE_TIERS.map((tier) => (
           <div className="offer-card" key={tier.apeType}>
             <ApeCardLink priceRange={tier.priceRange}>
@@ -141,7 +141,7 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
             </ApeCardLink>
           </div>
         ))}
-      </div>
+      </ScrollHintGrid>
       <div className="section-cta section-cta--desktop">
         <ClayLink href="/offers" variant="secondary">Tutte le offerte</ClayLink>
       </div>
