@@ -80,7 +80,7 @@ export default function OffersPage() {
                   <span className="offer-detail-card__rating">⭐ {promo.restaurantRating} ({promo.restaurantReviewCount})</span>
                   <span className="offer-detail-card__address">{promo.restaurantAddress}</span>
                 </div>
-                <span className="offer-detail-card__cta">Prenota con sconto →</span>
+                <span className="offer-detail-card__cta">Scopri di più →</span>
               </div>
             </Link>
           ))}
