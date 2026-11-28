@@ -111,19 +111,13 @@ function FlagGB(props: SVGProps<SVGSVGElement>) {
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [bees, setBees] = useState(0);
-  const [mobileCity, setMobileCity] = useState("Roma");
+  const [mobileCity] = useState("Tutto il Lazio");
   const { lang, setLang, t } = useLang();
 
   function toggleLang() {
     setLang(lang === "it" ? "en" : "it");
   }
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("apehour_city");
-      if (saved) setMobileCity(saved);
-    } catch {}
-  }, []);
   const [cityDropdown, setCityDropdown] = useState(false);
   const [searchOverlay, setSearchOverlay] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -385,46 +379,10 @@ export function SiteHeader() {
         <div className={`mobile-city-bar${isProfilePage ? " mobile-city-bar--hidden" : ""}`}>
           <div className="mobile-city-bar__inner">
             <div className="mobile-city-wrap" ref={cityDropdownRef}>
-              <button
-                className="mobile-city-btn"
-                type="button"
-                onClick={() => setCityDropdown((v) => !v)}
-                aria-expanded={cityDropdown}
-              >
+              <button className="mobile-city-btn" type="button" disabled>
                 <PinIcon className="mobile-city-btn__icon" aria-hidden="true" />
-                <span>{mobileCity === "Tutto il Lazio" ? mobileCity : `${mobileCity}, Italia`}</span>
-                <ChevronDownIcon
-                  className={cn("mobile-city-btn__chevron", cityDropdown && "mobile-city-btn__chevron--up")}
-                  aria-hidden="true"
-                />
+                <span>Tutto il Lazio</span>
               </button>
-              {cityDropdown && (
-                <ul className="mobile-city-dropdown" role="listbox">
-                  {CITIES_MOBILE.map((c) => (
-                    <li key={c} role="option" aria-selected={c === mobileCity}>
-                      <button
-                        type="button"
-                        className={cn("mobile-city-dropdown__item", c === mobileCity && "is-active")}
-                        onClick={() => {
-                          const cParam = c === "Tutto il Lazio" ? "" : c;
-                          setMobileCity(c);
-                          try { localStorage.setItem("apehour_city", cParam); } catch {}
-                          setCityDropdown(false);
-                          if (pathname === "/search") {
-                            const params = new URLSearchParams(window.location.search);
-                            if (cParam) params.set("city", cParam);
-                            else params.delete("city");
-                            router.push(`/search?${params.toString()}`);
-                          }
-                        }}
-                      >
-                        <PinIcon className="mobile-city-dropdown__icon" aria-hidden="true" />
-                        {c}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
 
             {pathname === "/search" ? (
@@ -490,7 +448,7 @@ export function SiteHeader() {
           <button
             className="mobile-search-overlay__locations"
             type="button"
-            onClick={() => { setSearchOverlay(false); router.push(`/search?view=map${cityFilter ? `&city=${encodeURIComponent(cityFilter)}` : ""}`); }}
+            onClick={() => { setSearchOverlay(false); router.push(`/search${cityFilter ? `?city=${encodeURIComponent(cityFilter)}` : ""}`); }}
           >
             <span className="mobile-search-overlay__locations-icon">
               <MapIcon aria-hidden="true" />

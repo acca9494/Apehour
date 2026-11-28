@@ -49,6 +49,26 @@ const TAG_OPTIONS = [
   { value: "eventi privati",             label: "Eventi privati",               emoji: "🎉" },
   { value: "area fumatori",              label: "Area fumatori",                emoji: "🚬" },
   { value: "terrazza riscaldata",        label: "Terrazza riscaldata",          emoji: "🔥" },
+  // Aggiunte per coprire caratteristiche già presenti su alcuni locali
+  // (import da schede stile Google Maps) ma non ancora selezionabili da qui.
+  { value: "Accessibile in sedia a rotelle", label: "Accessibile in sedia a rotelle", emoji: "♿" },
+  { value: "Buffet",                     label: "Buffet",                       emoji: "🍽️" },
+  { value: "Concerti acustici",          label: "Concerti acustici",            emoji: "🎻" },
+  { value: "DJ set",                     label: "DJ set",                       emoji: "🎧" },
+  { value: "Degustazioni",               label: "Degustazioni",                 emoji: "🍷" },
+  { value: "Eventi",                     label: "Eventi",                       emoji: "🎪" },
+  { value: "Eventi corporate",           label: "Eventi corporate",             emoji: "💼" },
+  { value: "Feste private",              label: "Feste private",                emoji: "🥳" },
+  { value: "Live music",                 label: "Live music",                   emoji: "🎤" },
+  { value: "Mostre artistiche",          label: "Mostre artistiche",            emoji: "🖼️" },
+  { value: "Stand-up comedy",            label: "Stand-up comedy",              emoji: "🎙️" },
+  { value: "Tè e Tisane",                label: "Tè e Tisane",                  emoji: "🍵" },
+  { value: "Seggioloni disponibili",     label: "Seggioloni disponibili",       emoji: "🍼" },
+  { value: "Opzioni vegane",             label: "Opzioni vegane",               emoji: "🌱" },
+  { value: "Opzioni vegetariane",        label: "Opzioni vegetariane",          emoji: "🥗" },
+  { value: "Connessione Wi-Fi gratuita", label: "Connessione Wi-Fi gratuita",   emoji: "📶" },
+  { value: "Tavoli all'esterno",         label: "Tavoli all'esterno",           emoji: "🌳" },
+  { value: "Cocktail Bar",               label: "Cocktail Bar",                 emoji: "🍸" },
 ];
 
 const CUISINE_TAG_OPTIONS = [
@@ -56,7 +76,7 @@ const CUISINE_TAG_OPTIONS = [
   "Mediterranea", "Gastronomia", "Fusion", "Street food",
 ];
 
-const MEAL_TYPE_OPTIONS = ["Pranzo", "Cena", "Aperto fino a tardi", "Bevande"];
+const MEAL_TYPE_OPTIONS = ["Colazione", "Pranzo", "Brunch", "Cena", "Aperto fino a tardi", "Bevande"];
 
 // Stesso vocabolario del tipo FoodType (src/lib/types.ts): valori diversi
 // qui non comparirebbero mai nel filtro "Diete speciali" della ricerca.

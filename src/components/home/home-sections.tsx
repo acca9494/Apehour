@@ -117,6 +117,7 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
         {promotions.map((promotion) => (
           <div className="offer-card" key={promotion.id}>
             <Link className="offer-card__desktop" href={`/restaurants/${promotion.restaurantSlug}`}>
+              <span className="offer-card__venue">{promotion.restaurantName}</span>
               <h3>{promotion.title}</h3>
               <p>{promotion.description}</p>
               <strong className="offer-card__cta">{h.bookOffer} <span aria-hidden="true">→</span></strong>
@@ -227,13 +228,15 @@ export function CategoriesSection() {
         <ClayLink href="/attivita" variant="secondary">{h.allActivities}</ClayLink>
       </div>
       <Link href="/attivita" className="activities-partners-teaser">
-        <span className="activities-partners-teaser__logos">
+        <span className="activities-partners-teaser__logo-slot">
           <Image src="/sotto-al-mare-logo.png" alt="Sotto al Mare" title="Sotto al Mare" width={54} height={54} />
-          <Image src="/arnia-ets-logo.png" alt="Arnia ETS" title="Arnia ETS" width={88} height={54} />
         </span>
         <span className="activities-partners-teaser__text">
           In collaborazione con &ldquo;Sotto al Mare&rdquo; e &ldquo;Arnia ETS&rdquo; — scopri le associazioni con cui lavoriamo
           <span className="activities-partners-teaser__arrow" aria-hidden="true">→</span>
+        </span>
+        <span className="activities-partners-teaser__logo-slot">
+          <Image src="/arnia-ets-logo.png" alt="Arnia ETS" title="Arnia ETS" width={88} height={54} />
         </span>
       </Link>
     </section>

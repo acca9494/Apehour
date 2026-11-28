@@ -7,12 +7,18 @@ const PARTNERS = [
   {
     name: "Sotto al Mare",
     image: "/sotto-al-mare.png",
+    logo: "/sotto-al-mare-logo.png",
+    logoWidth: 40,
+    logoHeight: 40,
     description: "Associazione che si occupa di tutela dei delfini costieri e monitoraggio del mare lungo il litorale del Lazio.",
     url: "https://sottoalmare.it/",
   },
   {
     name: "Arnia ETS",
     image: "/arnia-ets.png",
+    logo: "/arnia-ets-logo.png",
+    logoWidth: 66,
+    logoHeight: 40,
     description: "Associazione dedicata alla tutela delle api e alla sensibilizzazione ambientale.",
     url: "https://www.arniaets.it/",
   },
@@ -43,7 +49,10 @@ export default function AttivitaPage() {
                 </span>
               </span>
               <span className="activities-partners__body">
-                <strong>{p.name}</strong>
+                <span className="activities-partners__name-row">
+                  <Image src={p.logo} alt="" width={p.logoWidth} height={p.logoHeight} className="activities-partners__logo" />
+                  <strong>{p.name}</strong>
+                </span>
                 <p>{p.description}</p>
               </span>
               <span className="activities-partners__cta">

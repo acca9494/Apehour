@@ -11,6 +11,7 @@ export async function getPromotions(limit = 8): Promise<Promotion[]> {
     description: o.description,
     discount: o.discount,
     restaurantSlug: o.restaurantSlug,
+    restaurantName: o.restaurantName,
     apeType: o.apeType,
   }));
 }

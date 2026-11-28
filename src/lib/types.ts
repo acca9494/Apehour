@@ -94,6 +94,7 @@ export type Promotion = {
   description: string;
   discount: number;
   restaurantSlug: string;
+  restaurantName: string;
   apeType?: ApeType;
 };
 

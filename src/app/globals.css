@@ -2429,13 +2429,8 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   transition: transform 180ms ease;
 }
 .activities-partners-teaser:hover .activities-partners-teaser__arrow { transform: translateX(5px); }
-.activities-partners-teaser__logos {
-  display: inline-flex;
-  align-items: center;
-  gap: 1rem;
-  flex-shrink: 0;
-}
-.activities-partners-teaser__logos img { display: block; height: 64px; width: auto; }
+.activities-partners-teaser__logo-slot { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 6.5rem; transform: translateY(1.8rem); }
+.activities-partners-teaser__logo-slot img { display: block; height: 64px; width: auto; }
 .activities-partners-teaser__text { text-align: center; }
 
 .offer-grid.offer-grid--mobile-only { display: none; }
@@ -2644,12 +2639,14 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   flex-direction: column;
   gap: 0.45rem;
   padding: 1.5rem;
+  min-height: 11.5rem;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--bg-2);
   overflow: hidden;
   transition: border-color 180ms, transform 180ms, box-shadow 180ms;
 }
+.offer-card__venue { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--gold-dk); }
 
 .offer-card::before {
   content: "";
@@ -6233,8 +6230,19 @@ body:has(.search-page--map) > main {
   gap: 1.25rem;
 }
 @media (max-width: 600px) {
-  .activities-partners__grid { grid-template-columns: 1fr; }
-  .activities-partners__card { padding-bottom: 3.5rem; }
+  .activities-partners__grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+  .activities-partners__grid .activities-partners__card { padding-bottom: 4.5rem; }
+  .activities-partners__grid .activities-partners__photo { aspect-ratio: 16 / 10; }
+  /* Niente hover su touch: il bottone resta sempre espanso con il testo. */
+  .activities-partners__grid .activities-partners__cta {
+    width: 6.5rem;
+    background: var(--gold);
+    color: #fff;
+  }
+  .activities-partners__grid .activities-partners__cta-text {
+    max-width: 5rem;
+    opacity: 1;
+  }
 }
 .activities-partners__card {
   position: relative;
@@ -6286,6 +6294,8 @@ body:has(.search-page--map) > main {
 }
 .activities-partners__card strong { font-size: 1rem; }
 .activities-partners__card p { margin: 0; font-size: 0.8rem; color: var(--text-3); }
+.activities-partners__name-row { display: flex; align-items: center; gap: 0.5rem; justify-content: center; width: 100%; }
+.activities-partners__logo { object-fit: contain; flex-shrink: 0; }
 
 /* Pallino con freccia sempre visibile, si espande al passaggio del mouse
    mostrando "Vai al sito" invece di comparire dal nulla. */
@@ -9191,7 +9201,7 @@ body:has(.search-page--map) > main {
     opacity: 0;
   }
   /* Shift brand left: logo -20px, text -25px; push header-actions to right */
-  .site-header__inner { padding-left: 0.25rem; padding-right: 1.15rem; justify-content: space-between; }
+  .site-header__inner { padding-left: 0.25rem; padding-right: 2rem; justify-content: space-between; }
   .brand              { padding-left: calc(5.5rem - 5px); }
   .restaurant-grid,
   .search-grid   { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -9352,10 +9362,9 @@ body:has(.search-page--map) > main {
   }
   .offer-grid.offer-grid--desktop-only { display: none; }
   .offer-grid.offer-grid--mobile-only { display: flex; }
-  .activities-partners-teaser { flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; margin-bottom: 2.5rem; padding: 1.75rem 1.25rem; }
-  .activities-partners-teaser__logos { margin-top: 0.25rem; }
-  .activities-partners-teaser__text { order: 1; }
-  .activities-partners-teaser__logos { order: 2; }
+  .activities-partners-teaser { flex-wrap: wrap; row-gap: 1.5rem; column-gap: 1.75rem; margin-top: 2.5rem; margin-bottom: 2.5rem; padding: 1.75rem 1.25rem; }
+  .activities-partners-teaser__text { order: 1; flex-basis: 100%; }
+  .activities-partners-teaser__logo-slot { order: 2; }
   .page-section--offers { padding: 0.75rem 0; }
   .page-section--offers .section-heading { margin-bottom: 0.75rem; }
   .offers-header__eyebrow--desktop,
@@ -10330,3 +10339,24 @@ body:has(.search-page--map) .bottom-nav { z-index: 1215 !important; }
   .admin-preview__grid { grid-template-columns: 1fr; }
   .admin-preview__footer { flex-direction: column; align-items: stretch; }
 }
+
+/* ── MENU PAGE (es. /menu/la-collina) ─────────────── */
+.menu-page { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; font-family: Georgia, 'Times New Roman', serif; color: #2b2a25; }
+.menu-page__header { text-align: center; margin-bottom: 1rem; }
+.menu-page__header h1 { font-size: 2rem; letter-spacing: 0.08em; margin: 0; }
+.menu-page__header p { color: #7a5c2e; margin: 0.25rem 0 0; font-size: 0.85rem; letter-spacing: 0.05em; }
+.menu-page__tabs { display: flex; gap: 0.5rem; justify-content: center; margin: 1.5rem 0 2rem; position: sticky; top: 72px; background: var(--bg); padding: 0.75rem 0; z-index: 2; }
+.menu-page__tabs button { font-family: inherit; font-size: 0.95rem; font-weight: 700; padding: 0.55rem 1.3rem; border-radius: 999px; border: 1.5px solid #7a5c2e; background: transparent; color: #7a5c2e; cursor: pointer; }
+.menu-page__tabs button.is-active { background: #7a5c2e; color: #fff; }
+.menu-page__title { font-size: 1.3rem; text-align: center; letter-spacing: 0.06em; margin: 2.25rem 0 1rem; border-bottom: 2px solid #7a5c2e; padding-bottom: 0.4rem; }
+.menu-page__group { font-size: 1rem; font-weight: 800; margin: 1.5rem 0 0.5rem; color: #7a5c2e; }
+.menu-page__item { display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0; border-bottom: 1px dotted #c9bfa4; }
+.menu-page__item-name { flex: 1; }
+.menu-page__item-desc { display: block; font-size: 0.78rem; color: #6b6456; font-style: italic; margin-top: 0.15rem; }
+.menu-page__item-price { white-space: nowrap; font-weight: 700; }
+.menu-page__note { font-size: 0.8rem; color: #6b6456; text-align: center; margin: 0.5rem 0 1.5rem; }
+.menu-page__fisso { border: 1.5px solid #7a5c2e; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; }
+.menu-page__fisso h4 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+.menu-page__fisso-price { font-size: 1.4rem; font-weight: 800; color: #7a5c2e; text-align: right; }
+.menu-page__allergens { columns: 2; font-size: 0.85rem; }
+.menu-page__footer { text-align: center; margin-top: 3rem; font-size: 0.78rem; color: #6b6456; }
