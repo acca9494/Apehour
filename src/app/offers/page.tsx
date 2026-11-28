@@ -11,12 +11,6 @@ const APE_LABEL: Record<string, string> = {
   "bombo-queen": "Bombo Queen",
 };
 
-const APE_COLOR: Record<string, string> = {
-  "vespa-sprint": "#f59e0b",
-  "ape-plus": "#3b82f6",
-  "bombo-queen": "#8b5cf6",
-};
-
 export default function OffersPage() {
   const [offers, setOffers] = useState<PublicOffer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,12 +51,6 @@ export default function OffersPage() {
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="offer-detail-card__img"
                 />
-                <span
-                  className="offer-detail-card__discount"
-                  style={{ background: promo.apeType ? APE_COLOR[promo.apeType] : "var(--gold)" }}
-                >
-                  -{promo.discount}%
-                </span>
                 {promo.apeType && (
                   <span className="offer-detail-card__ape-badge">
                     {APE_LABEL[promo.apeType]}

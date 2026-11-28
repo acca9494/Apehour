@@ -14,6 +14,7 @@ import { getRestaurantBySlug, getSimilarRestaurants } from "@/lib/services/resta
 import { formatReviewCount } from "@/lib/utils";
 import { getServerT } from "@/lib/i18n/server";
 import { normalizeInstagram } from "@/lib/instagram";
+import { getActiveOffersForRestaurant } from "@/lib/offers/service.server";
 
 type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
 
@@ -34,9 +35,10 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) notFound();
 
-  const [similar, reviews, t] = await Promise.all([
+  const [similar, reviews, offers, t] = await Promise.all([
     getSimilarRestaurants(restaurant.slug),
     getReviews(restaurant.id),
+    getActiveOffersForRestaurant(restaurant.id),
     getServerT(),
   ]);
   const d = t.restaurantDetail;
@@ -103,6 +105,21 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
                 </section>
               )}
             </div>
+          )}
+
+          {/* ── Promozioni attive del locale ──────────────────────────── */}
+          {offers.length > 0 && (
+            <section className="detail-block">
+              <h2>Promozioni attive</h2>
+              <div className="detail-offers-grid">
+                {offers.map((offer) => (
+                  <div key={offer.id} className="detail-offer-card">
+                    <h3>{offer.title}</h3>
+                    {offer.description && <p>{offer.description}</p>}
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
           {/* ── 8. Punti forti ────────────────────────────────────────── */}

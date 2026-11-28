@@ -123,7 +123,6 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
               </ApeCardLink>
             )}
             <Link className="offer-card__desktop" href={`/restaurants/${promotion.restaurantSlug}`}>
-              <span>-{promotion.discount}%</span>
               <h3>{promotion.title}</h3>
               <p>{promotion.description}</p>
               <strong>{h.bookOffer}</strong>
