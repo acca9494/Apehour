@@ -60,7 +60,6 @@ export default function OffersPage() {
               <div className="offer-detail-card__body">
                 <div className="offer-detail-card__venue">
                   <h2>{promo.restaurantName}</h2>
-                  <span className="offer-detail-card__cuisine">{promo.restaurantCuisine}</span>
                 </div>
                 <h3 className="offer-detail-card__promo-title">{promo.title}</h3>
                 <p className="offer-detail-card__desc">{promo.description}</p>
