@@ -63,6 +63,8 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 main { min-height: 70vh; padding-bottom: 5rem; }
@@ -9264,6 +9266,7 @@ body:has(.search-page--map) > main {
     flex: 0 0 min(270px, 80vw);
     scroll-snap-align: start;
   }
+  .offer-grid > * { flex-basis: min(185px, 56vw); }
   /* Ombreggiatura gialla che indica di scorrere le card (offerte, eventi, attività) */
   .scroll-hint-wrap { position: relative; }
   .scroll-hint-wrap__hint-right,
