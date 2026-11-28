@@ -119,7 +119,7 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
             <Link className="offer-card__desktop" href={`/restaurants/${promotion.restaurantSlug}`}>
               <h3>{promotion.title}</h3>
               <p>{promotion.description}</p>
-              <strong>{h.bookOffer}</strong>
+              <strong className="offer-card__cta">{h.bookOffer} <span aria-hidden="true">→</span></strong>
             </Link>
           </div>
         ))}
