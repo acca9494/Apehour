@@ -109,7 +109,6 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
   return (
     <section className="page-section page-section--dark page-section--offers">
       <div className="offers-header">
-        <span className="eyebrow offers-header__eyebrow--desktop">{h.offersEyebrow}</span>
         <span className="offers-savings-badge offers-header__badge--desktop">{h.save40}</span>
         <span className="eyebrow offers-header__eyebrow--mobile">{h.bookNowEyebrow}</span>
         <h2 className="offers-header__title--mobile">{h.chooseTitle[0]}<span style={{ color: "var(--gold)" }}>{h.chooseTitle[1]}</span>{h.chooseTitle[2]}</h2>
