@@ -9266,7 +9266,7 @@ body:has(.search-page--map) > main {
     flex: 0 0 min(270px, 80vw);
     scroll-snap-align: start;
   }
-  .offer-grid > * { flex-basis: min(185px, 56vw); }
+  .offer-grid > * { flex-basis: min(210px, 62vw); }
   /* Ombreggiatura gialla che indica di scorrere le card (offerte, eventi, attività) */
   .scroll-hint-wrap { position: relative; }
   .scroll-hint-wrap__hint-right,
@@ -9386,7 +9386,7 @@ body:has(.search-page--map) > main {
   .page-section--activities .section-heading__title-row { flex-direction: row; align-items: center; gap: 0.6rem; justify-content: flex-start; }
   .page-section--with-deco .section-heading__title-row h2,
   .page-section--activities .section-heading__title-row h2 { white-space: nowrap; }
-  .page-section--with-deco .section-heading { margin-bottom: 0.6rem; transform: translateY(-3px); }
+  .page-section--with-deco .section-heading { margin-top: 0.4rem; margin-bottom: 1rem; }
   .page-section--with-deco { padding: 1.5rem 0 1rem; }
   .page-section:not(.page-section--with-deco):not(.page-section--offers):not(.page-section--dark) .section-heading,
   .page-section:not(.page-section--with-deco):not(.page-section--offers):not(.page-section--dark) .section-heading > div { align-items: center; text-align: center; }
