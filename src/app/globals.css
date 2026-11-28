@@ -3988,7 +3988,9 @@ main:has(.app-preview-page) ~ * { display: none !important; }
 
 .gallery-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  /* auto-fit (non auto-fill): con poche foto evita colonne vuote che le
+     lasciano piccole e ammassate invece di espandersi nello spazio. */
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.5rem;
 }
 .gallery-strip__tile {
