@@ -81,6 +81,7 @@ export interface VenueSettings {
   pec?: string;         // per fatturazione elettronica
   sdiCode?: string;     // per fatturazione elettronica
   openingHours: OpeningHoursRow[];
+  aperitivoHours?: string;      // fascia aperitivo (es. "18:30 - 20:30"), mostrata accanto agli orari normali
   tags: string[];
   cuisine: string;              // categoria/tipo di locale (es. "Spritz Bar", "Wine Bar")
   maxCapacity?: number;         // coperti massimi

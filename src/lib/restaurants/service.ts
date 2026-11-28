@@ -52,6 +52,7 @@ export interface RestaurantRow {
   deletion_reason: string | null;
   pickup_enabled: boolean;
   opening_hours: { day: string; hours: string }[];
+  aperitivo_hours: string | null;
 }
 
 export interface CreateRestaurantInput {
@@ -166,6 +167,7 @@ export interface VenueSettingsPatch {
   pec?: string;
   sdiCode?: string;
   openingHours: { day: string; hours: string }[];
+  aperitivoHours?: string;
   tags: string[];
   cuisine: string;
   maxCapacity?: number;
@@ -204,6 +206,7 @@ export async function updateVenueSettingsRow(id: string, patch: VenueSettingsPat
       pec: patch.pec ?? null,
       sdi_code: patch.sdiCode ?? null,
       opening_hours: patch.openingHours,
+      aperitivo_hours: patch.aperitivoHours ?? null,
       tags: patch.tags,
       cuisine: patch.cuisine,
       max_capacity: patch.maxCapacity ?? null,

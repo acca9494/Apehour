@@ -67,6 +67,7 @@ const DIET_OPTIONS = ["Vegano", "Vegetariano", "Senza Glutine", "Halal", "Bio"];
 const CUISINE_OPTIONS = [
   "Spritz Bar", "Wine Bar", "Cocktail Bar", "Vermouth Bar", "Cicchetti Bar",
   "Rooftop Bar", "Negroni Bar", "Champagne Bar", "Brunch", "Beer Bar", "Whisky Bar",
+  "Ristorante di carne",
 ];
 
 const PAYMENT_OPTIONS = [
@@ -339,6 +340,16 @@ export function VenueSettingsPanel() {
             >
               + Aggiungi riga orari
             </button>
+            <label className="settings-form__full">
+              Orario aperitivo (facoltativo)
+              <input
+                type="text"
+                value={settings.aperitivoHours ?? ""}
+                placeholder="18:30 - 20:30"
+                onChange={(e) => patch("aperitivoHours", e.target.value || undefined)}
+              />
+            </label>
+            <p className="settings-hint settings-form__full">Se impostata, viene mostrata accanto agli orari normali sulla pagina pubblica.</p>
           </div>
 
           <h3 style={{ marginTop: "2rem" }}>Cucine</h3>

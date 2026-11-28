@@ -24,6 +24,7 @@ const CATEGORY_VALUES: Array<{ key: string; emoji: string; value: Cuisine | "All
   { key: "beer",      emoji: "🍺", value: "Beer Bar" },
   { key: "champagne", emoji: "🥂", value: "Champagne Bar" },
   { key: "whisky",    emoji: "🥃", value: "Whisky Bar" },
+  { key: "meat",      emoji: "🥩", value: "Ristorante di carne" },
 ];
 
 const BUDGET_VALUES: Array<{ value: PriceRange | "All"; apeLabel: string; budget: string; imgSrc?: string }> = [

@@ -99,6 +99,7 @@ export function GalleryLightbox({ images, name }: { images: string[]; name: stri
               alt={`${name} foto ${i + 1}`}
               fill
               sizes="(max-width: 760px) 80vw, 30vw"
+              priority={i < 4}
             />
           </button>
         ))}

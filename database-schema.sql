@@ -101,6 +101,7 @@ CREATE TABLE public.restaurants (
 
   -- Orari di apertura generali (distinti dagli slot prenotabili)
   opening_hours    JSONB       NOT NULL DEFAULT '[]'::jsonb,  -- [{ "day": "Lun - Ven", "hours": "17:30 - 23:30" }, ...]
+  aperitivo_hours  TEXT,        -- fascia aperitivo mostrata accanto agli orari, es. "18:30 - 20:30"
 
   -- Prenotazione
   price_range      price_range NOT NULL DEFAULT '$$',
@@ -1185,7 +1186,7 @@ CREATE OR REPLACE VIEW public.restaurants_public AS
          r.zone_names, r.closed_days, COALESCE(r.cover_image_url, img.url) AS cover_image_url,
          r.urgency_label, r.social_proof,
          r.is_active, r.is_verified, r.created_at, r.updated_at, r.pickup_enabled, r.website_label,
-         r.instagram_2, r.instagram_2_label
+         r.instagram_2, r.instagram_2_label, r.aperitivo_hours
   FROM public.restaurants r
   LEFT JOIN public.restaurant_images img
     ON img.restaurant_id = r.id AND img.is_cover = TRUE

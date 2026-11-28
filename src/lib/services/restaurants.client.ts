@@ -48,6 +48,7 @@ function mapRow(row: PublicRestaurantRow, slots: BookingSlot[] = [], gallery?: s
     accessibilityTags: row.accessibility_tags ?? [],
     pickupEnabled: row.pickup_enabled ?? false,
     openingHours: row.opening_hours ?? [],
+    aperitivoHours: row.aperitivo_hours ?? undefined,
     coordinates: { lat: row.lat ?? 0, lng: row.lng ?? 0 },
     slots,
   };

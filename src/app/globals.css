@@ -2414,7 +2414,9 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   justify-content: center;
   gap: 1.1rem;
   text-align: center;
-  margin-top: 2.5rem;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  padding: 1.75rem 0;
   font-size: 0.92rem;
   font-weight: 600;
   color: var(--text-2);
@@ -2434,6 +2436,9 @@ main > *:not(.dashboard-layout):not(.user-dash-layout):not(.search-page):not(.ev
   flex-shrink: 0;
 }
 .activities-partners-teaser__logos img { display: block; height: 64px; width: auto; }
+.activities-partners-teaser__text { text-align: center; }
+
+.offer-grid--mobile-only { display: none; }
 
 .section-cta-link {
   display: none;
@@ -3985,6 +3990,7 @@ main:has(.app-preview-page) ~ * { display: none !important; }
 .highlight-grid div { display: flex; flex-direction: column; gap: 0.25rem; }
 .highlight-grid strong { font-size: 0.85rem; font-weight: 800; color: var(--text); }
 .highlight-grid p { font-size: 0.82rem; color: var(--text-3); margin: 0; line-height: 1.5; }
+.highlight-grid__full { grid-column: 1 / -1; }
 
 .detail-offers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
 .detail-offer-card {
@@ -4114,6 +4120,11 @@ main:has(.app-preview-page) ~ * { display: none !important; }
 .hours-list > div { display: flex; justify-content: space-between; font-size: 0.875rem; }
 .hours-list dt { color: var(--text-3); font-weight: 500; }
 .hours-list dd { font-weight: 700; color: var(--text); margin: 0; }
+.hours-block { display: flex; gap: 2rem; flex-wrap: wrap; }
+.hours-block > div:first-child { flex: 1 1 260px; }
+.hours-list > div { gap: 1.5rem; }
+.hours-block__aperitivo h2 { color: var(--gold); }
+.hours-block__aperitivo p { font-size: 0.95rem; font-weight: 700; color: var(--gold); margin: 0; }
 .map-placeholder {
   background: var(--bg-3);
   border-radius: var(--radius);
@@ -9216,7 +9227,7 @@ body:has(.search-page--map) > main {
   .section-heading > div { align-items: flex-start; }
   .section-heading__title-row { justify-content: flex-start; }
   .section-cta { margin-top: 0; }
-  .page-section--with-deco .section-cta { padding: 0; margin-top: 0.2rem; margin-bottom: 0; }
+  .page-section--with-deco .section-cta { padding: 0; margin-top: 1.5rem; margin-bottom: 0; }
   .page-section--with-deco { padding: 1rem 0 0.5rem; }
   .page-section--activities .section-cta { margin-top: 1rem; }
   .page-section   { padding: 2.5rem 0; }
@@ -9335,6 +9346,18 @@ body:has(.search-page--map) > main {
   .offer-card__ape-budget--bombo-queen {
     margin-top: calc(0.35rem - 3px);
   }
+  .offer-grid--desktop-only { display: none; }
+  .offer-grid--mobile-only {
+    display: flex;
+    gap: 0.6rem;
+    overflow: visible;
+    padding: 0 1.25rem;
+  }
+  .offer-grid--mobile-only .offer-card { flex: 1; min-width: 0; }
+  .activities-partners-teaser { flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; margin-bottom: 2.5rem; padding: 1.75rem 1.25rem; }
+  .activities-partners-teaser__logos { margin-top: 0.25rem; }
+  .activities-partners-teaser__text { order: 1; }
+  .activities-partners-teaser__logos { order: 2; }
   .page-section--offers { padding: 0.75rem 0; }
   .page-section--offers .section-heading { margin-bottom: 0.75rem; }
   .offers-header__eyebrow--desktop,

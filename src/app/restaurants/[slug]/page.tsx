@@ -145,7 +145,7 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
                   </div>
                 )}
                 {restaurant.tags.length > 0 && (
-                  <div>
+                  <div className="highlight-grid__full">
                     <strong>{d.idealFor}</strong>
                     <p>{restaurant.tags.join(", ")}</p>
                   </div>
@@ -257,16 +257,24 @@ export default async function RestaurantPage({ params, searchParams }: Props) {
             return (
               <section className="detail-block split-block">
                 {hasHours && (
-                  <div>
-                    <h2>{d.hours}</h2>
-                    <dl className="hours-list">
-                      {restaurant.openingHours.map((item) => (
-                        <div key={item.day}>
-                          <dt>{item.day}</dt>
-                          <dd>{item.hours}</dd>
-                        </div>
-                      ))}
-                    </dl>
+                  <div className="hours-block">
+                    <div>
+                      <h2>{d.hours}</h2>
+                      <dl className="hours-list">
+                        {restaurant.openingHours.map((item) => (
+                          <div key={item.day}>
+                            <dt>{item.day}</dt>
+                            <dd>{item.hours}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                    {restaurant.aperitivoHours && (
+                      <div className="hours-block__aperitivo">
+                        <h2>Aperitivo</h2>
+                        <p>{restaurant.aperitivoHours}</p>
+                      </div>
+                    )}
                   </div>
                 )}
                 {hasCoordinates && (

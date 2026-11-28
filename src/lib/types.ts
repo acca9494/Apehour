@@ -9,7 +9,8 @@ export type Cuisine =
   | "Champagne Bar"
   | "Brunch"
   | "Beer Bar"
-  | "Whisky Bar";
+  | "Whisky Bar"
+  | "Ristorante di carne";
 
 export type PriceRange = "$$" | "$$$" | "$$$$";
 
@@ -57,6 +58,7 @@ export type Restaurant = {
   accessibilityTags: string[];
   pickupEnabled: boolean;
   openingHours: OpeningHour[];
+  aperitivoHours?: string;
   coordinates: {
     lat: number;
     lng: number;

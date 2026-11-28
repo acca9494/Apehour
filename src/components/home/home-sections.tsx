@@ -74,6 +74,11 @@ const APE_PRICE_RANGE: Record<string, string> = {
   "ape-plus":     "$$$",
   "bombo-queen":  "$$$$",
 };
+const QUICK_APE_TIERS = [
+  { apeType: "vespa-sprint", priceRange: "$$" },
+  { apeType: "ape-plus",     priceRange: "$$$" },
+  { apeType: "bombo-queen",  priceRange: "$$$$" },
+];
 
 // Riga di card scorrevole su mobile con ombreggiatura arancione che invita a scorrere.
 function ScrollHintGrid({ className, alignToImage, children }: { className: string; alignToImage?: boolean; children: React.ReactNode }) {
@@ -109,19 +114,9 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
         <span className="eyebrow offers-header__eyebrow--mobile">{h.bookNowEyebrow}</span>
         <h2 className="offers-header__title--mobile">{h.chooseTitle[0]}<span style={{ color: "var(--gold)" }}>{h.chooseTitle[1]}</span>{h.chooseTitle[2]}</h2>
       </div>
-      <ScrollHintGrid className="offer-grid">
+      <ScrollHintGrid className="offer-grid offer-grid--desktop-only">
         {promotions.map((promotion) => (
           <div className="offer-card" key={promotion.id}>
-            {promotion.apeType && (
-              <ApeCardLink priceRange={APE_PRICE_RANGE[promotion.apeType]}>
-                <span className="offer-card__ape-name">{APE_LABEL[promotion.apeType]}</span>
-                <span className={`offer-card__ape-budget offer-card__ape-budget--${promotion.apeType}`}>{APE_BUDGET[promotion.apeType]}</span>
-                <div className="offer-card__ape-img-slot">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={APE_IMG[promotion.apeType]} alt={APE_LABEL[promotion.apeType]} className={`offer-card__ape-img offer-card__ape-img--${promotion.apeType}`} />
-                </div>
-              </ApeCardLink>
-            )}
             <Link className="offer-card__desktop" href={`/restaurants/${promotion.restaurantSlug}`}>
               <h3>{promotion.title}</h3>
               <p>{promotion.description}</p>
@@ -130,10 +125,27 @@ export function OffersSection({ promotions }: { promotions: Promotion[] }) {
           </div>
         ))}
       </ScrollHintGrid>
+      {/* Mobile: filtri veloci fissi (Vespa/Ape/Bombo), non legati alle
+          offerte reali — portano dritti a "Scopri i locali" col filtro
+          prezzo già selezionato. */}
+      <div className="offer-grid offer-grid--mobile-only">
+        {QUICK_APE_TIERS.map((tier) => (
+          <div className="offer-card" key={tier.apeType}>
+            <ApeCardLink priceRange={tier.priceRange}>
+              <span className="offer-card__ape-name">{APE_LABEL[tier.apeType]}</span>
+              <span className={`offer-card__ape-budget offer-card__ape-budget--${tier.apeType}`}>{APE_BUDGET[tier.apeType]}</span>
+              <div className="offer-card__ape-img-slot">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={APE_IMG[tier.apeType]} alt={APE_LABEL[tier.apeType]} className={`offer-card__ape-img offer-card__ape-img--${tier.apeType}`} />
+              </div>
+            </ApeCardLink>
+          </div>
+        ))}
+      </div>
       <div className="section-cta section-cta--desktop">
         <ClayLink href="/offers" variant="secondary">Tutte le offerte</ClayLink>
       </div>
-      <Link href="/offers" className="section-cta-link section-cta-link--mobile">Dai un&apos;occhiata alle nostre offerte →</Link>
+      <Link href="/offers" className="section-cta-link section-cta-link--mobile">Dai un&apos;occhiata alle nostre promozioni →</Link>
     </section>
   );
 }
@@ -220,8 +232,10 @@ export function CategoriesSection() {
           <Image src="/sotto-al-mare-logo.png" alt="Sotto al Mare" title="Sotto al Mare" width={54} height={54} />
           <Image src="/arnia-ets-logo.png" alt="Arnia ETS" title="Arnia ETS" width={88} height={54} />
         </span>
-        In collaborazione con &ldquo;Sotto al Mare&rdquo; e &ldquo;Arnia ETS&rdquo; — scopri le associazioni con cui lavoriamo
-        <span className="activities-partners-teaser__arrow" aria-hidden="true">→</span>
+        <span className="activities-partners-teaser__text">
+          In collaborazione con &ldquo;Sotto al Mare&rdquo; e &ldquo;Arnia ETS&rdquo; — scopri le associazioni con cui lavoriamo
+          <span className="activities-partners-teaser__arrow" aria-hidden="true">→</span>
+        </span>
       </Link>
     </section>
   );
