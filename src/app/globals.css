@@ -9260,7 +9260,7 @@ body:has(.search-page--map) > main {
   }
   .offer-grid::-webkit-scrollbar, .event-grid::-webkit-scrollbar { display: none; }
   .offer-grid > *, .event-grid > * {
-    flex: 0 0 min(200px, 62vw);
+    flex: 0 0 min(270px, 80vw);
     scroll-snap-align: start;
   }
   /* Ombreggiatura gialla che indica di scorrere le card (offerte, eventi, attività) */
@@ -9281,7 +9281,7 @@ body:has(.search-page--map) > main {
   .scroll-hint-wrap--image .scroll-hint-wrap__hint-right,
   .scroll-hint-wrap--image .scroll-hint-wrap__hint-left {
     bottom: auto;
-    height: calc(min(200px, 62vw) * 0.75);
+    height: calc(min(270px, 80vw) * 0.75);
   }
   .scroll-hint-wrap__hint-right {
     right: 0;
@@ -9316,25 +9316,25 @@ body:has(.search-page--map) > main {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    height: 96px;
+    height: 120px;
   }
   .offer-card__ape-img {
-    width: 98px;
-    height: 98px;
+    width: 122px;
+    height: 122px;
     object-fit: contain;
   }
-  .offer-card__ape-img--vespa-sprint { width: 112px; height: 112px; margin-bottom: 10px; }
-  .offer-card__ape-img--bombo-queen { width: 86px; height: 86px; margin-bottom: 15px; }
-  .offer-card__ape-img--ape-plus { width: 112px; height: 112px; margin-bottom: 3px; }
+  .offer-card__ape-img--vespa-sprint { width: 138px; height: 138px; margin-bottom: 10px; }
+  .offer-card__ape-img--bombo-queen { width: 108px; height: 108px; margin-bottom: 15px; }
+  .offer-card__ape-img--ape-plus { width: 138px; height: 138px; margin-bottom: 3px; }
   .offer-card__ape-name {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 800;
     color: var(--text);
     text-align: center;
     letter-spacing: 0.01em;
   }
   .offer-card__ape-budget {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 900;
     color: var(--gold-dk);
     letter-spacing: 0.05em;
@@ -9347,13 +9347,7 @@ body:has(.search-page--map) > main {
     margin-top: calc(0.35rem - 3px);
   }
   .offer-grid--desktop-only { display: none; }
-  .offer-grid--mobile-only {
-    display: flex;
-    gap: 0.6rem;
-    overflow: visible;
-    padding: 0 1.25rem;
-  }
-  .offer-grid--mobile-only .offer-card { flex: 1; min-width: 0; }
+  .offer-grid--mobile-only { display: flex; }
   .activities-partners-teaser { flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; margin-bottom: 2.5rem; padding: 1.75rem 1.25rem; }
   .activities-partners-teaser__logos { margin-top: 0.25rem; }
   .activities-partners-teaser__text { order: 1; }
@@ -9382,7 +9376,7 @@ body:has(.search-page--map) > main {
   .section-cta-link--mobile {
     display: block;
     width: fit-content;
-    margin: 0.75rem 1.25rem 0 auto;
+    margin: 1.5rem 1.25rem 1.5rem auto;
   }
   .page-section--with-deco .section-heading__title-row,
   .page-section--activities .section-heading__title-row { flex-direction: row; align-items: center; gap: 0.6rem; justify-content: flex-start; }
